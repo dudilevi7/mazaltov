@@ -1,22 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAppContext } from "../context/AppProvider";
-import CustomButton from "@/components/Button/custom-button";
+import AppHeader from "@/components/AppHeader";
+import TodoHeader from "@/components/TodoHeader";
+import TodoList from "@/components/TodoList";
 import TodoModal, { TodoFormData } from "@/components/TodoModal";
-import { Todo, TodoStatus } from "@/types/Todo";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRing, faUser } from "@fortawesome/free-solid-svg-icons";
-
-const STATUS_LABELS: Record<TodoStatus, string> = {
-  [TodoStatus.PENDING]: "ממתין",
-  [TodoStatus.IN_PROGRESS]: "בתהליך",
-  [TodoStatus.COMPLETED]: "הושלם",
-};
+import DeleteModal from "@/components/DeleteModal";
+import { Todo } from "@/types/Todo";
 
 export default function Home() {
-  const { todos, addTodo, updateTodo, removeTodo } = useAppContext()
+  const { todos, addTodo, updateTodo, removeTodo } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredTodos = useMemo(() => {
+    if (!searchQuery.trim()) return todos;
+    const q = searchQuery.toLowerCase().trim();
+    return todos.filter(
+      (todo) =>
+        todo.name.toLowerCase().includes(q) ||
+        todo.description.toLowerCase().includes(q) ||
+        todo.updatedBy.toLowerCase().includes(q)
+    );
+  }, [todos, searchQuery]);
 
   const handleOpenCreate = () => {
     setEditingTodo(null);
@@ -42,83 +50,55 @@ export default function Home() {
     handleCloseModal();
   };
 
+  const handleDeleteClick = (todo: Todo) => {
+    setTodoToDelete(todo);
+  };
+
+  const handleConfirmDelete = () => {
+    if (todoToDelete) {
+      removeTodo(todoToDelete.id);
+      setTodoToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setTodoToDelete(null);
+  };
+
   return (
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex flex-row items-center justify-between">
-        <div className="flex flex-col">
-          <div className="flex flex-row gap-1 items-center animate-fade-in-0.5">
-            <FontAwesomeIcon icon={faRing} className="text-gray-300 animate-pulse max-w-8" size="2x"/>
-            <h1 className="text-2xl font-bold text-gray-900 rounded-md">MazalTov</h1>
-          </div>
-          <span className="ml-11 text-sm text-gray-500">TODO List Dudi & Chen</span>
-        </div>
-
-        <CustomButton onClick={handleOpenCreate}>
-          לחץ להוספת משימה
-        </CustomButton>
+        <AppHeader />
+        <TodoHeader
+          onAddClick={handleOpenCreate}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
       </div>
 
       <ul className="flex flex-col gap-3 overflow-auto py-2 px-1">
-        {todos.length === 0 ? (
-          <li className="rounded-lg bg-gray-100 p-6 text-center text-gray-500">
-            אין משימות. הוסף משימה חדשה כדי להתחיל.
-          </li>
-        ) : (
-          todos.map((todo) => (
-            <li
-              key={todo.id}
-              className="flex flex-row-reverse items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm shadow-gray-500"
-            >
-              <div className="flex-1 text-right">
-                <h3 className="font-medium text-gray-900">{todo.name}</h3>
-                {todo.description && (
-                  <p className="mt-1 mx-2 truncate text-sm text-gray-600" dir="rtl">
-                    {todo.description}
-                  </p>
-                )}
-                <span
-                  className={`mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                    todo.status === TodoStatus.COMPLETED
-                      ? "bg-green-100 text-green-800"
-                      : todo.status === TodoStatus.IN_PROGRESS
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  {STATUS_LABELS[todo.status]}
-                </span>
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-row mb-4 gap-0.5">
-                  <span className="text-sm text-gray-500">{todo.updatedBy} </span>
-                  <FontAwesomeIcon icon={faUser} className="text-gray-500"/>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <CustomButton onClick={() => handleOpenEdit(todo)}>
-                    ערוך
-                  </CustomButton>
-                  <button
-                    type="button"
-                    onClick={() => removeTodo(todo.id)}
-                    className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                  >
-                    מחק
-                  </button>
-                </div>
-              </div>
-
-            </li>
-          ))
-        )}
+        <TodoList
+          todos={filteredTodos}
+          onEdit={handleOpenEdit}
+          onDelete={handleDeleteClick}
+        />
       </ul>
 
-      {isModalOpen && 
-      <TodoModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSave={handleSave}
-        todo={editingTodo}
-      />}
+      {isModalOpen && (
+        <TodoModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSave={handleSave}
+          todo={editingTodo}
+        />
+      )}
+
+      <DeleteModal
+        isOpen={!!todoToDelete}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title={todoToDelete?.name || ""}
+      />
     </div>
   );
 }
