@@ -1,8 +1,10 @@
 "use client";
 import { Todo, TodoStatus } from "@/types/Todo";
 import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
+import Tooltip from "@/components/Tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSpinner, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faSpinner, faCheck, faClock } from "@fortawesome/free-solid-svg-icons";
+import { formatDateDDMMYY, formatDateDDMMYYHHMM } from "@/lib/dateUtils";
 
 const STATUS_LABELS: Record<TodoStatus, string> = {
   [TodoStatus.PENDING]: "ממתין",
@@ -40,6 +42,16 @@ export default function TodoItem({ todo, onEdit, onDelete, onStatusChange }: Tod
         >
           {STATUS_LABELS[todo.status]}
         </span>
+          <div className="mt-1.5 flex flex-row-reverse items-end gap-1 text-xs text-gray-600">
+            <span>{formatDateDDMMYY(todo.createdAt)}</span>
+            {todo.reminderTimestamp > 0 &&
+            <Tooltip content={formatDateDDMMYYHHMM(todo.reminderTimestamp)}>
+              <div className="flex items-center gap-0.5">
+                <span>תזכורת</span>
+                <FontAwesomeIcon icon={faClock} className="text-gray-500" />
+              </div>
+            </Tooltip>}
+          </div>
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex flex-row mb-4 gap-0.5">

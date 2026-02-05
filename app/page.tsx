@@ -23,7 +23,7 @@ export default function Home() {
         todo.name.toLowerCase().includes(q) ||
         todo.description.toLowerCase().includes(q) ||
         todo.updatedBy.toLowerCase().includes(q)
-    );
+    ).sort((todo) => todo.createdAt - todo.createdAt);
   }, [todos, searchQuery]);
 
   const handleOpenCreate = () => {
