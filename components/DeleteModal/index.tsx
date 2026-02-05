@@ -1,5 +1,5 @@
 "use client";
-import CustomButton from "@/components/Button/custom-button";
+import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
 
 interface DeleteModalProps {
   isOpen: boolean;
@@ -24,10 +24,10 @@ export default function DeleteModal({
         </h2>
         <span>{title}</span>
         <div className="flex gap-2 justify-end pt-2">
-          <CustomButton variant="white" onClick={onClose}>
+          <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
             ביטול
           </CustomButton>
-          <CustomButton variant="red" onClick={onConfirm}>
+          <CustomButton size={ButtonSize.SM} variant="red" onClick={onConfirm}>
             מחק
           </CustomButton>
         </div>

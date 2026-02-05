@@ -1,8 +1,8 @@
 "use client";
 import { Todo, TodoStatus } from "@/types/Todo";
-import CustomButton from "@/components/Button/custom-button";
+import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faSpinner, faCheck } from "@fortawesome/free-solid-svg-icons";
 
 const STATUS_LABELS: Record<TodoStatus, string> = {
   [TodoStatus.PENDING]: "ממתין",
@@ -14,12 +14,13 @@ interface TodoItemProps {
   todo: Todo;
   onEdit: (todo: Todo) => void;
   onDelete: (todo: Todo) => void;
+  onStatusChange?: (todo: Todo, newStatus: TodoStatus) => void;
 }
 
-export default function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
+export default function TodoItem({ todo, onEdit, onDelete, onStatusChange }: TodoItemProps) {
   return (
     <li
-      className="flex flex-row-reverse items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm shadow-gray-500"
+      className={`flex flex-row-reverse items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm shadow-gray-500`}
     >
       <div className="flex-1 text-right">
         <h3 className="font-medium text-gray-900">{todo.name}</h3>
@@ -33,7 +34,7 @@ export default function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
             todo.status === TodoStatus.COMPLETED
               ? "bg-green-100 text-green-800"
               : todo.status === TodoStatus.IN_PROGRESS
-                ? "bg-amber-100 text-amber-800"
+                ? "bg-amber-200 text-amber-800"
                 : "bg-gray-200 text-gray-800"
           }`}
         >
@@ -46,8 +47,29 @@ export default function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
           <FontAwesomeIcon icon={faUser} className="text-gray-500" />
         </div>
         <div className="flex shrink-0 gap-2">
-          <CustomButton onClick={() => onEdit(todo)}>ערוך</CustomButton>
+          {todo.status === TodoStatus.PENDING && (
+            <CustomButton
+              size={ButtonSize.SM}
+              className="!bg-amber-200 hover:!bg-amber-300 !text-gray-900"
+              onClick={() => onStatusChange?.(todo, TodoStatus.IN_PROGRESS)}
+            >
+              <FontAwesomeIcon icon={faSpinner} className="mr-1" />
+              בתהליך
+            </CustomButton>
+          )}
+          {todo.status === TodoStatus.IN_PROGRESS && (
+            <CustomButton
+              size={ButtonSize.SM}
+              className="bg-green-500 hover:bg-green-600 text-white"
+              onClick={() => onStatusChange?.(todo, TodoStatus.COMPLETED)}
+            >
+              <FontAwesomeIcon icon={faCheck} className="mr-1" />
+              הושלם
+            </CustomButton>
+          )}
+          <CustomButton size={ButtonSize.SM} onClick={() => onEdit(todo)}>ערוך</CustomButton>
           <CustomButton
+            size={ButtonSize.SM}
             variant="red"
             onClick={() => onDelete(todo)}
           >

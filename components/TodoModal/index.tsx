@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Todo, TodoStatus } from "@/types/Todo";
-import CustomButton from "@/components/Button/custom-button";
+import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
 
 interface TodoModalProps {
   isOpen: boolean;
@@ -127,10 +127,10 @@ export default function TodoModal({
             />
           </div>
           <div className="flex gap-2 justify-end pt-2">
-            <CustomButton type="button" onClick={onClose}>
+            <CustomButton size={ButtonSize.SM} type="button" onClick={onClose}>
               ביטול
             </CustomButton>
-            <CustomButton type="submit">
+            <CustomButton size={ButtonSize.SM} type="submit">
               {isEdit ? "שמור שינויים" : "הוסף משימה"}
             </CustomButton>
           </div>

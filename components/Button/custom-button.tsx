@@ -1,14 +1,28 @@
+export enum ButtonSize {
+  SM = "sm",
+  MD = "md",
+  LG = "lg",
+}
+
 const variantStyles = {
   default: "bg-blue-500 text-white hover:bg-blue-600",
   white: "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50",
   red: "bg-red-500 text-white hover:bg-red-600",
 };
+
+const sizeStyles: Record<ButtonSize, string> = {
+  [ButtonSize.SM]: "px-3 py-1.5 text-sm rounded",
+  [ButtonSize.MD]: "px-4 py-2 rounded-md",
+  [ButtonSize.LG]: "px-6 py-3 text-lg rounded-lg",
+};
+
 interface CustomButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
   type?: "button" | "submit" | "reset";
   variant?: keyof typeof variantStyles;
+  size?: ButtonSize;
 }
 
 const CustomButton = ({
@@ -17,11 +31,12 @@ const CustomButton = ({
   className = "",
   type = "button",
   variant = "default",
+  size = ButtonSize.MD,
 }: CustomButtonProps) => {
   return (
     <button
       type={type}
-      className={`px-4 py-2 rounded-md cursor-pointer ${variantStyles[variant]} ${className}`}
+      className={`cursor-pointer ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       onClick={onClick}
     >
       {children}

@@ -1,14 +1,15 @@
 "use client";
-import { Todo } from "@/types/Todo";
+import { Todo, TodoStatus } from "@/types/Todo";
 import TodoItem from "@/components/TodoItem";
 
 interface TodoListProps {
   todos: Todo[];
   onEdit: (todo: Todo) => void;
   onDelete: (todo: Todo) => void;
+  onStatusChange?: (todo: Todo, newStatus: TodoStatus) => void;
 }
 
-export default function TodoList({ todos, onEdit, onDelete }: TodoListProps) {
+export default function TodoList({ todos, onEdit, onDelete, onStatusChange }: TodoListProps) {
   if (todos.length === 0) {
     return (
       <li className="rounded-lg bg-gray-100 p-6 text-center text-gray-500">
@@ -25,6 +26,7 @@ export default function TodoList({ todos, onEdit, onDelete }: TodoListProps) {
           todo={todo}
           onEdit={onEdit}
           onDelete={onDelete}
+          onStatusChange={onStatusChange}
         />
       ))}
     </>

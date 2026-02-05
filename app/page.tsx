@@ -6,7 +6,7 @@ import TodoHeader from "@/components/TodoHeader";
 import TodoList from "@/components/TodoList";
 import TodoModal, { TodoFormData } from "@/components/TodoModal";
 import DeleteModal from "@/components/DeleteModal";
-import { Todo } from "@/types/Todo";
+import { Todo, TodoStatus } from "@/types/Todo";
 
 export default function Home() {
   const { todos, addTodo, updateTodo, removeTodo } = useAppContext();
@@ -65,6 +65,10 @@ export default function Home() {
     setTodoToDelete(null);
   };
 
+  const handleStatusChange = (todo: Todo, newStatus: TodoStatus) => {
+    updateTodo(todo.id, { status: newStatus });
+  };
+
   return (
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex flex-row items-center justify-between">
@@ -81,6 +85,7 @@ export default function Home() {
           todos={filteredTodos}
           onEdit={handleOpenEdit}
           onDelete={handleDeleteClick}
+          onStatusChange={handleStatusChange}
         />
       </ul>
 
