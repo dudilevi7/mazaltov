@@ -1,7 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
 import { Todo, TodoStatus } from "@/types/Todo";
 import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClock } from "@fortawesome/free-solid-svg-icons";
 
 interface TodoModalProps {
   isOpen: boolean;
@@ -33,19 +36,31 @@ export default function TodoModal({
   const [name, setName] = useState(todo?.name || "");
   const [description, setDescription] = useState(todo?.description || "");
   const [status, setStatus] = useState<TodoStatus>(TodoStatus.PENDING);
-  const [reminderTimestamp, setReminderTimestamp] = useState<number>(0);
+  const [reminderDate, setReminderDate] = useState<Date | null>(
+    todo?.reminderTimestamp ? new Date(todo.reminderTimestamp) : null
+  );
   const [updatedBy, setUpdatedBy] = useState(todo?.updatedBy || "");
 
   const isEdit = !!todo;
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(todo?.name || "");
+      setDescription(todo?.description || "");
+      setStatus(todo?.status ?? TodoStatus.PENDING);
+      setReminderDate(todo?.reminderTimestamp ? new Date(todo.reminderTimestamp) : null);
+      setUpdatedBy(todo?.updatedBy || "");
+    }
+  }, [isOpen, todo]);
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      name, 
+      name,
       description,
       status,
-      reminderTimestamp,
+      reminderTimestamp: reminderDate ? reminderDate.getTime() : 0,
       updatedBy,
     });
     onClose();
@@ -103,15 +118,16 @@ export default function TodoModal({
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              תזכורת (timestamp)
+              תזכורת
             </label>
-            <input
-              type="number"
-              value={reminderTimestamp || ""}
-              onChange={(e) =>
-                setReminderTimestamp(Number(e.target.value) || 0)
-              }
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            <DatePicker
+              selected={reminderDate}
+              onChange={(date: Date | null) => setReminderDate(date)}
+              showTimeSelect
+              dateFormat="dd/MM/yyyy HH:mm"
+              placeholderText="בחר תאריך ושעה"
+              className="rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              isClearable
             />
           </div>
           <div>
