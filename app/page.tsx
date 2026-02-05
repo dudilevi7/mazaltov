@@ -1,6 +1,6 @@
 "use client";
-import { useContext, useState } from "react";
-import { AppContext } from "../context/AppProvider";
+import { useState } from "react";
+import { useAppContext } from "../context/AppProvider";
 import CustomButton from "@/components/Button/custom-button";
 import TodoModal, { TodoFormData } from "@/components/TodoModal";
 import { Todo, TodoStatus } from "@/types/Todo";
@@ -14,7 +14,7 @@ const STATUS_LABELS: Record<TodoStatus, string> = {
 };
 
 export default function Home() {
-  const { todos, addTodo, updateTodo, removeTodo } = useContext(AppContext);
+  const { todos, addTodo, updateTodo, removeTodo } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
@@ -45,10 +45,14 @@ export default function Home() {
   return (
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex flex-row items-center justify-between">
-        <div className="flex flex-row gap-1 items-center">
-          <FontAwesomeIcon icon={faRing} className="text-gray-300 animate-pulse" size="2x" width={24}/>
-          <h1 className="text-2xl font-bold text-gray-900 rounded-md ">TODO Wedding List Dudi & Chen</h1>
+        <div className="flex flex-col">
+          <div className="flex flex-row gap-1 items-center animate-fade-in-0.5">
+            <FontAwesomeIcon icon={faRing} className="text-gray-300 animate-pulse max-w-8" size="2x"/>
+            <h1 className="text-2xl font-bold text-gray-900 rounded-md">MazalTov</h1>
+          </div>
+          <span className="ml-11 text-sm text-gray-500">TODO List Dudi & Chen</span>
         </div>
+
         <CustomButton onClick={handleOpenCreate}>
           לחץ להוספת משימה
         </CustomButton>
