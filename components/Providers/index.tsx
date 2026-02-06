@@ -1,14 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import AppHeader from "@/components/AppHeader";
-import CustomButton from "@/components/Button/custom-button";
-import SearchBar from "@/components/SearchBar";
 import DeleteModal from "@/components/DeleteModal";
 import ProvidersModal, { ProviderFormData } from "@/components/Providers/modal";
 import ProviderCard from "@/components/Providers/provider-card";
+import ProvidersHeader from "@/components/Providers/header";
 import { useProvidersContext } from "@/context/ProvidersContext";
 import type { Provider } from "@/types/Provider";
 import { useAppContext } from "@/context/AppContext";
@@ -93,28 +90,15 @@ const Providers = () => {
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex flex-row items-center justify-between">
         <AppHeader />
-        <div className="flex flex-col gap-3 relative">
-          <div className="flex flex-row items-center gap-3">
-            <CustomButton onClick={handleOpenCreate}>הוסף ספק</CustomButton>
-            <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="חיפוש ספק" />
-          </div>
-          <div className={`absolute top-14 right-0 flex items-center gap-2 text-sm text-gray-700 ${rowDirectionClassName}`}>
-            <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
-            <span>שירות</span>
-            <select
-              value={selectedService}
-              onChange={(e) => setSelectedService(e.target.value)}
-              className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">הכל</option>
-              {services.map((service) => (
-                <option key={service} value={service}>
-                  {service}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <ProvidersHeader
+          onAddClick={handleOpenCreate}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          serviceValue={selectedService}
+          onServiceChange={setSelectedService}
+          serviceOptions={services}
+          rowDirectionClassName={rowDirectionClassName}
+        />
       </div>
 
       <div className="flex-1 overflow-auto mt-10">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
 import type { Provider } from "@/types/Provider";
 import { PaymentMethod } from "@/types/Provider";
@@ -36,7 +36,6 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
   const [service, setService] = useState("");
   const [price, setPrice] = useState<string>("");
   const [advancePayment, setAdvancePayment] = useState<string>("");
-  const [toBePaid, setToBePaid] = useState<string>("");
   const [comments, setComments] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
 
@@ -49,7 +48,6 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
       setService(provider?.service || "");
       setPrice(provider ? String(provider.price ?? "") : "");
       setAdvancePayment(provider ? String(provider.advancePayment ?? "") : "");
-      setToBePaid(provider ? String(provider.toBePaid ?? "") : "");
       setComments(provider?.comments || "");
       setPaymentMethod(provider?.paymentMethod ?? PaymentMethod.CASH);
     }
@@ -62,6 +60,13 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
     return Number.isNaN(parsed) ? 0 : parsed;
   };
 
+  const computedToBePaid = useMemo(() => {
+    const total = parseNumber(price || "0");
+    const advance = parseNumber(advancePayment || "0");
+    const diff = total - advance;
+    return diff < 0 ? 0 : diff;
+  }, [price, advancePayment]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -71,7 +76,7 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
       service,
       price: parseNumber(price),
       advancePayment: parseNumber(advancePayment),
-      toBePaid: parseNumber(toBePaid),
+      toBePaid: computedToBePaid,
       comments,
       paymentMethod,
     });
@@ -144,9 +149,9 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
               <input
                 type="number"
                 min="0"
-                value={toBePaid}
-                onChange={(e) => setToBePaid(e.target.value)}
-                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={Number.isNaN(computedToBePaid) ? "" : String(computedToBePaid)}
+                readOnly
+                className="w-full text-right rounded-md bg-gray-100 border border-gray-300 px-3 py-2 text-gray-900"
               />
             </div>
             <div>
