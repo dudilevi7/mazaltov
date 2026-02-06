@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+
+---
+description: Guidelines for creating and maintaining Cursor rules to ensure consistency and effectiveness.
+globs: .cursor/rules/*.mdc
+alwaysApply: true
+---
+
+- **Required Rule Structure:**
+  ```markdown
+  ---
+  description: Clear, one-line description of what the rule enforces
+  globs: path/to/files/*.ext, other/path/**/*
+  alwaysApply: boolean
+  ---
+
+  - **Use Best Practices**
+    - Don't use function, use arrow functions const getSomething = () =>
+    - Use typescript as you can in functions, variables. put types in relevent type (in folder types)
+    example: const items: TODO[] = [], const getTodosById = (id: string): TODO[] => {...}
+    - In each Compoenet export default should be in the bottom. 
+    declartion of component const Item ... 
+    export default Item
+    - trying use Tailwind in className always and not use style={} even you need conditions inside.
+    - Always try to minimze the files, keep on structure for example, header of page, content/list (sub compoennt of item), footer if needed, 
+    - use custom components to be effienct as well. once I asking from you new custom compoenet think on relevant props to add for flexbility
+    - add icons when needed, in buttons for example.
+    - use helpers, dedicated helpers if functions is complex => create helper.tsx file in each dedicated compoenet folder
+    - use dictionary where needed (Record<string,T>) mostly with dropdown options
+  ```
+
+- **Contexts**
+ - Always create a dedicated hook for that.
+ - Context could contain relevant states, functions, data, flags for the page
+ - Notify if context be bigger, try to avoid useEffects from the context.
+
+- **Code Examples:**
+  - Use default values as you can const url = todoUrl || ""
+  - 
+
+- **Tailwind**
+  - try to keep the colors schema of the project.
+  - add hover states.
+  - add animate-fade-in where needed
+  - add animations/tranistions where needed to be interactive
+  - support mobile display as you can use tailwind for that.
