@@ -10,5 +10,7 @@ export const parseNumber = (value: string) => {
     return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-export const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS" }).format(value || 0);
+export const formatCurrency = (value: number, withoutFloatingPoint: boolean = true): string => {
+    const formattedCurrency = new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS" }).format(value || 0);
+    return withoutFloatingPoint ? formattedCurrency.replace(/\.\d{2}/, "") : formattedCurrency;
+}

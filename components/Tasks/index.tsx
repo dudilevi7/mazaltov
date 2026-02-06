@@ -8,6 +8,8 @@ import TodoList from "@/components/TodoList";
 import TodoModal, { TodoFormData } from "@/components/TodoModal";
 import DeleteModal from "@/components/DeleteModal";
 import { Todo, TodoStatus } from "@/types/Todo";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 
 const Tasks = () => {
   const { todos, addTodo, updateTodo, removeTodo } = useAppContext();
@@ -15,19 +17,14 @@ const Tasks = () => {
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortByDate, setSortByDate] = useState<boolean>(false);
 
   const filteredTodos = useMemo(() => {
-    if (!searchQuery.trim()) return todos;
     const q = searchQuery.toLowerCase().trim();
-    return todos
-      .filter(
-        (todo) =>
-          todo.name.toLowerCase().includes(q) ||
-          todo.description.toLowerCase().includes(q) ||
-          todo.updatedBy.toLowerCase().includes(q)
-      )
-      .sort((todo) => todo.createdAt - todo.createdAt);
-  }, [todos, searchQuery]);
+    const sortedTodos = todos.sort((a, b) => sortByDate ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+    if (!q) return sortedTodos;
+    return sortedTodos.filter(todo => todo.name.toLowerCase().includes(q) || todo.description.toLowerCase().includes(q) || todo.updatedBy.toLowerCase().includes(q));
+  }, [todos, searchQuery, sortByDate]);
 
   const handleOpenCreate = () => {
     setEditingTodo(null);
@@ -72,6 +69,10 @@ const Tasks = () => {
     updateTodo(todo.id, { status: newStatus });
   };
 
+  const handleSortByDate = () => {
+    setSortByDate(!sortByDate);
+  };
+
   return (
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex flex-row items-center justify-between">
@@ -82,7 +83,12 @@ const Tasks = () => {
           onSearchChange={setSearchQuery}
         />
       </div>
-
+      <div className="flex flex-row items-center justify-end gap-2">
+        <span className="text-gray-500">מיון לפי תאריך</span>
+        <FontAwesomeIcon icon={faArrowDown} 
+          className={`text-gray-500 hover:text-gray-700 cursor-pointer ${sortByDate ? 'rotate-180' : ''} transition-all`}
+           onClick={handleSortByDate} />
+      </div>
       <ul className="flex flex-col gap-3 overflow-auto py-2 px-1">
         <TodoList
           todos={filteredTodos}

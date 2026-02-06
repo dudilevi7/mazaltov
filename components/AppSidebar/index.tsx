@@ -30,7 +30,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "providers", labelHe: "ספקים", labelEn: "Providers", icon: faHandshake, route: "/providers" },
   { id: "calendar", labelHe: "לוח שנה", labelEn: "Calendar", icon: faCalendarDays },
   { id: "guests", labelHe: "אורחים", labelEn: "Guests", icon: faUsers },
-  { id: "budget", labelHe: "תקציב", labelEn: "Budget", icon: faCoins },
+  { id: "budget", labelHe: "תקציב", labelEn: "Budget", icon: faCoins, route: "/budget" },
   { id: "settings", labelHe: "הגדרות", labelEn: "Settings", icon: faGear },
 ];
 
