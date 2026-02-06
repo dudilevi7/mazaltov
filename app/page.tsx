@@ -8,7 +8,7 @@ import TodoModal, { TodoFormData } from "@/components/TodoModal";
 import DeleteModal from "@/components/DeleteModal";
 import { Todo, TodoStatus } from "@/types/Todo";
 
-export default function Home() {
+const Home = () => {
   const { todos, addTodo, updateTodo, removeTodo } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
@@ -106,4 +106,6 @@ export default function Home() {
       />
     </div>
   );
-}
+};
+
+export default Home;

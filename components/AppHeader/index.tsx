@@ -2,7 +2,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRing } from "@fortawesome/free-solid-svg-icons";
 
-export default function AppHeader() {
+const AppHeader = () => {
   return (
     <div className="flex flex-col">
       <div className="flex flex-row gap-1 items-center animate-fade-in-0.5">
@@ -15,4 +15,6 @@ export default function AppHeader() {
       </div>
     </div>
   );
-}
+};
+
+export default AppHeader;

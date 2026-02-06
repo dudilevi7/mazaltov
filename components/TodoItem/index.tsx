@@ -19,7 +19,7 @@ interface TodoItemProps {
   onStatusChange?: (todo: Todo, newStatus: TodoStatus) => void;
 }
 
-export default function TodoItem({ todo, onEdit, onDelete, onStatusChange }: TodoItemProps) {
+const TodoItem = ({ todo, onEdit, onDelete, onStatusChange }: TodoItemProps) => {
   return (
     <li
       className={`flex flex-row-reverse items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm shadow-gray-500`}
@@ -91,4 +91,6 @@ export default function TodoItem({ todo, onEdit, onDelete, onStatusChange }: Tod
       </div>
     </li>
   );
-}
+};
+
+export default TodoItem;
