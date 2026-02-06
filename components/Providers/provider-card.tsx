@@ -4,6 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import type { Provider } from "@/types/Provider";
+import { formatCurrency } from "@/lib/utils";
+import { getWhatsappUrl } from "./helper";
+import { useMemo } from "react";
 
 interface ProviderCardProps {
   provider: Provider;
@@ -24,10 +27,7 @@ const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
   } = provider;
 
   const hasPhone = !!phone && phone.trim().length > 0;
-  const whatsappUrl = hasPhone ? `https://wa.me/${phone}` : "";
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS" }).format(value || 0);
+  const whatsappUrl = useMemo(() => getWhatsappUrl(phone || ""), [phone]);
 
   const paymentMethodLabel: Record<string, string> = {
     cash: "מזומן",
@@ -73,7 +73,7 @@ const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
         )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t pt-3">
+      <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -85,18 +85,18 @@ const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
           <button
             type="button"
             onClick={() => onEdit(provider)}
-            className="cursor-pointer text-blue-500 hover:text-blue-600 transition-colors"
+            className="cursor-pointer text-gray-400 hover:text-gray-500 transition-colors"
           >
             <FontAwesomeIcon icon={faPen} />
           </button>
         </div>
         {hasPhone && (
           <a
-            href={whatsappUrl}
             target="_blank"
             rel="noreferrer"
             className="cursor-pointer text-green-500 hover:text-green-600 transition-colors"
             aria-label="שלח הודעת ווטסאפ"
+            onClick={() => window.open(whatsappUrl, "_blank")}
           >
             <FontAwesomeIcon icon={faWhatsapp} />
           </a>

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
 import type { Provider } from "@/types/Provider";
 import { PaymentMethod } from "@/types/Provider";
+import { parseNumber } from "@/lib/utils";
+import { validatePhoneNumber } from "./helper";
 
 interface ProvidersModalProps {
   isOpen: boolean;
@@ -39,7 +41,15 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
   const [comments, setComments] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
 
+  const isPhoneValid = useMemo(() => validatePhoneNumber(phone || ""), [phone]);
   const isEdit = !!provider;
+  
+  const computedToBePaid = useMemo(() => {
+    const total = parseNumber(price || "0");
+    const advance = parseNumber(advancePayment || "0");
+    const diff = total - advance;
+    return diff < 0 ? 0 : diff;
+  }, [price, advancePayment]);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,18 +64,6 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
   }, [isOpen, provider]);
 
   if (!isOpen) return null;
-
-  const parseNumber = (value: string) => {
-    const parsed = parseFloat(value.replace(",", "."));
-    return Number.isNaN(parsed) ? 0 : parsed;
-  };
-
-  const computedToBePaid = useMemo(() => {
-    const total = parseNumber(price || "0");
-    const advance = parseNumber(advancePayment || "0");
-    const diff = total - advance;
-    return diff < 0 ? 0 : diff;
-  }, [price, advancePayment]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +111,11 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
                 dir="ltr"
               />
             </div>
+            {!isPhoneValid && (
+              <div className="text-red-500 text-sm">
+                הטלפון שגוי
+              </div>
+            )}
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">שירות</label>
               <input
