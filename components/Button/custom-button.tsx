@@ -23,6 +23,7 @@ interface CustomButtonProps {
   type?: "button" | "submit" | "reset";
   variant?: keyof typeof variantStyles;
   size?: ButtonSize;
+  icon?: React.ReactNode;
 }
 
 const CustomButton = ({
@@ -32,14 +33,16 @@ const CustomButton = ({
   type = "button",
   variant = "default",
   size = ButtonSize.MD,
+  icon,
 }: CustomButtonProps) => {
   return (
     <button
       type={type}
-      className={`cursor-pointer ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={`cursor-pointer inline-flex items-center gap-2 ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       onClick={onClick}
     >
-      {children}
+      {icon && <span className="flex items-center">{icon}</span>}
+      <span>{children}</span>
     </button>
   );
 };
