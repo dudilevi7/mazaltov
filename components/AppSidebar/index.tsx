@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAppContext } from "@/context/AppProvider";
+import { useAppContext } from "@/context/AppContext";
 import { LanguageDirection } from "@/types/General";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -13,6 +13,7 @@ import {
   faUsers,
   faCoins,
   faGear,
+  faHandshake,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -28,6 +29,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "tasks", labelHe: "משימות", labelEn: "Tasks", icon: faListCheck, route: "/tasks" },
   { id: "calendar", labelHe: "לוח שנה", labelEn: "Calendar", icon: faCalendarDays },
   { id: "guests", labelHe: "אורחים", labelEn: "Guests", icon: faUsers },
+  { id: "providers", labelHe: "ספקים", labelEn: "Providers", icon: faHandshake, route: "/providers" },
   { id: "budget", labelHe: "תקציב", labelEn: "Budget", icon: faCoins },
   { id: "settings", labelHe: "הגדרות", labelEn: "Settings", icon: faGear },
 ];
@@ -75,7 +77,7 @@ const AppSidebar = () => {
                 className={`flex items-center gap-2 rounded-md text-gray-700 hover:bg-gray-200 transition-colors ${
                   isOpen
                     ? `w-full px-3 py-2 text-sm font-medium ${
-                        isRtl ? "flex-row-reverse justify-end" : "justify-start"
+                        isRtl ? "flex flex-row" : "flex justify-start"
                       }`
                     : "w-10 h-10 justify-center"
                 } ${isActive ? "bg-gray-200" : ""} cursor-pointer`}

@@ -3,8 +3,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { Todo } from '../types/Todo';
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils';
 import { LanguageDirection } from '@/types/General';
+import { MAZAL_TOV_TODOS_KEY } from '@/constants/localStorage';
 
-const MAZAL_TOV_TODOS_KEY = "todosMazalTov"
 
 interface AppContextType {
   languageDirection: LanguageDirection,
@@ -15,7 +15,7 @@ interface AppContextType {
   removeTodo: (id: number) => void;
 }
 export const AppContext = createContext<AppContextType>({
-  languageDirection: LanguageDirection.HEB, 
+  languageDirection: LanguageDirection.ENG, 
   todos: [],
   setTodos: () => {},
   addTodo: () => {},
@@ -28,7 +28,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [languageDirection, setLangugageDirection] = useState<LanguageDirection>(LanguageDirection.HEB)
   
   useEffect(() => {
-    setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
+  setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
   }, [])
 
   const addTodo = (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => {

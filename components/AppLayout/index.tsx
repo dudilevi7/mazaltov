@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAppContext } from "@/context/AppProvider";
+import { useAppContext } from "@/context/AppContext";
 import { LanguageDirection } from "@/types/General";
 import AppSidebar from "@/components/AppSidebar";
 

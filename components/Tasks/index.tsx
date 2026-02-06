@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useAppContext } from "@/context/AppProvider";
+import { useAppContext } from "@/context/AppContext";
 import AppHeader from "@/components/AppHeader";
 import TodoHeader from "@/components/TodoHeader";
 import TodoList from "@/components/TodoList";

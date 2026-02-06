@@ -1,0 +1,192 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
+import type { Provider } from "@/types/Provider";
+import { PaymentMethod } from "@/types/Provider";
+
+interface ProvidersModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: ProviderFormData) => void;
+  provider?: Provider | null;
+}
+
+export interface ProviderFormData {
+  name: string;
+  phone?: string;
+  service: string;
+  price: number;
+  advancePayment: number;
+  toBePaid: number;
+  comments: string;
+  paymentMethod: PaymentMethod;
+}
+
+const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
+  { value: PaymentMethod.CASH, label: "מזומן" },
+  { value: PaymentMethod.TRANSFER, label: "העברה" },
+  { value: PaymentMethod.CHECK, label: "צ׳ק" },
+  { value: PaymentMethod.OTHER, label: "אחר" },
+];
+
+const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalProps) => {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [service, setService] = useState("");
+  const [price, setPrice] = useState<string>("");
+  const [advancePayment, setAdvancePayment] = useState<string>("");
+  const [toBePaid, setToBePaid] = useState<string>("");
+  const [comments, setComments] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
+
+  const isEdit = !!provider;
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(provider?.name || "");
+      setPhone(provider?.phone || "");
+      setService(provider?.service || "");
+      setPrice(provider ? String(provider.price ?? "") : "");
+      setAdvancePayment(provider ? String(provider.advancePayment ?? "") : "");
+      setToBePaid(provider ? String(provider.toBePaid ?? "") : "");
+      setComments(provider?.comments || "");
+      setPaymentMethod(provider?.paymentMethod ?? PaymentMethod.CASH);
+    }
+  }, [isOpen, provider]);
+
+  if (!isOpen) return null;
+
+  const parseNumber = (value: string) => {
+    const parsed = parseFloat(value.replace(",", "."));
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    onSave({
+      name,
+      phone: phone || undefined,
+      service,
+      price: parseNumber(price),
+      advancePayment: parseNumber(advancePayment),
+      toBePaid: parseNumber(toBePaid),
+      comments,
+      paymentMethod,
+    });
+
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
+      <div className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl">
+        <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          {isEdit ? "עריכת ספק" : "הוספת ספק חדש"}
+        </h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">שם ספק</label>
+              <input
+                dir="rtl"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">טלפון</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">שירות</label>
+              <input
+                dir="rtl"
+                type="text"
+                value={service}
+                onChange={(e) => setService(e.target.value)}
+                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">מחיר כולל</label>
+              <input
+                type="number"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">תשלום מקדמה</label>
+              <input
+                type="number"
+                min="0"
+                value={advancePayment}
+                onChange={(e) => setAdvancePayment(e.target.value)}
+                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">נותר לתשלום</label>
+              <input
+                type="number"
+                min="0"
+                value={toBePaid}
+                onChange={(e) => setToBePaid(e.target.value)}
+                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">אמצעי תשלום</label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                {paymentMethodOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">הערות</label>
+            <textarea
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+              rows={3}
+              dir="rtl"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex gap-2 justify-end pt-2">
+            <CustomButton size={ButtonSize.SM} type="button" variant="white" onClick={onClose}>
+              ביטול
+            </CustomButton>
+            <CustomButton size={ButtonSize.SM} type="submit">
+              {isEdit ? "שמור שינויים" : "הוסף ספק"}
+            </CustomButton>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default ProvidersModal;
+
