@@ -8,6 +8,7 @@ import { MAZAL_TOV_TODOS_KEY } from '@/constants/localStorage';
 
 interface AppContextType {
   languageDirection: LanguageDirection,
+  rowDirectionClassName: string,
   todos: Todo[];
   setTodos: (todos: Todo[]) => void;
   addTodo: (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => void;
@@ -16,6 +17,7 @@ interface AppContextType {
 }
 export const AppContext = createContext<AppContextType>({
   languageDirection: LanguageDirection.ENG, 
+  rowDirectionClassName: "",
   todos: [],
   setTodos: () => {},
   addTodo: () => {},
@@ -26,10 +28,14 @@ export const AppContext = createContext<AppContextType>({
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [languageDirection, setLangugageDirection] = useState<LanguageDirection>(LanguageDirection.HEB)
-  
+  const [rowDirectionClassName, setRowDirectionClassName] = useState<string>("flex-row-reverse")
   useEffect(() => {
   setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
   }, [])
+
+  useEffect(() => {
+    setRowDirectionClassName(languageDirection === LanguageDirection.HEB ? "flex-row-reverse" : "flex-row")
+  }, [languageDirection])
 
   const addTodo = (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = Date.now();
@@ -61,7 +67,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ todos, setTodos, addTodo, updateTodo, removeTodo, languageDirection }}>
+    <AppContext.Provider value={{ todos, setTodos, addTodo, updateTodo, removeTodo, languageDirection, rowDirectionClassName }}>
       {children}
     </AppContext.Provider>
   )

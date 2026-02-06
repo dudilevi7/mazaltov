@@ -11,9 +11,11 @@ import ProvidersModal, { ProviderFormData } from "@/components/Providers/modal";
 import ProviderCard from "@/components/Providers/provider-card";
 import { useProvidersContext } from "@/context/ProvidersContext";
 import type { Provider } from "@/types/Provider";
+import { useAppContext } from "@/context/AppContext";
 
 const Providers = () => {
   const { providers, addProvider, updateProvider, removeProvider } = useProvidersContext();
+  const { rowDirectionClassName } = useAppContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedService, setSelectedService] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -91,14 +93,14 @@ const Providers = () => {
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex flex-row items-center justify-between">
         <AppHeader />
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 relative">
           <div className="flex flex-row items-center gap-3">
             <CustomButton onClick={handleOpenCreate}>הוסף ספק</CustomButton>
             <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="חיפוש ספק" />
           </div>
-          <div className="flex flex-row items-center gap-2 text-sm text-gray-700">
+          <div className={`absolute top-14 right-0 flex items-center gap-2 text-sm text-gray-700 ${rowDirectionClassName}`}>
             <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
-            <span>סינון לפי שירות:</span>
+            <span>שירות</span>
             <select
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
@@ -115,7 +117,7 @@ const Providers = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto mt-10">
         {filteredProviders.length === 0 ? (
           <div className="rounded-lg bg-gray-100 p-6 text-center text-gray-500">
             אין ספקים. הוסף ספק חדש כדי להתחיל.

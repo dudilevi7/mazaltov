@@ -27,9 +27,9 @@ interface SidebarItem {
 
 const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "tasks", labelHe: "משימות", labelEn: "Tasks", icon: faListCheck, route: "/tasks" },
+  { id: "providers", labelHe: "ספקים", labelEn: "Providers", icon: faHandshake, route: "/providers" },
   { id: "calendar", labelHe: "לוח שנה", labelEn: "Calendar", icon: faCalendarDays },
   { id: "guests", labelHe: "אורחים", labelEn: "Guests", icon: faUsers },
-  { id: "providers", labelHe: "ספקים", labelEn: "Providers", icon: faHandshake, route: "/providers" },
   { id: "budget", labelHe: "תקציב", labelEn: "Budget", icon: faCoins },
   { id: "settings", labelHe: "הגדרות", labelEn: "Settings", icon: faGear },
 ];
