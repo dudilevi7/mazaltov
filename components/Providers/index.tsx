@@ -86,6 +86,11 @@ const Providers = () => {
     setProviderToDelete(null);
   };
 
+  const handleClearAll = () => {
+    setSearchQuery("");
+    setSelectedService("");
+  };
+
   return (
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex flex-row items-center justify-between">
@@ -98,6 +103,7 @@ const Providers = () => {
           onServiceChange={setSelectedService}
           serviceOptions={services}
           rowDirectionClassName={rowDirectionClassName}
+          onClearAll={handleClearAll}
         />
       </div>
 

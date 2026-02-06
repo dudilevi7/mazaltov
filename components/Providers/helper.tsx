@@ -15,4 +15,12 @@ const validatePhoneNumber = (phone?: string) => {
     cleanedPhone = cleanedPhone.replace(/\D/g, "");
     return PHONE_NUMBER_REGEX.test(cleanedPhone);
 }
-export { getWhatsappUrl, validatePhoneNumber };
+
+const getMobileUrl = (phone:string) => {
+    if (!phone) return "";
+    let cleanedPhone = phone;
+    cleanedPhone = cleanedPhone.replace(/\D/g, "");
+    cleanedPhone = cleanedPhone.replaceAll("-", "").replaceAll(" ", "").replaceAll("+972", "0");
+    return `tel:${cleanedPhone}`;
+}
+export { getWhatsappUrl, validatePhoneNumber, getMobileUrl };

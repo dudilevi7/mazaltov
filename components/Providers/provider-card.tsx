@@ -1,12 +1,14 @@
 "use client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faPhone, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import type { Provider } from "@/types/Provider";
 import { formatCurrency } from "@/lib/utils";
-import { getWhatsappUrl } from "./helper";
+import { getMobileUrl, getWhatsappUrl } from "./helper";
 import { useMemo } from "react";
+import { useAppContext } from "@/context/AppContext";
+import Tooltip from "../Tooltip";
 
 interface ProviderCardProps {
   provider: Provider;
@@ -15,6 +17,7 @@ interface ProviderCardProps {
 }
 
 const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
+  const { rowDirectionClassName } = useAppContext();
   const {
     name,
     phone,
@@ -28,6 +31,7 @@ const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
 
   const hasPhone = !!phone && phone.trim().length > 0;
   const whatsappUrl = useMemo(() => getWhatsappUrl(phone || ""), [phone]);
+  const mobileUrl = useMemo(() => getMobileUrl(phone || ""), [phone]);
 
   const paymentMethodLabel: Record<string, string> = {
     cash: "מזומן",
@@ -39,15 +43,11 @@ const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
   return (
     <div className="flex flex-col justify-between rounded-lg bg-white p-4 shadow-sm border border-gray-200 animate-fade-in-0.5">
       <div className="flex flex-col gap-1 text-right">
-        <div className="flex justify-between items-center mb-1">
+        <div className={`flex justify-between items-center mb-1 ${rowDirectionClassName}`}>
           <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
           <span className="text-sm text-gray-500">{service}</span>
         </div>
-        {hasPhone && (
-          <div className="text-sm text-gray-600">
-            טלפון: <span dir="ltr">{phone}</span>
-          </div>
-        )}
+      
         <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-700">
           <div>
             <div className="text-gray-500 text-xs">מחיר כולל</div>
@@ -69,7 +69,10 @@ const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
           </div>
         </div>
         {comments && (
-          <p className="mt-3 text-sm text-gray-600 whitespace-pre-wrap">{comments}</p>
+          <div className="flex flex-col mt-1">
+            <span className="bg-gray-100 text-gray-500 text-xs px-1 py-0.5 rounded-md self-end">הערות</span>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{comments}</p>
+          </div>
         )}
       </div>
 
@@ -91,15 +94,24 @@ const ProviderCard = ({ provider, onEdit, onDelete }: ProviderCardProps) => {
           </button>
         </div>
         {hasPhone && (
-          <a
-            target="_blank"
-            rel="noreferrer"
-            className="cursor-pointer text-green-500 hover:text-green-600 transition-colors"
-            aria-label="שלח הודעת ווטסאפ"
-            onClick={() => window.open(whatsappUrl, "_blank")}
-          >
-            <FontAwesomeIcon icon={faWhatsapp} />
-          </a>
+          <div className="flex items-center gap-2">
+            <Tooltip
+              content="התקשר לספק"
+              place="top"
+              className="cursor-pointer text-gray-500 hover:text-green-600 transition-colors"
+            >
+              <FontAwesomeIcon icon={faPhone} className="cursor-pointer text-gray-500 hover:text-green-600 transition-colors" onClick={() => window.open(mobileUrl, "_blank")} />
+            </Tooltip>
+            <a
+              target="_blank"
+              rel="noreferrer"
+              className="cursor-pointer text-green-500 hover:text-green-600 transition-colors"
+              aria-label="שלח הודעת ווטסאפ"
+              onClick={() => window.open(whatsappUrl, "_blank")}
+            >
+              <FontAwesomeIcon icon={faWhatsapp} scale={1.2}/>
+            </a>
+          </div>
         )}
       </div>
     </div>

@@ -39,7 +39,7 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
   const [price, setPrice] = useState<string>("");
   const [advancePayment, setAdvancePayment] = useState<string>("");
   const [comments, setComments] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CHECK);
 
   const isPhoneValid = useMemo(() => validatePhoneNumber(phone || ""), [phone]);
   const isEdit = !!provider;

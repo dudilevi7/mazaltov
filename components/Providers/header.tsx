@@ -1,7 +1,7 @@
 "use client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { faBroom, faFilter } from "@fortawesome/free-solid-svg-icons";
 import CustomButton from "@/components/Button/custom-button";
 import SearchBar from "@/components/SearchBar";
 import SelectDropdown, { SelectOption } from "@/components/Shared/SelectDropdown";
@@ -14,6 +14,7 @@ interface ProvidersHeaderProps {
   onServiceChange: (value: string) => void;
   serviceOptions: string[];
   rowDirectionClassName?: string;
+  onClearAll: () => void;
 }
 
 const ProvidersHeader = ({
@@ -24,6 +25,7 @@ const ProvidersHeader = ({
   onServiceChange,
   serviceOptions,
   rowDirectionClassName = "",
+  onClearAll,
 }: ProvidersHeaderProps) => {
   const dropdownOptions: SelectOption[] = [
     { value: "", label: "הכל" },
@@ -40,7 +42,7 @@ const ProvidersHeader = ({
         <SearchBar value={searchValue} onChange={onSearchChange} placeholder="חיפוש ספק" />
       </div>
       <div
-        className={`absolute top-14 right-0 flex items-center gap-2 text-sm text-gray-700 ${rowDirectionClassName}`}
+        className={`absolute top-14 right-0 flex items-center gap-2 text-sm text-gray-700 ${rowDirectionClassName} w-full`}
       >
         <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
         <span>שירות</span>
@@ -51,6 +53,11 @@ const ProvidersHeader = ({
           placeholder="הכל"
           className="min-w-32"
         />
+        <div className="mx-4 flex flex-row items-center gap-2 cursor-pointer justify-end
+         hover:bg-gray-200 hover:text-gray-900 rounded-md p-1" onClick={onClearAll}>
+          <span>נקה הכל</span>
+          <FontAwesomeIcon icon={faBroom} className="text-gray-500" />
+        </div>
       </div>
     </div>
   );
