@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export function formatDateDDMMYY(timestamp: number): string {
   const d = new Date(timestamp);
   const day = String(d.getDate()).padStart(2, "0");
@@ -7,9 +9,9 @@ export function formatDateDDMMYY(timestamp: number): string {
 }
 
 export function formatDateDDMMYYHHMM(timestamp: number): string {
-  const d = new Date(timestamp);
+  const date = new Date(timestamp);
   const dateStr = formatDateDDMMYY(timestamp);
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${dateStr} ${hours}:${minutes}`;
+  const now = moment(date);
+  const timeString = now.format('HH:mm'); 
+  return `${dateStr} ${timeString}`;
 }
