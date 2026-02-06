@@ -80,7 +80,7 @@ const AppSidebar = () => {
                     : "w-10 h-10 justify-center"
                 } ${isActive ? "bg-gray-200" : ""} cursor-pointer`}
               >
-                <FontAwesomeIcon icon={item.icon} className="shrink-0 text-gray-500 hover:text-gray-700 transition-colors"/>
+                <FontAwesomeIcon icon={item.icon} className="shrink-0"/>
                 {isOpen && (
                   <span className="text-base animate-fade-in-0.5">
                     {isRtl ? item.labelHe : item.labelEn}
