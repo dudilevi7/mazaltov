@@ -19,7 +19,7 @@ interface ProviderCardProps {
 }
 
 const ProviderCard = ({ provider, onEdit, onDelete, onAddProviderTask }: ProviderCardProps) => {
-  const { rowDirectionClassName } = useAppContext()
+  const { languageDirection } = useAppContext()
   const { name, phone, service, price, advancePayment, toBePaid, comments, paymentMethod } = provider
 
   const hasPhone = !!phone && phone.trim().length > 0
@@ -34,10 +34,15 @@ const ProviderCard = ({ provider, onEdit, onDelete, onAddProviderTask }: Provide
   }
 
   return (
-    <div className="flex flex-col justify-between rounded-lg bg-white p-4 shadow-sm border border-gray-200 animate-fade-in-0.5">
-      <div className="flex flex-col gap-1 text-right">
-        <div className={`flex justify-between items-center mb-1 ${rowDirectionClassName}`}>
-          <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
+    <div
+      className={`flex flex-col justify-between rounded-lg bg-white p-4 border border-gray-200 animate-fade-in-0.5`}
+      dir={languageDirection}>
+      <div className="flex flex-col gap-1">
+        <div className={`flex justify-between items-center mb-1`}>
+          <div className="flex items-center gap-2" dir={languageDirection}>
+            {!toBePaid && <span className="text-sm bg-green-500 text-white px-2 py-0.5 rounded-md">שולם</span>}
+            <span className="text-lg font-semibold text-gray-800">{name}</span>
+          </div>
           <span className="text-sm text-gray-500">{service}</span>
         </div>
 
@@ -61,14 +66,14 @@ const ProviderCard = ({ provider, onEdit, onDelete, onAddProviderTask }: Provide
         </div>
         {comments && (
           <div className="flex flex-col mt-1">
-            <span className="bg-gray-100 text-gray-500 text-xs px-1 py-0.5 rounded-md self-end">הערות</span>
+            <span className="bg-gray-100 text-gray-500 text-xs px-1 py-0.5 rounded-md self-start">הערות</span>
             <p className="text-sm text-gray-600 whitespace-pre-wrap">{comments}</p>
           </div>
         )}
         <CustomButton
           size={ButtonSize.SM}
           variant="white"
-          className={`mt-2 self-end ${rowDirectionClassName} bg-gray-100! hover:bg-blue-200! hover:text-blue-600!`}
+          className={`mt-2 self-start bg-gray-100! hover:bg-blue-200! hover:text-blue-600!`}
           onClick={() => onAddProviderTask(provider)}
           icon={<FontAwesomeIcon icon={faPlus} />}>
           הוסף משימת ספק
