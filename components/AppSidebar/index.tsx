@@ -16,6 +16,7 @@ import {
   faHandshake,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import Tooltip from "../Tooltip";
 
 interface SidebarItem {
   id: string;
@@ -71,8 +72,12 @@ const AppSidebar = () => {
             const isActive = item.route && pathname?.startsWith(item.route);
 
             return (
-              <button
+              <Tooltip
+                content={!isOpen ? (isRtl ? item.labelHe : item.labelEn) : ""}
+                place={!isOpen ? (isRtl ? "right" : "left") : "top"}
                 key={item.id}
+              >
+              <button
                 onClick={() => handleItemClick(item)}
                 className={`flex items-center gap-2 rounded-md text-gray-700 hover:bg-blue-100 transition-colors ${
                   isOpen
@@ -89,6 +94,7 @@ const AppSidebar = () => {
                   </span>
                 )}
               </button>
+              </Tooltip>
             );
           })}
         </nav>

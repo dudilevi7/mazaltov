@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import {  faMoneyBillAlt } from "@fortawesome/free-solid-svg-icons";
 import AppHeader from "@/components/AppHeader";
 import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
 import ProgressBar from "@/components/Shared/ProgressBar";
@@ -61,7 +61,7 @@ const Budget = () => {
           {income && (
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faDollarSign} className="text-gray-500" />
+                <FontAwesomeIcon icon={faMoneyBillAlt} className="text-gray-500" />
                 <span className="font-semibold text-gray-900">
                   הכנסות משוערות סה&quot;כ: {formatCurrency(estimatedTotal)}
                 </span>
@@ -82,7 +82,7 @@ const Budget = () => {
             dir={languageDirection}
           >
             <FontAwesomeIcon
-              icon={faDollarSign}
+              icon={faMoneyBillAlt}
               className={balance >= 0 ? "text-green-600" : "text-red-600"}
             />
             <span className={balance >= 0 ? "text-green-700 font-semibold" : "text-red-700 font-semibold"}>

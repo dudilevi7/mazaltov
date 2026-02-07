@@ -19,15 +19,15 @@ export default function Tooltip({
 
   return (
     <>
-      <span
+      <div
         data-tooltip-id={id}
         data-tooltip-content={content}
         data-tooltip-place={place}
         className={`inline-flex items-center cursor-help ${className}`}
       >
         {children}
-      </span>
-      <ReactTooltip id={id} />
+      </div>
+      {content && <ReactTooltip id={id} className="z-50"/>}
     </>
   );
 }
