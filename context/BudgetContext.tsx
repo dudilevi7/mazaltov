@@ -1,20 +1,37 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useProvidersContext } from "@/context/ProvidersContext";
 import type { Provider } from "@/types/Provider";
+import type { Income } from "@/types/Income";
+import { getFromLocalStorage, setToLocalStorage } from "@/lib/utils";
+import { MAZAL_TOV_INCOMES_KEY } from "@/constants/localStorage";
 
 interface BudgetContextType {
   totalPrice: number;
   totalPaid: number;
   totalToBePaid: number;
   biggestProvider: Provider | null;
+  income: Income | null;
+  setIncome: (income: Income) => void;
+  estimatedTotal: number;
+  balance: number;
 }
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
 
 const BudgetProvider = ({ children }: { children: React.ReactNode }) => {
   const { providers } = useProvidersContext();
+  const [income, setIncomeState] = useState<Income | null>(null);
+
+  useEffect(() => {
+    setIncomeState(getFromLocalStorage(MAZAL_TOV_INCOMES_KEY, null));
+  }, []);
+
+  const setIncome = (data: Income) => {
+    setIncomeState(data);
+    setToLocalStorage(MAZAL_TOV_INCOMES_KEY, data);
+  };
 
   const value = useMemo(() => {
     const totalPrice = providers.reduce((sum, p) => sum + (p.price || 0), 0);
@@ -25,13 +42,22 @@ const BudgetProvider = ({ children }: { children: React.ReactNode }) => {
         ? providers.reduce((max, p) => (p.price > (max?.price ?? 0) ? p : max))
         : null;
 
+    const estimatedTotal = income
+      ? income.numberOfGuests * income.avgGiftPerGuest
+      : 0;
+    const balance = estimatedTotal - totalPrice;
+
     return {
       totalPrice,
       totalPaid,
       totalToBePaid,
       biggestProvider,
+      income,
+      setIncome,
+      estimatedTotal,
+      balance,
     };
-  }, [providers]);
+  }, [providers, income]);
 
   return (
     <BudgetContext.Provider value={value}>

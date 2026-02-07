@@ -1,14 +1,29 @@
 "use client";
 
+import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import AppHeader from "@/components/AppHeader";
+import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
 import ProgressBar from "@/components/Shared/ProgressBar";
+import IncomesModal from "@/components/Budget/IncomesModal";
 import { useAppContext } from "@/context/AppContext";
 import { useBudgetContext } from "@/context/BudgetContext";
 import { formatCurrency } from "@/lib/utils";
 
 const Budget = () => {
-  const { totalPrice, totalPaid, totalToBePaid, biggestProvider } = useBudgetContext();
+  const {
+    totalPrice,
+    totalPaid,
+    totalToBePaid,
+    biggestProvider,
+    income,
+    setIncome,
+    estimatedTotal,
+    balance,
+  } = useBudgetContext();
   const { languageDirection } = useAppContext();
+  const [isIncomesModalOpen, setIsIncomesModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen w-full flex-col bg-gray-50 font-sans p-6">
@@ -16,9 +31,11 @@ const Budget = () => {
         <AppHeader />
       </div>
 
-      <div className="flex flex-col gap-6 animate-fade-in-0.5">
+      <div className="flex flex-col gap-6 animate-fade-in-0.5 overflow-auto">
         <div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-800" dir={languageDirection}>התקדמות הוצאות</h2>
+          <h2 className="mb-2 text-lg font-semibold text-gray-800" dir={languageDirection}>
+            התקדמות הוצאות
+          </h2>
           <ProgressBar
             total={totalPrice}
             completed={totalPaid}
@@ -27,9 +44,52 @@ const Budget = () => {
           <div className="mt-2 flex gap-4 text-sm text-gray-600" dir={languageDirection}>
             <span className="text-green-600">שולם: {formatCurrency(totalPaid)}</span>
             <span className="text-red-500">נותר: {formatCurrency(totalToBePaid)}</span>
-            <span className="text-gray-900">סה"כ: {formatCurrency(totalPrice)}</span>
+            <span className="text-gray-900">סה&quot;כ: {formatCurrency(totalPrice)}</span>
           </div>
         </div>
+
+        <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-200" dir={languageDirection}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-800">הכנסות</h2>
+            <CustomButton
+              size={ButtonSize.SM}
+              onClick={() => setIsIncomesModalOpen(true)}
+            >
+              הוסף הכנסות משוערות
+            </CustomButton>
+          </div>
+          {income && (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faDollarSign} className="text-gray-500" />
+                <span className="font-semibold text-gray-900">
+                  הכנסות משוערות סה&quot;כ: {formatCurrency(estimatedTotal)}
+                </span>
+              </div>
+              <span className="text-sm text-gray-600">אורחים: {income.numberOfGuests}</span>
+              <span className="text-sm text-gray-600">
+                מתנה ממוצעת לאורח: {formatCurrency(income.avgGiftPerGuest)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {(income || totalPrice > 0) && (
+          <div
+            className={`rounded-lg p-4 shadow-sm border flex items-center gap-2 ${
+              balance >= 0 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+            }`}
+            dir={languageDirection}
+          >
+            <FontAwesomeIcon
+              icon={faDollarSign}
+              className={balance >= 0 ? "text-green-600" : "text-red-600"}
+            />
+            <span className={balance >= 0 ? "text-green-700 font-semibold" : "text-red-700 font-semibold"}>
+              מאזן: {formatCurrency(balance)}
+            </span>
+          </div>
+        )}
 
         {biggestProvider && (
           <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-200" dir={languageDirection}>
@@ -44,12 +104,22 @@ const Budget = () => {
           </div>
         )}
 
-        {!biggestProvider && totalPrice === 0 && (
+        {!biggestProvider && totalPrice === 0 && !income && (
           <div className="rounded-lg bg-gray-100 p-6 text-center text-gray-500">
-            אין נתוני תקציב. הוסף ספקים בדף הספקים.
+            אין נתוני תקציב. הוסף ספקים בדף הספקים והכנסות משוערות.
           </div>
         )}
       </div>
+
+      <IncomesModal
+        isOpen={isIncomesModalOpen}
+        onClose={() => setIsIncomesModalOpen(false)}
+        onSave={(data) => {
+          setIncome(data);
+          setIsIncomesModalOpen(false);
+        }}
+        income={income}
+      />
     </div>
   );
 };
