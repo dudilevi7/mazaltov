@@ -12,6 +12,7 @@ interface BudgetContextType {
   totalPaid: number;
   totalToBePaid: number;
   biggestProvider: Provider | null;
+  providers: Provider[];
   income: Income | null;
   setIncome: (income: Income) => void;
   estimatedTotal: number;
@@ -52,6 +53,7 @@ const BudgetProvider = ({ children }: { children: React.ReactNode }) => {
       totalPaid,
       totalToBePaid,
       biggestProvider,
+      providers,
       income,
       setIncome,
       estimatedTotal,
