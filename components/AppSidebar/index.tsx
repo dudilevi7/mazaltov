@@ -74,17 +74,17 @@ const AppSidebar = () => {
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item)}
-                className={`flex items-center gap-2 rounded-md text-gray-700 hover:bg-gray-200 transition-colors ${
+                className={`flex items-center gap-2 rounded-md text-gray-700 hover:bg-blue-100 transition-colors ${
                   isOpen
                     ? `w-full px-3 py-2 text-sm font-medium ${
                         isRtl ? "flex flex-row" : "flex justify-start"
                       }`
                     : "w-10 h-10 justify-center"
-                } ${isActive ? "bg-gray-200" : ""} cursor-pointer`}
+                } ${isActive ? "bg-blue-100" : "text-gray-500"} cursor-pointer`}
               >
-                <FontAwesomeIcon icon={item.icon} className="shrink-0"/>
+                <FontAwesomeIcon icon={item.icon} className={`shrink-0 ${isActive ? "text-blue-500" : "text-gray-500"}`}/>
                 {isOpen && (
-                  <span className="text-base animate-fade-in-0.5">
+                  <span className={`text-base animate-fade-in-0.5 ${isActive ? "text-blue-500" : "text-gray-500"}`}>
                     {isRtl ? item.labelHe : item.labelEn}
                   </span>
                 )}

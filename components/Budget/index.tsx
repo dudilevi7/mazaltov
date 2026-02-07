@@ -32,7 +32,7 @@ const Budget = () => {
         </div>
 
         {biggestProvider && (
-          <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-200">
+          <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-200" dir={languageDirection}>
             <h3 className="mb-2 text-sm font-medium text-gray-500">הספק בעל המחיר הגבוה ביותר</h3>
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-gray-900">{biggestProvider.name}</span>
