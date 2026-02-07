@@ -10,6 +10,7 @@ interface Todo {
     status: TodoStatus;
     reminderTimestamp: number;
     updatedBy: string;
+    providerId?: number;
     createdAt: number;
     updatedAt: number;
 }

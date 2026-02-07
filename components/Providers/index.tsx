@@ -5,7 +5,8 @@ import AppHeader from '@/components/AppHeader'
 import DeleteModal from '@/components/DeleteModal'
 import TodoModal, { TodoFormData } from '@/components/TodoModal'
 import ProvidersModal, { ProviderFormData } from '@/components/Providers/modal'
-import ProviderCard from '@/components/Providers/provider-card'
+import ProviderCard from '@/components/ProviderCard'
+import ProviderTasksModal from '@/components/ProviderCard/ProviderTasksModal'
 import ProvidersHeader from '@/components/Providers/header'
 import { useProvidersContext } from '@/context/ProvidersContext'
 import { useAppContext } from '@/context/AppContext'
@@ -13,7 +14,7 @@ import type { Provider } from '@/types/Provider'
 
 const Providers = () => {
   const { providers, addProvider, updateProvider, removeProvider } = useProvidersContext()
-  const { addTodo, rowDirectionClassName } = useAppContext()
+  const { addTodo, todos, rowDirectionClassName } = useAppContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedService, setSelectedService] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -21,6 +22,7 @@ const Providers = () => {
   const [providerToDelete, setProviderToDelete] = useState<Provider | null>(null)
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [providerForTask, setProviderForTask] = useState<Provider | null>(null)
+  const [providerForWatch, setProviderForWatch] = useState<Provider | null>(null)
 
   const services = useMemo(
     () => Array.from(new Set(providers.map((p) => p.service.trim()).filter((service) => !!service))),
@@ -93,10 +95,28 @@ const Providers = () => {
   }
 
   const handleTaskSave = (data: TodoFormData) => {
-    addTodo(data)
+    addTodo({
+      ...data,
+      providerId: providerForTask?.id,
+    })
     setIsTaskModalOpen(false)
     setProviderForTask(null)
   }
+
+  const handleWatchProviderTasks = (provider: Provider) => {
+    setProviderForWatch(provider)
+  }
+
+  const providerTasksMap = useMemo(() => {
+    const map: Record<number, import('@/types/Todo').Todo[]> = {}
+    todos.forEach((todo) => {
+      if (todo.providerId != null) {
+        if (!map[todo.providerId]) map[todo.providerId] = []
+        map[todo.providerId].push(todo)
+      }
+    })
+    return map
+  }, [todos])
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6">
@@ -125,9 +145,11 @@ const Providers = () => {
               <ProviderCard
                 key={provider.id}
                 provider={provider}
+                providerTasks={providerTasksMap[provider.id] || []}
                 onEdit={handleOpenEdit}
                 onDelete={handleDeleteClick}
                 onAddProviderTask={handleAddProviderTask}
+                onWatchProviderTasks={handleWatchProviderTasks}
               />
             ))}
           </div>
@@ -143,7 +165,18 @@ const Providers = () => {
           setProviderForTask(null)
         }}
         onSave={handleTaskSave}
-        initialData={providerForTask ? { name: providerForTask.name, description: providerForTask.service } : undefined}
+        initialData={
+          providerForTask
+            ? { name: providerForTask.name, description: providerForTask.service }
+            : undefined
+        }
+      />
+
+      <ProviderTasksModal
+        isOpen={!!providerForWatch}
+        onClose={() => setProviderForWatch(null)}
+        provider={providerForWatch}
+        tasks={providerForWatch ? providerTasksMap[providerForWatch.id] || [] : []}
       />
 
       <DeleteModal

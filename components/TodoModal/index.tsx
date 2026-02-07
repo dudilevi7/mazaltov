@@ -20,6 +20,7 @@ export interface TodoFormData {
   status: TodoStatus;
   reminderTimestamp: number;
   updatedBy: string;
+  providerId?: number;
 }
 
 const STATUS_OPTIONS: { value: TodoStatus; label: string }[] = [
@@ -70,6 +71,7 @@ export default function TodoModal({
       status,
       reminderTimestamp: reminderDate ? reminderDate.getTime() : 0,
       updatedBy,
+      providerId: todo?.providerId ?? initialData?.providerId,
     });
     onClose();
   };
