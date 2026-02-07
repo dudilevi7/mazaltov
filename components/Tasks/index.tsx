@@ -79,12 +79,12 @@ const Tasks = () => {
   }
 
   return (
-    <div className="flex w-full flex-col bg-gray-50 font-sans p-6">
-      <div className="mb-6 flex flex-row items-center justify-between">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6">
+      <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
         <AppHeader />
         <TodoHeader onAddClick={handleOpenCreate} searchValue={searchQuery} onSearchChange={setSearchQuery} />
       </div>
-      <div className="flex flex-row items-center justify-end gap-2">
+      <div className="flex shrink-0 flex-row items-center justify-end gap-2">
         <span className="text-gray-500">מיון לפי תאריך</span>
         <FontAwesomeIcon
           icon={faArrowDown}
@@ -92,7 +92,7 @@ const Tasks = () => {
           onClick={handleSortByDate}
         />
       </div>
-      <ul className="flex flex-col gap-3 overflow-auto py-2 px-1">
+      <ul className="min-h-0 flex-1 overflow-auto py-2 px-1 flex flex-col gap-3">
         <TodoList
           todos={filteredTodos}
           onEdit={handleOpenEdit}

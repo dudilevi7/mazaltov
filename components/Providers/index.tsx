@@ -3,21 +3,24 @@
 import { useMemo, useState } from 'react'
 import AppHeader from '@/components/AppHeader'
 import DeleteModal from '@/components/DeleteModal'
+import TodoModal, { TodoFormData } from '@/components/TodoModal'
 import ProvidersModal, { ProviderFormData } from '@/components/Providers/modal'
 import ProviderCard from '@/components/Providers/provider-card'
 import ProvidersHeader from '@/components/Providers/header'
 import { useProvidersContext } from '@/context/ProvidersContext'
-import type { Provider } from '@/types/Provider'
 import { useAppContext } from '@/context/AppContext'
+import type { Provider } from '@/types/Provider'
 
 const Providers = () => {
   const { providers, addProvider, updateProvider, removeProvider } = useProvidersContext()
-  const { rowDirectionClassName } = useAppContext()
+  const { addTodo, rowDirectionClassName } = useAppContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedService, setSelectedService] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null)
   const [providerToDelete, setProviderToDelete] = useState<Provider | null>(null)
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [providerForTask, setProviderForTask] = useState<Provider | null>(null)
 
   const services = useMemo(
     () => Array.from(new Set(providers.map((p) => p.service.trim()).filter((service) => !!service))),
@@ -84,9 +87,20 @@ const Providers = () => {
     setSelectedService('')
   }
 
+  const handleAddProviderTask = (provider: Provider) => {
+    setProviderForTask(provider)
+    setIsTaskModalOpen(true)
+  }
+
+  const handleTaskSave = (data: TodoFormData) => {
+    addTodo(data)
+    setIsTaskModalOpen(false)
+    setProviderForTask(null)
+  }
+
   return (
-    <div className="flex w-full flex-col bg-gray-50 font-sans p-6">
-      <div className="mb-6 flex flex-row items-center justify-between">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6">
+      <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
         <AppHeader />
         <ProvidersHeader
           onAddClick={handleOpenCreate}
@@ -100,7 +114,7 @@ const Providers = () => {
         />
       </div>
 
-      <div className="flex-1 mt-10">
+      <div className="min-h-0 flex-1 overflow-auto mt-10">
         {filteredProviders.length === 0 ? (
           <div className="rounded-lg bg-gray-100 p-6 text-center text-gray-500">
             אין ספקים. הוסף ספק חדש כדי להתחיל.
@@ -113,6 +127,7 @@ const Providers = () => {
                 provider={provider}
                 onEdit={handleOpenEdit}
                 onDelete={handleDeleteClick}
+                onAddProviderTask={handleAddProviderTask}
               />
             ))}
           </div>
@@ -120,6 +135,16 @@ const Providers = () => {
       </div>
 
       <ProvidersModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSave} provider={editingProvider} />
+
+      <TodoModal
+        isOpen={isTaskModalOpen}
+        onClose={() => {
+          setIsTaskModalOpen(false)
+          setProviderForTask(null)
+        }}
+        onSave={handleTaskSave}
+        initialData={providerForTask ? { name: providerForTask.name, description: providerForTask.service } : undefined}
+      />
 
       <DeleteModal
         isOpen={!!providerToDelete}

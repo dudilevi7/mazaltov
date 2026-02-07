@@ -20,8 +20,8 @@ const Budget = () => {
   const [isIncomesModalOpen, setIsIncomesModalOpen] = useState(false)
 
   return (
-    <div className="flex w-full flex-col bg-gray-50 font-sans p-6">
-      <div className="mb-6 flex flex-row items-center justify-between">
+    <div className="flex h-screen overflow-hidden w-full flex-col bg-gray-50 font-sans p-6">
+      <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
         <AppHeader />
       </div>
       <BudgetProgressBar />

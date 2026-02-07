@@ -11,6 +11,7 @@ interface TodoModalProps {
   onClose: () => void;
   onSave: (data: TodoFormData) => void;
   todo?: Todo | null;
+  initialData?: Partial<TodoFormData>;
 }
 
 export interface TodoFormData {
@@ -32,9 +33,10 @@ export default function TodoModal({
   onClose,
   onSave,
   todo,
+  initialData,
 }: TodoModalProps) {
-  const [name, setName] = useState(todo?.name || "");
-  const [description, setDescription] = useState(todo?.description || "");
+  const [name, setName] = useState(todo?.name || initialData?.name || "");
+  const [description, setDescription] = useState(todo?.description || initialData?.description || "");
   const [status, setStatus] = useState<TodoStatus>(TodoStatus.PENDING);
   const [reminderDate, setReminderDate] = useState<Date | null>(
     todo?.reminderTimestamp ? new Date(todo.reminderTimestamp) : null
@@ -45,13 +47,19 @@ export default function TodoModal({
 
   useEffect(() => {
     if (isOpen) {
-      setName(todo?.name || "");
-      setDescription(todo?.description || "");
-      setStatus(todo?.status ?? TodoStatus.PENDING);
-      setReminderDate(todo?.reminderTimestamp ? new Date(todo.reminderTimestamp) : null);
-      setUpdatedBy(todo?.updatedBy || "");
+      setName(todo?.name || initialData?.name || "");
+      setDescription(todo?.description || initialData?.description || "");
+      setStatus(todo?.status ?? initialData?.status ?? TodoStatus.PENDING);
+      setReminderDate(
+        todo?.reminderTimestamp
+          ? new Date(todo.reminderTimestamp)
+          : initialData?.reminderTimestamp
+            ? new Date(initialData.reminderTimestamp)
+            : null
+      );
+      setUpdatedBy(todo?.updatedBy || initialData?.updatedBy || "");
     }
-  }, [isOpen, todo]);
+  }, [isOpen, todo, initialData]);
 
 
   const handleSubmit = (e: React.FormEvent) => {
