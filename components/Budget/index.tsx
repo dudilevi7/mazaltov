@@ -14,13 +14,11 @@ import BudgetProgressBar from './BudgetProgressBar'
 import BudgetContent from './content'
 
 const Budget = () => {
-  const { totalPrice, totalPaid, totalToBePaid, biggestProvider, income, setIncome, estimatedTotal, balance } =
-    useBudgetContext()
-  const { languageDirection } = useAppContext()
+  const { income, setIncome } = useBudgetContext()
   const [isIncomesModalOpen, setIsIncomesModalOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden w-full flex-col bg-gray-50 font-sans p-6">
+    <div className="flex h-screen overflow-auto w-full flex-col bg-gray-50 font-sans p-6">
       <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
         <AppHeader />
       </div>
