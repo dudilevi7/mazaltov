@@ -1,9 +1,14 @@
 'use client'
+
 import { Todo, TodoStatus } from '@/types/Todo'
 import TodoItem from '@/components/TodoItem'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFile } from '@fortawesome/free-solid-svg-icons'
 import { useAppContext } from '@/context/AppContext'
+import { useProvidersContext } from '@/context/ProvidersContext'
+
+const getProviderName = (providers: { id: number; name: string }[], providerId?: number): string | undefined =>
+  providerId ? providers.find((p) => p.id === providerId)?.name : undefined
 
 interface TodoListProps {
   todos: Todo[]
@@ -12,8 +17,10 @@ interface TodoListProps {
   onStatusChange?: (todo: Todo, newStatus: TodoStatus) => void
 }
 
-export default function TodoList({ todos, onEdit, onDelete, onStatusChange }: TodoListProps) {
+const TodoList = ({ todos, onEdit, onDelete, onStatusChange }: TodoListProps) => {
   const { languageDirection } = useAppContext()
+  const { providers } = useProvidersContext()
+
   if (todos.length === 0) {
     return (
       <div
@@ -33,3 +40,5 @@ export default function TodoList({ todos, onEdit, onDelete, onStatusChange }: To
     </>
   )
 }
+
+export default TodoList

@@ -2,16 +2,12 @@
 
 import { useMemo, useState } from 'react'
 import { useAppContext } from '@/context/AppContext'
-import AppHeader from '@/components/AppHeader'
-import TodoHeader from '@/components/TodoHeader'
-import TodoList from '@/components/TodoList'
 import TodoModal, { TodoFormData } from '@/components/TodoModal'
 import DeleteModal from '@/components/DeleteModal'
 import { Todo, TodoStatus } from '@/types/Todo'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowDown } from '@fortawesome/free-solid-svg-icons'
-import SelectDropdown from '../Shared/SelectDropdown'
-import { TASK_STATUS_OPTIONS } from '@/constants/options'
+import TasksHeader from './header'
+import TasksFilters from './filters'
+import TasksContent from './content'
 
 const Tasks = () => {
   const { todos, addTodo, updateTodo, removeTodo, languageDirection } = useAppContext()
@@ -24,20 +20,28 @@ const Tasks = () => {
 
   const filteredTodos = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
-    let sortedTodos = todos.sort((a, b) => (sortByDate ? b.createdAt - a.createdAt : a.createdAt - b.createdAt))
-    if (selectedStatus !== 'all') {
-      sortedTodos = sortedTodos.filter((todo) => todo.status === selectedStatus)
-    }
-    if (!q) return sortedTodos
-    let filteredTodos = sortedTodos.filter(
+    const sorted = [...todos].sort((a, b) =>
+      sortByDate ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+    )
+    const byStatus =
+      selectedStatus === 'all' ? sorted : sorted.filter((todo) => todo.status === selectedStatus)
+    if (!q) return byStatus
+    return byStatus.filter(
       (todo) =>
         todo.name.toLowerCase().includes(q) ||
         todo.description.toLowerCase().includes(q) ||
         todo.updatedBy.toLowerCase().includes(q)
     )
-
-    return filteredTodos
   }, [todos, searchQuery, sortByDate, selectedStatus])
+
+  const incompleteTodos = useMemo(
+    () => filteredTodos.filter((t) => t.status !== TodoStatus.COMPLETED),
+    [filteredTodos]
+  )
+  const completedTodos = useMemo(
+    () => filteredTodos.filter((t) => t.status === TodoStatus.COMPLETED),
+    [filteredTodos]
+  )
 
   const handleOpenCreate = () => {
     setEditingTodo(null)
@@ -82,44 +86,27 @@ const Tasks = () => {
     updateTodo(todo.id, { status: newStatus })
   }
 
-  const handleSortByDate = () => {
-    setSortByDate(!sortByDate)
-  }
-
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6">
-      <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
-        <AppHeader />
-        <TodoHeader onAddClick={handleOpenCreate} searchValue={searchQuery} onSearchChange={setSearchQuery} />
-      </div>
-      <div className="flex flex-row items-center justify-end gap-2">
-        <div
-          className="flex shrink-0 flex-row items-center justify-end gap-1 text-gray-500 hover:text-gray-700 cursor-pointer"
-          onClick={handleSortByDate}>
-          <span className="">מיון לפי תאריך</span>
-          <FontAwesomeIcon icon={faArrowDown} className={` ${sortByDate ? 'rotate-180' : ''} transition-all`} />
-        </div>
-        <SelectDropdown
-          value={selectedStatus}
-          onChange={(value) => setSelectedStatus(value as TodoStatus)}
-          options={TASK_STATUS_OPTIONS}
-          placeholder="הכל"
-          className="min-w-40"
-        />
-      </div>
-      <div className="flex flex-row">
-        <span className="mx-1 mt-1 text-gray-500 text-sm font-medium hover:text-blue-600" dir={languageDirection}>
-          {filteredTodos.length} {languageDirection === 'rtl' ? 'משימות' : 'Tasks'}
-        </span>
-      </div>
-      <ul className="min-h-0 flex-1 overflow-auto py-2 px-1 flex flex-col gap-3">
-        <TodoList
-          todos={filteredTodos}
-          onEdit={handleOpenEdit}
-          onDelete={handleDeleteClick}
-          onStatusChange={handleStatusChange}
-        />
-      </ul>
+      <TasksHeader
+        onAddClick={handleOpenCreate}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+      <TasksFilters
+        sortByDate={sortByDate}
+        onSortByDate={() => setSortByDate((p) => !p)}
+        selectedStatus={selectedStatus}
+        onStatusChange={(v) => setSelectedStatus(v)}
+      />
+      <TasksContent
+        incompleteTodos={incompleteTodos}
+        completedTodos={completedTodos}
+        languageDirection={languageDirection}
+        onEdit={handleOpenEdit}
+        onDelete={handleDeleteClick}
+        onStatusChange={handleStatusChange}
+      />
 
       {isModalOpen && (
         <TodoModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSave} todo={editingTodo} />
