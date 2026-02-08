@@ -10,7 +10,8 @@ import ProviderTasksModal from '@/components/ProviderCard/ProviderTasksModal'
 import ProvidersHeader from '@/components/Providers/header'
 import { useProvidersContext } from '@/context/ProvidersContext'
 import { useAppContext } from '@/context/AppContext'
-import type { Provider } from '@/types/Provider'
+import { PaidFilterStatus, Provider } from '@/types/Provider'
+import { getIsPaid } from './helper'
 
 const Providers = () => {
   const { providers, addProvider, updateProvider, removeProvider } = useProvidersContext()
@@ -23,6 +24,7 @@ const Providers = () => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [providerForTask, setProviderForTask] = useState<Provider | null>(null)
   const [providerForWatch, setProviderForWatch] = useState<Provider | null>(null)
+  const [paidFilterValue, setPaidFilterValue] = useState<PaidFilterStatus>(PaidFilterStatus.ALL)
 
   const services = useMemo(
     () => Array.from(new Set(providers.map((p) => p.service.trim()).filter((service) => !!service))),
@@ -41,9 +43,11 @@ const Providers = () => {
 
       const matchService = !selectedService || provider.service === selectedService
 
-      return matchSearch && matchService
+      const matchPaidStatus = getIsPaid(provider, paidFilterValue)
+
+      return matchSearch && matchService && matchPaidStatus
     })
-  }, [providers, searchQuery, selectedService])
+  }, [providers, searchQuery, selectedService, paidFilterValue])
 
   const handleOpenCreate = () => {
     setEditingProvider(null)
@@ -87,6 +91,7 @@ const Providers = () => {
   const handleClearAll = () => {
     setSearchQuery('')
     setSelectedService('')
+    setPaidFilterValue(PaidFilterStatus.ALL)
   }
 
   const handleAddProviderTask = (provider: Provider) => {
@@ -131,6 +136,8 @@ const Providers = () => {
           serviceOptions={services}
           rowDirectionClassName={rowDirectionClassName}
           onClearAll={handleClearAll}
+          paidFilterValue={paidFilterValue}
+          onPaidFilterChange={setPaidFilterValue}
         />
       </div>
 
@@ -165,11 +172,7 @@ const Providers = () => {
           setProviderForTask(null)
         }}
         onSave={handleTaskSave}
-        initialData={
-          providerForTask
-            ? { name: providerForTask.name, description: providerForTask.service }
-            : undefined
-        }
+        initialData={providerForTask ? { name: providerForTask.name, description: providerForTask.service } : undefined}
       />
 
       <ProviderTasksModal
