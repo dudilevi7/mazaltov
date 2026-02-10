@@ -21,6 +21,7 @@ export interface TodoFormData {
   reminderTimestamp: number;
   updatedBy: string;
   providerId?: number;
+  isTask?: boolean;
 }
 
 const STATUS_OPTIONS: { value: TodoStatus; label: string }[] = [
@@ -43,6 +44,7 @@ export default function TodoModal({
     todo?.reminderTimestamp ? new Date(todo.reminderTimestamp) : null
   );
   const [updatedBy, setUpdatedBy] = useState(todo?.updatedBy || "");
+  const [isTask, setIsTask] = useState<boolean>(todo?.isTask ?? initialData?.isTask ?? true);
 
   const isEdit = !!todo;
 
@@ -59,6 +61,7 @@ export default function TodoModal({
             : null
       );
       setUpdatedBy(todo?.updatedBy || initialData?.updatedBy || "");
+      setIsTask(todo?.isTask ?? initialData?.isTask ?? true);
     }
   }, [isOpen, todo, initialData]);
 
@@ -72,6 +75,7 @@ export default function TodoModal({
       reminderTimestamp: reminderDate ? reminderDate.getTime() : 0,
       updatedBy,
       providerId: todo?.providerId ?? initialData?.providerId,
+      isTask,
     });
     onClose();
   };
@@ -139,6 +143,19 @@ export default function TodoModal({
               className="rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               isClearable
             />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              האם זו משימה?
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={isTask}
+                onChange={(e) => setIsTask(e.target.checked)}
+              />
+              <span className="text-sm text-gray-700">סימון כמשימה לצורך הצגה בלוח השנה</span>
+            </div>
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
