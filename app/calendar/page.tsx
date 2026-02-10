@@ -1,15 +1,14 @@
-"use client";
+'use client'
 
-import MazalTovCalendar from "@/components/Calendar";
-import { CalendarProvider } from "@/context/CalendarContext";
+import Calender from '@/components/Calendar'
+import { CalendarProvider } from '@/context/CalendarContext'
 
 const CalendarPage = () => {
   return (
     <CalendarProvider>
-      <MazalTovCalendar />
+      <Calender />
     </CalendarProvider>
-  );
-};
+  )
+}
 
-export default CalendarPage;
-
+export default CalendarPage
