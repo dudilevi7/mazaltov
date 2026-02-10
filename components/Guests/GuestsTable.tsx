@@ -24,6 +24,7 @@ const GuestsTable = ({
 }: GuestsTableProps) => {
   const [showDeleteSpecificGuestModal, setShowDeleteSpecificGuestModal] = useState(false)
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null)
+
   const onDeleteClick = (guest: Guest) => {
     setGuestToDelete(guest)
     setShowDeleteSpecificGuestModal(true)
@@ -34,6 +35,10 @@ const GuestsTable = ({
       setShowDeleteSpecificGuestModal(false)
       setGuestToDelete(null)
     }
+  }
+  const onDeleteCancel = () => {
+    setShowDeleteSpecificGuestModal(false)
+    setGuestToDelete(null)
   }
   const columns: CustomTableColumn<Guest>[] = [
     { key: 'name', label: 'שם' },
@@ -96,7 +101,7 @@ const GuestsTable = ({
       <CustomTable<Guest> columns={columns} data={guests} getRowKey={(g) => g.id} emptyMessage={emptyMessage} />
       <DeleteModal
         isOpen={showDeleteSpecificGuestModal}
-        onClose={() => setShowDeleteSpecificGuestModal(false)}
+        onClose={onDeleteCancel}
         onConfirm={onDeleteConfirm}
         title={`אורח ${guestToDelete?.name}`}
       />
