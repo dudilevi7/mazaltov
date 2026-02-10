@@ -4,6 +4,7 @@ import './globals.css'
 import AppProvider from '../context/AppContext'
 import { ProvidersProvider } from '@/context/ProvidersContext'
 import { BudgetProvider } from '@/context/BudgetContext'
+import { GuestsProvider } from '@/context/GuestsContext'
 import AppLayout from '@/components/AppLayout'
 
 const geistSans = Geist({
@@ -32,7 +33,9 @@ export default function RootLayout({
         <AppProvider>
           <ProvidersProvider>
             <BudgetProvider>
-              <AppLayout>{children}</AppLayout>
+              <GuestsProvider>
+                <AppLayout>{children}</AppLayout>
+              </GuestsProvider>
             </BudgetProvider>
           </ProvidersProvider>
         </AppProvider>
