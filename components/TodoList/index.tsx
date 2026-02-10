@@ -26,7 +26,7 @@ const TodoList = ({ todos, onEdit, onDelete, onStatusChange }: TodoListProps) =>
       <div
         className="rounded-lg bg-gray-100 p-6 text-center text-gray-500 h-screen flex flex-col items-center justify-center"
         dir={languageDirection}>
-        <FontAwesomeIcon icon={faFile} className="text-gray-500 text-2xl" />
+        <FontAwesomeIcon icon={faFile} className="text-gray-500 max-w-10 max-h-10" />
         <span className="text-gray-500 text-sm font-medium">אין משימות להציג.</span>
       </div>
     )

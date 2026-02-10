@@ -19,7 +19,10 @@ const TasksFilters = ({ sortByDate, onSortByDate, selectedStatus, onStatusChange
       className="flex shrink-0 flex-row items-center justify-end gap-1 text-gray-500 hover:text-gray-700 cursor-pointer"
       onClick={onSortByDate}>
       <span>מיון לפי תאריך</span>
-      <FontAwesomeIcon icon={faArrowDown} className={`${sortByDate ? 'rotate-180' : ''} transition-all`} />
+      <FontAwesomeIcon
+        icon={faArrowDown}
+        className={`${sortByDate ? 'rotate-180' : ''} transition-all max-w-4 max-h-4`}
+      />
     </div>
     <SelectDropdown
       value={selectedStatus}
