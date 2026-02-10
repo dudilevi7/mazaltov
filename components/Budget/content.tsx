@@ -2,9 +2,10 @@ import { useAppContext } from '@/context/AppContext'
 import { useBudgetContext } from '@/context/BudgetContext'
 import { formatCurrency } from '@/lib/utils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMoneyBillAlt } from '@fortawesome/free-solid-svg-icons'
+import { faInfoCircle, faMoneyBillAlt } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '../Button/custom-button'
 import ExpensesSection from './ExpensesSection'
+import Tooltip from '../Tooltip'
 
 interface BudgetContentProps {
   setIsIncomesModalOpen: (isOpen: boolean) => void
@@ -25,6 +26,9 @@ const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) 
           <span className={balance >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
             מאזן: {formatCurrency(balance)}
           </span>
+          <Tooltip content="מאזן הוא ההפרש בין התוצאות להכנסות המשוערות">
+            <FontAwesomeIcon icon={faInfoCircle} className="text-red-500 hover:text-red-700 cursor-pointer text-sm" />
+          </Tooltip>
         </div>
       )}
       <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-200" dir={languageDirection}>

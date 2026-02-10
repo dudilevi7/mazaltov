@@ -17,7 +17,7 @@ const BudgetProgressBar = () => {
         <ProgressBar total={totalPrice} completed={totalPaid} remaining={totalToBePaid} />
         <div className="mt-2 flex gap-4 text-sm text-gray-600" dir={languageDirection}>
           <span className="text-green-600">שולם: {formatCurrency(totalPaid)}</span>
-          <span className="text-red-500">נותר: {formatCurrency(totalToBePaid)}</span>
+          <span className="text-red-500">נותר לתשלום: {formatCurrency(totalToBePaid)}</span>
           <span className="text-gray-900">סה&quot;כ: {formatCurrency(totalPrice)}</span>
         </div>
       </div>
