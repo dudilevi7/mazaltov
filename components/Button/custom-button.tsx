@@ -24,6 +24,7 @@ interface CustomButtonProps {
   variant?: keyof typeof variantStyles
   size?: ButtonSize
   icon?: React.ReactNode
+  disabled?: boolean
 }
 
 const CustomButton = ({
@@ -34,12 +35,14 @@ const CustomButton = ({
   variant = 'default',
   size = ButtonSize.MD,
   icon,
+  disabled = false,
 }: CustomButtonProps) => {
   return (
     <button
       type={type}
-      className={`cursor-pointer inline-flex items-center gap-1 ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
-      onClick={onClick}>
+      className={`cursor-pointer inline-flex items-center gap-1 ${variantStyles[variant]} ${sizeStyles[size]} ${className} ${disabled ? 'opacity-50 !cursor-not-allowed' : ''}`}
+      onClick={onClick}
+      disabled={disabled}>
       {icon && <span className="flex items-center">{icon}</span>}
       <span>{children}</span>
     </button>
