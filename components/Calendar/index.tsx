@@ -8,8 +8,10 @@ import TodoModal, { TodoFormData } from '@/components/TodoModal'
 import DeleteModal from '@/components/DeleteModal'
 import type { Todo } from '@/types/Todo'
 import { LanguageDirection } from '@/types/General'
-import { getDateKey } from './helper'
+import { getDateKey, getTileClassName } from './helper'
 import AppHeader from '../AppHeader'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCalendar, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
 
 const CalendarPage = () => {
   const { selectedDate, setSelectedDate, todosByDate, todosForSelectedDate } = useCalendarContext()
@@ -44,7 +46,6 @@ const CalendarPage = () => {
       addTodo({
         ...data,
         reminderTimestamp: data.reminderTimestamp || selectedDate.getTime(),
-        isTask: data.isTask ?? true,
       })
     }
     closeModal()
@@ -72,42 +73,47 @@ const CalendarPage = () => {
   }
 
   return (
-    <div className={`flex h-screen w-full flex-col gap-6 p-6`} dir={languageDirection}>
-      <div className="flex w-full flex-col rounded-2xl bg-white p-4">
-        <h1 className="mb-4 text-xl font-semibold text-gray-900">לוח שנה</h1>
+    <div className="flex h-screen w-full flex-col overflow-hidden font-sans p-6">
+      <div className="flex shrink-0 flex-row items-center justify-between">
+        <AppHeader />
+      </div>
+      <div className="flex w-full flex-col rounded-md p-4 gap-4" dir={languageDirection}>
+        <div className="flex flex-row items-center gap-1 w-fit rounded-md">
+          <FontAwesomeIcon icon={faCalendar} className="text-lg text-gray-700" />
+          <span className="text-base font-semibold text-gray-700">לוח שנה</span>
+        </div>
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="flex justify-center w-4/6">
+          <div className="flex justify-center w-4/6 h-full">
             <Calendar
               onChange={(value) => handleDayClick(value as Date)}
               value={selectedDate}
               locale={locale}
               prev2Label={null}
               next2Label={null}
+              nextLabel={
+                <FontAwesomeIcon
+                  icon={faChevronLeft}
+                  className="text-gray-500 hover:text-gray-700 cursor-pointer text-xs"
+                />
+              }
+              prevLabel={
+                <FontAwesomeIcon
+                  icon={faChevronRight}
+                  className="text-gray-500 hover:text-gray-700 cursor-pointer text-xs"
+                />
+              }
+              navigationLabel={({ label }) => {
+                return <span className="text-base font-semibold text-gray-800">{label}</span>
+              }}
+              defaultView="month"
               calendarType={languageDirection === LanguageDirection.HEB ? 'hebrew' : 'gregory'}
               onClickDay={handleDayClick}
               className={`rounded-md border border-gray-200 bg-white p-4 shadow-sm`}
-              tileClassName={({ date }) => {
-                const key = getDateKey(date)
-                const hasTodos = !!todosByDate[key]?.length
-                const isSelected = getDateKey(selectedDate) === key
-
-                let base =
-                  'relative flex h-10 w-10 items-center justify-center rounded-md text-sm transition-colors cursor-pointer'
-
-                if (isSelected) {
-                  base += ' bg-blue-500 text-white shadow-md'
-                } else if (hasTodos) {
-                  base += ' bg-blue-50 text-blue-600 hover:bg-blue-100'
-                } else {
-                  base += ' text-gray-700 hover:bg-gray-100'
-                }
-
-                return base
-              }}
+              tileClassName={({ date }) => getTileClassName({ date, todosByDate, selectedDate })}
             />
           </div>
 
-          <div className="flex-1 rounded-2xl bg-gray-50 p-4">
+          <div className="flex-1 rounded-md bg-gray-50 p-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500">
@@ -175,8 +181,7 @@ const CalendarPage = () => {
             editingTodo
               ? undefined
               : {
-                  reminderTimestamp: selectedDate.getTime(),
-                  isTask: true,
+                reminderTimestamp: selectedDate.getTime(),
                 }
           }
         />

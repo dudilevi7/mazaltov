@@ -11,7 +11,6 @@ interface Todo {
     reminderTimestamp: number;
     updatedBy: string;
     providerId?: number;
-    isTask?: boolean;
     createdAt: number;
     updatedAt: number;
 }
