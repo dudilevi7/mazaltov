@@ -42,7 +42,7 @@ export const getTileClassName = ({
   const isSelected = getDateKey(selectedDate) === key
 
   let base =
-    'relative flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-md text-sm transition-colors cursor-pointer'
+    'relative flex h-10 w-10 md:h-18 md:w-18 items-center justify-center rounded-md text-sm transition-colors cursor-pointer'
 
   if (isSelected) {
     base += ' bg-blue-500 text-white shadow-md'

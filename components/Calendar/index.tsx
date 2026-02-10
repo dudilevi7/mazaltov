@@ -83,7 +83,7 @@ const CalendarPage = () => {
           <span className="text-base font-semibold text-gray-700">לוח שנה</span>
         </div>
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="flex justify-center w-4/6 h-full">
+          <div className="flex justify-center md:w-4/6">
             <Calendar
               onChange={(value) => handleDayClick(value as Date)}
               value={selectedDate}
@@ -181,7 +181,7 @@ const CalendarPage = () => {
             editingTodo
               ? undefined
               : {
-                reminderTimestamp: selectedDate.getTime(),
+                  reminderTimestamp: selectedDate.getTime(),
                 }
           }
         />
