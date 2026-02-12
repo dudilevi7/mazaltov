@@ -72,7 +72,6 @@ const importGuestsFromExcel = async (): Promise<Guest[]> => {
   const xls = XLSX.read(data, { type: 'array' })
   const sheet = xls.Sheets[xls.SheetNames[0]]
   const guests = XLSX.utils.sheet_to_json(sheet)
-  console.log({ guests })
 
   return guests.map((guest: any, index: number) => ({
     name: guest['שם'],

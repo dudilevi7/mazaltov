@@ -32,7 +32,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'calendar', labelHe: 'לוח שנה', labelEn: 'Calendar', icon: faCalendarDays, route: '/calendar' },
   { id: 'guests', labelHe: 'אורחים', labelEn: 'Guests', icon: faUsers, route: '/guests' },
   { id: 'budget', labelHe: 'תקציב', labelEn: 'Budget', icon: faCoins, route: '/budget' },
-  { id: 'settings', labelHe: 'הגדרות', labelEn: 'Settings', icon: faGear },
+  { id: 'settings', labelHe: 'הגדרות', labelEn: 'Settings', icon: faGear, route: '/settings' },
 ]
 
 const AppSidebar = () => {

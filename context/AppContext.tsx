@@ -4,10 +4,14 @@ import { Todo } from '../types/Todo'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
 import { LanguageDirection } from '@/types/General'
 import { MAZAL_TOV_TODOS_KEY } from '@/constants/localStorage'
+import { EventSettings, EventType } from '@/types/Settings'
 
 interface AppContextType {
   languageDirection: LanguageDirection
+  setLanguageDirection: (direction: LanguageDirection) => void
   rowDirectionClassName: string
+  eventSettings: EventSettings
+  setEventSettings: (settings: EventSettings) => void
   todos: Todo[]
   setTodos: (todos: Todo[]) => void
   addTodo: (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => void
@@ -16,7 +20,16 @@ interface AppContextType {
 }
 export const AppContext = createContext<AppContextType>({
   languageDirection: LanguageDirection.HEB,
+  setLanguageDirection: () => {},
   rowDirectionClassName: '',
+  eventSettings: {
+    eventType: EventType.WEDDING,
+    ownerName: '',
+    brideName: '',
+    groomName: '',
+    customEventType: '',
+  },
+  setEventSettings: () => {},
   todos: [],
   setTodos: () => {},
   addTodo: () => {},
@@ -26,8 +39,15 @@ export const AppContext = createContext<AppContextType>({
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [todos, setTodos] = useState<Todo[]>([])
-  const [languageDirection, setLangugageDirection] = useState<LanguageDirection>(LanguageDirection.HEB)
+  const [languageDirection, setLanguageDirection] = useState<LanguageDirection>(LanguageDirection.HEB)
   const [rowDirectionClassName, setRowDirectionClassName] = useState<string>('flex-row-reverse')
+  const [eventSettings, setEventSettings] = useState<EventSettings>({
+    eventType: EventType.WEDDING,
+    ownerName: '',
+    brideName: '',
+    groomName: '',
+    customEventType: '',
+  })
   useEffect(() => {
     setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
   }, [])
@@ -64,7 +84,18 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AppContext.Provider
-      value={{ todos, setTodos, addTodo, updateTodo, removeTodo, languageDirection, rowDirectionClassName }}>
+      value={{
+        todos,
+        setTodos,
+        addTodo,
+        updateTodo,
+        removeTodo,
+        languageDirection,
+        setLanguageDirection,
+        rowDirectionClassName,
+        eventSettings,
+        setEventSettings,
+      }}>
       {children}
     </AppContext.Provider>
   )
