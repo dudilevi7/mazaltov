@@ -12,12 +12,13 @@ import DeleteModal from '@/components/DeleteModal'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
 import type { Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
+import { importGuestsFromExcel } from './helper'
 
 const Guests = () => {
-  const { guests, addGuest, updateGuest, clearGuests, deleteGuest } = useGuestsContext()
+  const { guests, addGuest, updateGuest, clearGuests, deleteGuest, setGuests } = useGuestsContext()
   const { languageDirection } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
@@ -80,6 +81,11 @@ const Guests = () => {
     deleteGuest(guest.id)
   }
 
+  const handleImportGuestsFromExcel = async () => {
+    const guests = await importGuestsFromExcel()
+    setGuests(guests)
+  }
+
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6" dir={languageDirection}>
       <GuestsHeader />
@@ -90,6 +96,13 @@ const Guests = () => {
         <div className="flex items-center gap-2">
           <CustomButton size={ButtonSize.SM} onClick={openAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
             הוסף אורח
+          </CustomButton>
+          <CustomButton
+            size={ButtonSize.SM}
+            onClick={handleImportGuestsFromExcel}
+            className="bg-green-600 hover:bg-green-700 text-white"
+            icon={<FontAwesomeIcon icon={faUpload} />}>
+            ייבא מאקסל{' '}
           </CustomButton>
         </div>
 

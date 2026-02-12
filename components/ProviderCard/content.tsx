@@ -27,7 +27,7 @@ const ProviderCardContent = ({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-700">
+      <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
         <div>
           <div className="text-gray-500 text-xs">מחיר כולל</div>
           <div className="font-medium">{formatCurrency(price)}</div>
@@ -48,7 +48,7 @@ const ProviderCardContent = ({
       {comments && (
         <div className="flex flex-col mt-1 gap-2">
           <span className="text-gray-500 text-xs self-start">הערות</span>
-          <p className="bg-gray-100 p-2 rounded-md border border-gray-200 text-sm text-gray-800 font-bold whitespace-pre-wrap">
+          <p className="bg-gray-100 p-2 rounded-md border border-gray-200 text-sm text-gray-800 font-bold whitespace-pre-wrap min-h-20">
             {comments}
           </p>
         </div>

@@ -1,6 +1,7 @@
 import type { Guest } from '@/types/Guest'
 import { GuestStatus, GuestSide } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
+import * as XLSX from 'xlsx'
 
 const PHONE_NUMBER_REGEX = /^[\+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4}$/
 
@@ -63,6 +64,31 @@ const exportGuestsToCsv = (guests: Guest[], columns: { key: keyof Guest; label: 
   return [header, ...rows].join('\n')
 }
 
+const importGuestsFromExcel = async (): Promise<Guest[]> => {
+  const [file] = await (window as any).showOpenFilePicker()
+  const fileHandle = await file.getFile()
+  const text = await fileHandle.text()
+  const data = new Uint8Array(await fileHandle.arrayBuffer())
+  const xls = XLSX.read(data, { type: 'array' })
+  const sheet = xls.Sheets[xls.SheetNames[0]]
+  const guests = XLSX.utils.sheet_to_json(sheet)
+  console.log({ guests })
+
+  return guests.map((guest: any, index: number) => ({
+    name: guest['שם'],
+    phoneNumber: guest['טלפון'],
+    quantity: guest['כמות מוזמנים'],
+    side: guest['צד'],
+    category: guest['קבוצה'],
+    gift: guest['מתנה'],
+    status: GuestStatus.PENDING,
+    manualApproval: false,
+    id: index + 1,
+    createdAt: new Date().getTime(),
+    updatedAt: new Date().getTime(),
+  }))
+}
+
 export {
   validatePhoneNumber,
   validateRealName,
@@ -72,4 +98,5 @@ export {
   SIDE_LABELS,
   STATUS_LABELS,
   exportGuestsToCsv,
+  importGuestsFromExcel,
 }
