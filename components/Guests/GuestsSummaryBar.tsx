@@ -30,15 +30,19 @@ const GuestsSummaryBar = () => {
   const sideLabels = useMemo(() => getSideLabels(eventSettings), [eventSettings])
 
   const stats = useMemo(() => {
-    const total = guests.reduce((sum, g) => sum + g.quantity, 0)
+    const total = guests.reduce((sum, guest) => sum + guest.quantity, 0)
     const bySide: Record<string, number> = {}
     sideOptions.forEach((opt) => {
-      bySide[opt.value] = guests.filter((g) => g.side === opt.value).reduce((s, g) => s + g.quantity, 0)
+      bySide[opt.label] = guests.filter((guest) => guest.side === opt.label).reduce((s, guest) => s + guest.quantity, 0)
     })
-    const accepted = guests.filter((g) => g.status === GuestStatus.ACCEPTED).reduce((s, g) => s + g.quantity, 0)
-    const declined = guests.filter((g) => g.status === GuestStatus.DECLINED).reduce((s, g) => s + g.quantity, 0)
+    const accepted = guests
+      .filter((guest) => guest.status === GuestStatus.ACCEPTED)
+      .reduce((s, guest) => s + guest.quantity, 0)
+    const declined = guests
+      .filter((guest) => guest.status === GuestStatus.DECLINED)
+      .reduce((s, guest) => s + guest.quantity, 0)
     return { total, bySide, accepted, declined }
-  }, [guests, sideOptions])
+  }, [guests, sideOptions, sideLabels])
 
   const handleDownloadExcel = () => {
     const csv = exportGuestsToCsv(guests, DISPLAY_COLUMNS)
@@ -62,11 +66,10 @@ const GuestsSummaryBar = () => {
       <div className="flex items-center gap-3 text-gray-700 text-sm">
         {sideOptions.map((opt) => (
           <div key={opt.value} className="flex items-center gap-1">
-            <FontAwesomeIcon
-              icon={opt.value === 'both' ? faUserGroup : faUser}
-              className="text-gray-500"
-            />
-            <span>{sideLabels[opt.value] ?? opt.label}: {stats.bySide[opt.value] ?? 0}</span>
+            <FontAwesomeIcon icon={opt.value === 'both' ? faUserGroup : faUser} className="text-gray-500" />
+            <span>
+              {sideLabels[opt.value] ?? opt.label}: {stats.bySide[opt.label] ?? 0}
+            </span>
           </div>
         ))}
       </div>

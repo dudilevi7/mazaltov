@@ -53,6 +53,12 @@ const Guests = () => {
     })
   }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter])
 
+  const hasFiltersOrSearch =
+    searchQuery.trim() !== '' ||
+    sideFilter !== 'all' ||
+    statusFilter !== 'all' ||
+    categoryFilter !== 'all'
+
   const openAdd = () => {
     setEditingGuest(null)
     setIsModalOpen(true)
@@ -127,7 +133,7 @@ const Guests = () => {
           categoryOptions={categoryOptions}
         />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="חיפוש אורח" />
           <CustomButton
             size={ButtonSize.SM}
@@ -136,6 +142,11 @@ const Guests = () => {
             icon={<FontAwesomeIcon icon={faTrash} />}>
             מחק הכל
           </CustomButton>
+          {hasFiltersOrSearch && (
+            <span className="text-gray-500 text-sm ms-auto">
+              {filteredGuests.length} אורחים
+            </span>
+          )}
         </div>
 
         <div className="min-h-0 flex-1 overflow-auto">

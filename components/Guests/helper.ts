@@ -28,6 +28,12 @@ export const getSideLabels = (eventSettings: EventSettings): Record<string, stri
   return { [GuestSide.OWNER]: eventSettings.ownerName?.trim() || 'מארגן' }
 }
 
+export const getWhatsAppUrl = (phone: string): string => {
+  const digits = phone.replace(/\D/g, '')
+  const normalized = digits.startsWith('0') ? '972' + digits.slice(1) : digits
+  return `https://wa.me/${normalized}`
+}
+
 const PHONE_NUMBER_REGEX = /^[\+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4}$/
 
 const validatePhoneNumber = (phone?: string): boolean => {

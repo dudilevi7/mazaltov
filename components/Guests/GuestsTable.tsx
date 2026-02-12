@@ -2,12 +2,14 @@
 
 import CustomTable, { CustomTableColumn } from '@/components/Shared/CustomTable'
 import type { Guest } from '@/types/Guest'
-import { STATUS_LABELS } from './helper'
+import { getWhatsAppUrl, STATUS_LABELS } from './helper'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { useState } from 'react'
 import DeleteModal from '../DeleteModal'
+import Tooltip from '@/components/Tooltip'
 
 interface GuestsTableProps {
   guests: Guest[]
@@ -77,6 +79,16 @@ const GuestsTable = ({
       label: '',
       render: (row: Guest) => (
         <div className="flex items-center gap-2">
+          <Tooltip content="שלח הודעה בוואטסאפ" place="top">
+            <a
+              href={row.phoneNumber ? getWhatsAppUrl(row.phoneNumber) : undefined}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-2 py-1 text-green-600 hover:bg-green-50 transition-colors h-8 w-8"
+              aria-label="WhatsApp">
+              <FontAwesomeIcon icon={faWhatsapp} className="h-4 w-4" />
+            </a>
+          </Tooltip>
           <CustomButton
             size={ButtonSize.SM}
             variant="white"
