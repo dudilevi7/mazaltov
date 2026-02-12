@@ -87,7 +87,7 @@ const Tasks = () => {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6">
+    <div className="flex h-screen w-full flex-col overflow-hidden font-sans">
       <TasksHeader
         onAddClick={handleOpenCreate}
         searchValue={searchQuery}

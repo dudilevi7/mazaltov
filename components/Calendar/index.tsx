@@ -7,7 +7,6 @@ import TodoModal, { TodoFormData } from '@/components/TodoModal'
 import DeleteModal from '@/components/DeleteModal'
 import type { Todo } from '@/types/Todo'
 import { LanguageDirection } from '@/types/General'
-import AppHeader from '../AppHeader'
 import CalendarHeader from './header'
 import CalendarSelector from './CalendarSelector'
 import CalendarDayTasksDisplay from './CalendarDayTasksDisplay'
@@ -55,14 +54,8 @@ const CalendarPage = () => {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden font-sans p-6">
-      <header className=" flex shrink-0 flex-row items-center justify-between">
-        <AppHeader />
-      </header>
-
-      <div className="flex w-full flex-col rounded-md p-4 gap-4 min-h-0 flex-1" dir={languageDirection}>
-        <CalendarHeader />
-
+    <div className="flex h-screen w-full flex-col overflow-hidden font-sans">
+      <div className="flex w-full flex-col rounded-md gap-4 min-h-0 flex-1" dir={languageDirection}>
         <section className="flex flex-col gap-6 md:flex-row flex-1 min-h-0">
           <CalendarSelector />
           <CalendarDayTasksDisplay

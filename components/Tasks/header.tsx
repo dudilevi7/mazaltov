@@ -1,6 +1,5 @@
 'use client'
 
-import AppHeader from '@/components/AppHeader'
 import TodoHeader from '@/components/TodoHeader'
 
 interface TasksHeaderProps {
@@ -10,8 +9,7 @@ interface TasksHeaderProps {
 }
 
 const TasksHeader = ({ onAddClick, searchValue, onSearchChange }: TasksHeaderProps) => (
-  <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
-    <AppHeader />
+  <div className="mb-6 flex shrink-0 flex-row items-center justify-end">
     <TodoHeader onAddClick={onAddClick} searchValue={searchValue} onSearchChange={onSearchChange} />
   </div>
 )

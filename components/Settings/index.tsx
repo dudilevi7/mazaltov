@@ -78,7 +78,7 @@ const Settings = () => {
   const isWedding = eventSettings.eventType === EventType.WEDDING
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6" dir={languageDirection}>
+    <div className="flex h-screen w-full flex-col overflow-hidden font-sans" dir={languageDirection}>
       <header className="flex items-center justify-between pb-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <FontAwesomeIcon icon={faGear} className="text-gray-500" />

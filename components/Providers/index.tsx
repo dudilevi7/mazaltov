@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import AppHeader from '@/components/AppHeader'
 import DeleteModal from '@/components/DeleteModal'
 import TodoModal, { TodoFormData } from '@/components/TodoModal'
 import ProvidersModal, { ProviderFormData } from '@/components/Providers/modal'
@@ -124,9 +123,8 @@ const Providers = () => {
   }, [todos])
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-50 font-sans p-6">
-      <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
-        <AppHeader />
+    <div className="flex h-screen w-full flex-col overflow-hidden font-sans">
+      <div className="mb-6 flex shrink-0 flex-row items-center justify-end">
         <ProvidersHeader
           onAddClick={handleOpenCreate}
           searchValue={searchQuery}

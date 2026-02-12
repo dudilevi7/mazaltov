@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMoneyBillAlt } from '@fortawesome/free-solid-svg-icons'
-import AppHeader from '@/components/AppHeader'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import ProgressBar from '@/components/Shared/ProgressBar'
 import IncomesModal from '@/components/Budget/IncomesModal'
@@ -18,10 +17,7 @@ const Budget = () => {
   const [isIncomesModalOpen, setIsIncomesModalOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-auto w-full flex-col bg-gray-50 font-sans p-6">
-      <div className="mb-6 flex shrink-0 flex-row items-center justify-between">
-        <AppHeader />
-      </div>
+    <div className="flex h-screen overflow-auto w-full flex-col font-sans">
       <BudgetProgressBar />
 
       <BudgetContent setIsIncomesModalOpen={setIsIncomesModalOpen} />
