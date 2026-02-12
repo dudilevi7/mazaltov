@@ -14,11 +14,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faSpinner, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
 import type { Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
-import { importGuestsFromExcel } from './helper'
+import { getSideOptions, getSideLabels, importGuestsFromExcel } from './helper'
 
 const Guests = () => {
   const { guests, addGuest, updateGuest, clearGuests, deleteGuest, setGuests } = useGuestsContext()
-  const { languageDirection } = useAppContext()
+  const { languageDirection, eventSettings } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
@@ -28,6 +28,11 @@ const Guests = () => {
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [isImportingExcel, setIsImportingExcel] = useState(false)
 
+  const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
+  const sideFilterOptions: SelectOption[] = useMemo(
+    () => [{ value: 'all', label: 'הכל' }, ...sideOptions],
+    [sideOptions]
+  )
   const categoryOptions: SelectOption[] = useMemo(() => {
     const categories = Array.from(new Set(guests.map((g) => g.category.trim()).filter(Boolean)))
     return [{ value: 'all', label: 'הכל' }, ...categories.map((c) => ({ value: c, label: c }))]
@@ -35,15 +40,15 @@ const Guests = () => {
 
   const filteredGuests = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
-    return guests.filter((g) => {
+    return guests.filter((guest) => {
       const matchSearch =
         !q ||
-        g.name.toLowerCase().includes(q) ||
-        (g.category || '').toLowerCase().includes(q) ||
-        (g.phoneNumber || '').includes(q)
-      const matchSide = sideFilter === 'all' || g.side === sideFilter
-      const matchStatus = statusFilter === 'all' || g.status === statusFilter
-      const matchCategory = categoryFilter === 'all' || g.category === categoryFilter
+        guest.name.toLowerCase().includes(q) ||
+        (guest.category || '').toLowerCase().includes(q) ||
+        (guest.phoneNumber || '').includes(q)
+      const matchSide = sideFilter === 'all' || guest.side === sideFilter
+      const matchStatus = statusFilter === 'all' || guest.status === statusFilter
+      const matchCategory = categoryFilter === 'all' || guest.category === categoryFilter
       return matchSearch && matchSide && matchStatus && matchCategory
     })
   }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter])
@@ -114,6 +119,7 @@ const Guests = () => {
         <GuestsFilters
           sideFilter={sideFilter}
           onSideFilterChange={setSideFilter}
+          sideFilterOptions={sideFilterOptions}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
           categoryFilter={categoryFilter}
@@ -133,7 +139,12 @@ const Guests = () => {
         </div>
 
         <div className="min-h-0 flex-1 overflow-auto">
-          <GuestsTable guests={filteredGuests} onEdit={openEdit} onDeleteGuest={handleDeleteGuest} />
+          <GuestsTable
+            guests={filteredGuests}
+            sideLabels={getSideLabels(eventSettings)}
+            onEdit={openEdit}
+            onDeleteGuest={handleDeleteGuest}
+          />
         </div>
       </div>
 
@@ -143,6 +154,7 @@ const Guests = () => {
         onSave={handleSave}
         guest={editingGuest}
         existingGuests={guests}
+        sideOptions={sideOptions}
       />
 
       <DeleteModal

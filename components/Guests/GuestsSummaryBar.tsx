@@ -1,12 +1,13 @@
 'use client'
 
 import { useGuestsContext } from '@/context/GuestsContext'
-import { GuestStatus, GuestSide } from '@/types/Guest'
+import { useAppContext } from '@/context/AppContext'
+import { GuestStatus } from '@/types/Guest'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUsers, faUser, faCheck, faTimes, faFileExcel, faUserGroup } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { useMemo } from 'react'
-import { exportGuestsToCsv } from './helper'
+import { exportGuestsToCsv, getSideOptions, getSideLabels } from './helper'
 import type { Guest } from '@/types/Guest'
 
 const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
@@ -23,18 +24,21 @@ const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
 
 const GuestsSummaryBar = () => {
   const { guests } = useGuestsContext()
+  const { eventSettings } = useAppContext()
+
+  const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
+  const sideLabels = useMemo(() => getSideLabels(eventSettings), [eventSettings])
 
   const stats = useMemo(() => {
     const total = guests.reduce((sum, g) => sum + g.quantity, 0)
-    const bySide = {
-      [GuestSide.BRIDE]: guests.filter((g) => g.side === GuestSide.BRIDE).reduce((s, g) => s + g.quantity, 0),
-      [GuestSide.GROOM]: guests.filter((g) => g.side === GuestSide.GROOM).reduce((s, g) => s + g.quantity, 0),
-      [GuestSide.BOTH]: guests.filter((g) => g.side === GuestSide.BOTH).reduce((s, g) => s + g.quantity, 0),
-    }
+    const bySide: Record<string, number> = {}
+    sideOptions.forEach((opt) => {
+      bySide[opt.value] = guests.filter((g) => g.side === opt.value).reduce((s, g) => s + g.quantity, 0)
+    })
     const accepted = guests.filter((g) => g.status === GuestStatus.ACCEPTED).reduce((s, g) => s + g.quantity, 0)
     const declined = guests.filter((g) => g.status === GuestStatus.DECLINED).reduce((s, g) => s + g.quantity, 0)
     return { total, bySide, accepted, declined }
-  }, [guests])
+  }, [guests, sideOptions])
 
   const handleDownloadExcel = () => {
     const csv = exportGuestsToCsv(guests, DISPLAY_COLUMNS)
@@ -56,18 +60,15 @@ const GuestsSummaryBar = () => {
         <span className="border-s-1 border-gray-400 h-5"></span>
       </div>
       <div className="flex items-center gap-3 text-gray-700 text-sm">
-        <div className="flex items-center gap-1">
-          <FontAwesomeIcon icon={faUser} className="text-gray-500" />
-          <span>כלה: {stats.bySide[GuestSide.BRIDE]}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <FontAwesomeIcon icon={faUser} className="text-gray-500" />
-          <span>חתן: {stats.bySide[GuestSide.GROOM]}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <FontAwesomeIcon icon={faUserGroup} className="text-gray-500" />
-          <span>שניהם: {stats.bySide[GuestSide.BOTH]}</span>
-        </div>
+        {sideOptions.map((opt) => (
+          <div key={opt.value} className="flex items-center gap-1">
+            <FontAwesomeIcon
+              icon={opt.value === 'both' ? faUserGroup : faUser}
+              className="text-gray-500"
+            />
+            <span>{sideLabels[opt.value] ?? opt.label}: {stats.bySide[opt.value] ?? 0}</span>
+          </div>
+        ))}
       </div>
       <div className="flex items-center gap-1 bg-green-600 px-2 py-1 rounded-md text-white text-sm">
         <FontAwesomeIcon icon={faCheck} />

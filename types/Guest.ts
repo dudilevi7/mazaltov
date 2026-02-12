@@ -4,18 +4,12 @@ enum GuestStatus {
   DECLINED = 'declined',
 }
 
-enum GuestSide {
-  BRIDE = 'bride',
-  GROOM = 'groom',
-  BOTH = 'both',
-}
-
 interface Guest {
   id: number
   name: string
   quantity: number
   status: GuestStatus
-  side: GuestSide
+  side: string
   table?: number
   phoneNumber?: string
   category: string
@@ -25,6 +19,12 @@ interface Guest {
   updatedAt: number
 }
 
+enum GuestSide {
+  BRIDE = 'bride',
+  GROOM = 'groom',
+  BOTH = 'both',
+  OWNER = 'owner',
+}
+
 export { GuestStatus, GuestSide }
 export type { Guest }
-

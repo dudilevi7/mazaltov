@@ -1,7 +1,32 @@
 import type { Guest } from '@/types/Guest'
 import { GuestStatus, GuestSide } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
+import type { EventSettings } from '@/types/Settings'
+import { EventType } from '@/types/Settings'
 import * as XLSX from 'xlsx'
+
+const isWedding = (s: EventSettings) => s.eventType === EventType.WEDDING
+
+export const getSideOptions = (eventSettings: EventSettings): SelectOption[] => {
+  if (isWedding(eventSettings)) {
+    return [
+      { value: GuestSide.BRIDE, label: eventSettings.brideName?.trim() || 'כלה' },
+      { value: GuestSide.GROOM, label: eventSettings.groomName?.trim() || 'חתן' },
+    ]
+  }
+  return [{ value: GuestSide.OWNER, label: eventSettings.ownerName?.trim() || 'מארגן' }]
+}
+
+export const getSideLabels = (eventSettings: EventSettings): Record<string, string> => {
+  if (isWedding(eventSettings)) {
+    return {
+      [GuestSide.BRIDE]: eventSettings.brideName?.trim() || 'כלה',
+      [GuestSide.GROOM]: eventSettings.groomName?.trim() || 'חתן',
+      [GuestSide.BOTH]: 'שניהם',
+    }
+  }
+  return { [GuestSide.OWNER]: eventSettings.ownerName?.trim() || 'מארגן' }
+}
 
 const PHONE_NUMBER_REGEX = /^[\+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4}$/
 
@@ -11,7 +36,6 @@ const validatePhoneNumber = (phone?: string): boolean => {
   return PHONE_NUMBER_REGEX.test(cleaned)
 }
 
-// const NAME_REGEX_INC_HEBREW = /^[\u0590-\u05FF\s]{2,}(?:\s[\u0590-\u05FF\s]{2,})+$|^[A-Za-z\s]{2,}(?:\s[A-Za-z\s]{2,})+$/
 const ONLY_LETTERS_HEBREW_SPACE_AND_BRACKETS = /^[A-Za-z\u0590-\u05FF\s\(\)\[\]]+$/
 
 const validateRealName = (name: string): boolean => {
@@ -25,23 +49,11 @@ const isNameInGuests = (name: string, guests: Guest[], excludeId?: number): bool
   return guests.some((g) => g.id !== excludeId && g.name?.trim().toLowerCase() === normalized)
 }
 
-const SIDE_OPTIONS: SelectOption[] = [
-  { value: GuestSide.BRIDE, label: 'כלה' },
-  { value: GuestSide.GROOM, label: 'חתן' },
-  { value: GuestSide.BOTH, label: 'שניהם' },
-]
-
 const STATUS_OPTIONS: SelectOption[] = [
   { value: GuestStatus.PENDING, label: 'ממתין' },
   { value: GuestStatus.ACCEPTED, label: 'אישר' },
   { value: GuestStatus.DECLINED, label: 'דחה' },
 ]
-
-const SIDE_LABELS: Record<GuestSide, string> = {
-  [GuestSide.BRIDE]: 'כלה',
-  [GuestSide.GROOM]: 'חתן',
-  [GuestSide.BOTH]: 'שניהם',
-}
 
 const STATUS_LABELS: Record<GuestStatus, string> = {
   [GuestStatus.PENDING]: 'ממתין',
@@ -92,9 +104,7 @@ export {
   validatePhoneNumber,
   validateRealName,
   isNameInGuests,
-  SIDE_OPTIONS,
   STATUS_OPTIONS,
-  SIDE_LABELS,
   STATUS_LABELS,
   exportGuestsToCsv,
   importGuestsFromExcel,

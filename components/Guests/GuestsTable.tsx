@@ -2,7 +2,7 @@
 
 import CustomTable, { CustomTableColumn } from '@/components/Shared/CustomTable'
 import type { Guest } from '@/types/Guest'
-import { SIDE_LABELS, STATUS_LABELS } from './helper'
+import { STATUS_LABELS } from './helper'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
@@ -11,6 +11,7 @@ import DeleteModal from '../DeleteModal'
 
 interface GuestsTableProps {
   guests: Guest[]
+  sideLabels: Record<string, string>
   emptyMessage?: string
   onEdit?: (guest: Guest) => void
   onDeleteGuest?: (guest: Guest) => void
@@ -18,6 +19,7 @@ interface GuestsTableProps {
 
 const GuestsTable = ({
   guests,
+  sideLabels,
   emptyMessage = 'אין אורחים',
   onEdit = () => {},
   onDeleteGuest = () => {},
@@ -51,7 +53,7 @@ const GuestsTable = ({
     {
       key: 'side',
       label: 'צד',
-      render: (row: Guest) => SIDE_LABELS[row.side],
+      render: (row: Guest) => sideLabels[row.side] ?? row.side,
     },
     {
       key: 'table',

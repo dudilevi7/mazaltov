@@ -3,24 +3,18 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFilter } from '@fortawesome/free-solid-svg-icons'
 import SelectDropdown, { SelectOption } from '@/components/Shared/SelectDropdown'
-import { GuestStatus, GuestSide } from '@/types/Guest'
+import { GuestStatus } from '@/types/Guest'
 
 interface GuestsFiltersProps {
   sideFilter: string
   onSideFilterChange: (value: string) => void
+  sideFilterOptions: SelectOption[]
   statusFilter: string
   onStatusFilterChange: (value: string) => void
   categoryFilter: string
   onCategoryFilterChange: (value: string) => void
   categoryOptions: SelectOption[]
 }
-
-const SIDE_FILTER_OPTIONS: SelectOption[] = [
-  { value: 'all', label: 'הכל' },
-  { value: GuestSide.BRIDE, label: 'כלה' },
-  { value: GuestSide.GROOM, label: 'חתן' },
-  { value: GuestSide.BOTH, label: 'שניהם' },
-]
 
 const STATUS_FILTER_OPTIONS: SelectOption[] = [
   { value: 'all', label: 'הכל' },
@@ -32,6 +26,7 @@ const STATUS_FILTER_OPTIONS: SelectOption[] = [
 const GuestsFilters = ({
   sideFilter,
   onSideFilterChange,
+  sideFilterOptions,
   statusFilter,
   onStatusFilterChange,
   categoryFilter,
@@ -43,8 +38,8 @@ const GuestsFilters = ({
     <span className="whitespace-nowrap">צד:</span>
     <SelectDropdown
       value={sideFilter}
-      onChange={onSideFilterChange}
-      options={SIDE_FILTER_OPTIONS}
+      onChange={(value) => onSideFilterChange(sideFilterOptions.find((option) => option.value === value)?.label || '')}
+      options={sideFilterOptions}
       placeholder="הכל"
       className="min-w-32"
     />
