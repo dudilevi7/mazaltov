@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
@@ -36,14 +35,19 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 ]
 
 const AppSidebar = () => {
-  const { languageDirection } = useAppContext()
-  const [isOpen, setIsOpen] = useState(true)
+  const { languageDirection, isSidebarOpen, setSidebarOpen } = useAppContext()
   const router = useRouter()
   const pathname = usePathname()
 
   const isRtl = languageDirection === LanguageDirection.HEB
   const isRight = isRtl
-  const ChevronIcon = isOpen ? (isRight ? faChevronRight : faChevronLeft) : isRight ? faChevronLeft : faChevronRight
+  const ChevronIcon = isSidebarOpen
+    ? isRight
+      ? faChevronRight
+      : faChevronLeft
+    : isRight
+      ? faChevronLeft
+      : faChevronRight
 
   const handleItemClick = (item: SidebarItem) => {
     if (item.route) {
@@ -55,22 +59,23 @@ const AppSidebar = () => {
     <div
       className={`relative flex shrink-0 h-full min-h-screen bg-gray-100 border-gray-200 transition-all duration-300 ${
         isRight ? 'border-l' : 'border-r'
-      } ${isOpen ? 'w-36' : 'w-12'}`}
+      } ${isSidebarOpen ? 'w-36' : 'w-12'}`}
       dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className={`flex flex-col h-full ${isOpen ? 'py-4 px-3 animate-fade-in-0.5' : 'py-4 px-0 items-center'}`}>
+      <div
+        className={`flex flex-col h-full ${isSidebarOpen ? 'py-4 px-3 animate-fade-in-0.5' : 'py-4 px-0 items-center'}`}>
         <nav className="flex flex-col gap-1">
           {SIDEBAR_ITEMS.map((item) => {
             const isActive = item.route && pathname?.startsWith(item.route)
 
             return (
               <Tooltip
-                content={!isOpen ? (isRtl ? item.labelHe : item.labelEn) : ''}
-                place={!isOpen ? (isRtl ? 'right' : 'left') : 'top'}
+                content={!isSidebarOpen ? (isRtl ? item.labelHe : item.labelEn) : ''}
+                place={!isSidebarOpen ? (isRtl ? 'right' : 'left') : 'top'}
                 key={item.id}>
                 <button
                   onClick={() => handleItemClick(item)}
                   className={`flex items-center gap-2 rounded-md text-gray-700 hover:bg-blue-100 transition-colors ${
-                    isOpen
+                    isSidebarOpen
                       ? `w-full px-3 py-2 text-sm font-medium ${isRtl ? 'flex flex-row' : 'flex justify-start'}`
                       : 'w-10 h-10 justify-center rounded-s-none'
                   } ${isActive ? 'bg-blue-100' : 'text-gray-500'} cursor-pointer`}>
@@ -78,7 +83,7 @@ const AppSidebar = () => {
                     icon={item.icon}
                     className={`shrink-0 ${isActive ? 'text-blue-500' : 'text-gray-500'}`}
                   />
-                  {isOpen && (
+                  {isSidebarOpen && (
                     <span className={`text-base animate-fade-in-0.5 ${isActive ? 'text-blue-500' : 'text-gray-500'}`}>
                       {isRtl ? item.labelHe : item.labelEn}
                     </span>
@@ -91,7 +96,7 @@ const AppSidebar = () => {
       </div>
 
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setSidebarOpen(!isSidebarOpen)}
         className={`absolute w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 transition-colors shadow-sm z-10 
           top-[70%] ${isRight ? `left-0 transform translate-[-50%]` : `right-0 transform translate-x-[50%] translate-y-[-50%]`}`}>
         <FontAwesomeIcon icon={ChevronIcon} className="text-sm " />

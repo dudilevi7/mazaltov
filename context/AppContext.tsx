@@ -3,7 +3,11 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { Todo } from '../types/Todo'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
 import { LanguageDirection } from '@/types/General'
-import { MAZAL_TOV_TODOS_KEY, MAZAL_TOV_EVENT_SETTINGS_KEY } from '@/constants/localStorage'
+import {
+  MAZAL_TOV_TODOS_KEY,
+  MAZAL_TOV_EVENT_SETTINGS_KEY,
+  MAZAL_TOV_SIDEBAR_OPEN_KEY,
+} from '@/constants/localStorage'
 import { EventSettings, EventType } from '@/types/Settings'
 
 interface AppContextType {
@@ -17,6 +21,8 @@ interface AppContextType {
   updateTodo: (id: number, todo: Partial<Omit<Todo, 'id' | 'createdAt'>>) => void
   removeTodo: (id: number) => void
   updateEventSettings: (updates: Partial<EventSettings>) => void
+  isSidebarOpen: boolean
+  setSidebarOpen: (open: boolean) => void
 }
 export const AppContext = createContext<AppContextType>({
   languageDirection: LanguageDirection.HEB,
@@ -37,6 +43,8 @@ export const AppContext = createContext<AppContextType>({
   updateTodo: () => {},
   removeTodo: () => {},
   updateEventSettings: () => {},
+  isSidebarOpen: true,
+  setSidebarOpen: () => {},
 })
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
@@ -53,6 +61,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     eventDate: '',
   }
   const [eventSettings, setEventSettings] = useState<EventSettings>(defaultEventSettings)
+  const [isSidebarOpen, setSidebarOpenState] = useState<boolean>(() => {
+    const stored = getFromLocalStorage(MAZAL_TOV_SIDEBAR_OPEN_KEY, null)
+    return stored !== null ? stored : true
+  })
+
+  const setSidebarOpen = (open: boolean) => {
+    setSidebarOpenState(open)
+    setToLocalStorage(MAZAL_TOV_SIDEBAR_OPEN_KEY, open)
+  }
 
   useEffect(() => {
     setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
@@ -110,6 +127,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         rowDirectionClassName,
         eventSettings,
         updateEventSettings,
+        isSidebarOpen,
+        setSidebarOpen,
       }}>
       {children}
     </AppContext.Provider>

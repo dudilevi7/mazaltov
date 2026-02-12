@@ -3,6 +3,7 @@ const MAZAL_TOV_PROVIDERS_KEY = "providersMazalTov"
 const MAZAL_TOV_INCOMES_KEY = "incomesMazalTov"
 const MAZAL_TOV_GUESTS_KEY = "guestsMazalTov"
 const MAZAL_TOV_EVENT_SETTINGS_KEY = "eventSettingsMazalTov"
+const MAZAL_TOV_SIDEBAR_OPEN_KEY = "sidebarOpenMazalTov"
 
 export {
   MAZAL_TOV_TODOS_KEY,
@@ -10,4 +11,5 @@ export {
   MAZAL_TOV_INCOMES_KEY,
   MAZAL_TOV_GUESTS_KEY,
   MAZAL_TOV_EVENT_SETTINGS_KEY,
+  MAZAL_TOV_SIDEBAR_OPEN_KEY,
 }

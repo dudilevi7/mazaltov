@@ -11,7 +11,7 @@ import DeleteModal from '@/components/DeleteModal'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faSpinner, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
 import type { Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { importGuestsFromExcel } from './helper'
@@ -26,6 +26,7 @@ const Guests = () => {
   const [sideFilter, setSideFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [isImportingExcel, setIsImportingExcel] = useState(false)
 
   const categoryOptions: SelectOption[] = useMemo(() => {
     const categories = Array.from(new Set(guests.map((g) => g.category.trim()).filter(Boolean)))
@@ -81,8 +82,10 @@ const Guests = () => {
   }
 
   const handleImportGuestsFromExcel = async () => {
+    setIsImportingExcel(true)
     const guests = await importGuestsFromExcel()
     setGuests(guests)
+    setIsImportingExcel(false)
   }
 
   return (
@@ -98,7 +101,12 @@ const Guests = () => {
             size={ButtonSize.SM}
             onClick={handleImportGuestsFromExcel}
             className="bg-green-600 hover:bg-green-700 text-white"
-            icon={<FontAwesomeIcon icon={faUpload} />}>
+            icon={
+              <FontAwesomeIcon
+                icon={isImportingExcel ? faSpinner : faUpload}
+                className={isImportingExcel ? 'animate-spin' : ''}
+              />
+            }>
             ייבא מאקסל{' '}
           </CustomButton>
         </div>
