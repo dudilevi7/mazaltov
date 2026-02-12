@@ -5,21 +5,11 @@ import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
 import { EventType } from '@/types/Settings'
 import SelectDropdownWithCustomOption from '@/components/Shared/SelectDropdownWithCustomOption'
-import SelectDropdown, { SelectOption } from '@/components/Shared/SelectDropdown'
+import SelectDropdown from '@/components/Shared/SelectDropdown'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHeart, faUser, faUserGroup, faLanguage, faBuilding } from '@fortawesome/free-solid-svg-icons'
 import { faFlagUsa, faStarOfDavid } from '@fortawesome/free-solid-svg-icons'
-
-const EVENT_TYPE_OPTIONS: SelectOption[] = [
-  { value: EventType.WEDDING, label: 'חתונה' },
-  { value: EventType.BAR_MITZVA, label: 'בר מצווה' },
-  { value: EventType.BRIT, label: 'ברית' },
-]
-
-const LANGUAGE_OPTIONS: SelectOption[] = [
-  { value: LanguageDirection.HEB, label: 'עברית' },
-  { value: LanguageDirection.ENG, label: 'English' },
-]
+import { EVENT_TYPE_OPTIONS, LANGUAGE_OPTIONS } from './helper'
 
 const Settings = () => {
   const { languageDirection, setLanguageDirection, eventSettings, updateEventSettings } = useAppContext()
