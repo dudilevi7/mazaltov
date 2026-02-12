@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { Todo } from '../types/Todo'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
 import { LanguageDirection } from '@/types/General'
-import { MAZAL_TOV_TODOS_KEY } from '@/constants/localStorage'
+import { MAZAL_TOV_TODOS_KEY, MAZAL_TOV_EVENT_SETTINGS_KEY } from '@/constants/localStorage'
 import { EventSettings, EventType } from '@/types/Settings'
 
 interface AppContextType {
@@ -11,12 +11,12 @@ interface AppContextType {
   setLanguageDirection: (direction: LanguageDirection) => void
   rowDirectionClassName: string
   eventSettings: EventSettings
-  setEventSettings: (settings: EventSettings) => void
   todos: Todo[]
   setTodos: (todos: Todo[]) => void
   addTodo: (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => void
   updateTodo: (id: number, todo: Partial<Omit<Todo, 'id' | 'createdAt'>>) => void
   removeTodo: (id: number) => void
+  updateEventSettings: (updates: Partial<EventSettings>) => void
 }
 export const AppContext = createContext<AppContextType>({
   languageDirection: LanguageDirection.HEB,
@@ -28,28 +28,35 @@ export const AppContext = createContext<AppContextType>({
     brideName: '',
     groomName: '',
     customEventType: '',
+    eventHall: '',
+    eventDate: '',
   },
-  setEventSettings: () => {},
   todos: [],
   setTodos: () => {},
   addTodo: () => {},
   updateTodo: () => {},
   removeTodo: () => {},
+  updateEventSettings: () => {},
 })
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [todos, setTodos] = useState<Todo[]>([])
   const [languageDirection, setLanguageDirection] = useState<LanguageDirection>(LanguageDirection.HEB)
   const [rowDirectionClassName, setRowDirectionClassName] = useState<string>('flex-row-reverse')
-  const [eventSettings, setEventSettings] = useState<EventSettings>({
+  const defaultEventSettings: EventSettings = {
     eventType: EventType.WEDDING,
     ownerName: '',
     brideName: '',
     groomName: '',
     customEventType: '',
-  })
+    eventHall: '',
+    eventDate: '',
+  }
+  const [eventSettings, setEventSettings] = useState<EventSettings>(defaultEventSettings)
+
   useEffect(() => {
     setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
+    setEventSettings(getFromLocalStorage(MAZAL_TOV_EVENT_SETTINGS_KEY, defaultEventSettings))
   }, [])
 
   useEffect(() => {
@@ -82,6 +89,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setToLocalStorage(MAZAL_TOV_TODOS_KEY, updatedTodos)
   }
 
+  const updateEventSettings = (updates: Partial<EventSettings>) => {
+    setEventSettings((prev) => {
+      const nextSettings = { ...prev, ...updates }
+      setToLocalStorage(MAZAL_TOV_EVENT_SETTINGS_KEY, nextSettings)
+      return nextSettings
+    })
+  }
+
   return (
     <AppContext.Provider
       value={{
@@ -94,7 +109,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setLanguageDirection,
         rowDirectionClassName,
         eventSettings,
-        setEventSettings,
+        updateEventSettings,
       }}>
       {children}
     </AppContext.Provider>

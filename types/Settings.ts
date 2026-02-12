@@ -11,6 +11,8 @@ interface EventSettings {
   ownerName?: string
   brideName?: string
   groomName?: string
+  eventHall?: string
+  eventDate?: string
 }
 
 export { EventType }

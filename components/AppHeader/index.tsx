@@ -46,14 +46,14 @@ const AppHeader = () => {
   }
 
   return (
-    <div className={`flex flex-row items-start justify-between`} dir={languageDirection}>
+    <div className={`flex flex-row items-start justify-between mb-2`} dir={languageDirection}>
       <PageName />
       <div className="flex flex-col">
         <div className="flex flex-row gap-1 items-center animate-fade-in-0.5">
           <FontAwesomeIcon icon={faRing} className="text-gray-300 animate-pulse max-w-8" size="2x" />
           <span className="text-2xl font-bold text-gray-800 rounded-md">MazalTov</span>
         </div>
-        {eventLine && <p className="text-sm text-gray-600 animate-fade-in-0.5">{eventLine}</p>}
+        {eventLine && <p className="text-sm text-blue-500 rounded-md animate-fade-in-0.5 self-end">{eventLine}</p>}
       </div>
     </div>
   )

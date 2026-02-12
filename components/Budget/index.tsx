@@ -17,7 +17,7 @@ const Budget = () => {
   const [isIncomesModalOpen, setIsIncomesModalOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-auto w-full flex-col font-sans">
+    <div className="flex w-full flex-col font-sans">
       <BudgetProgressBar />
 
       <BudgetContent setIsIncomesModalOpen={setIsIncomesModalOpen} />

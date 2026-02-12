@@ -7,7 +7,7 @@ import { EventType } from '@/types/Settings'
 import SelectDropdownWithCustomOption from '@/components/Shared/SelectDropdownWithCustomOption'
 import SelectDropdown, { SelectOption } from '@/components/Shared/SelectDropdown'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHeart, faUser, faUserGroup, faLanguage, faGear, faRing } from '@fortawesome/free-solid-svg-icons'
+import { faHeart, faUser, faUserGroup, faLanguage, faBuilding } from '@fortawesome/free-solid-svg-icons'
 import { faFlagUsa, faStarOfDavid } from '@fortawesome/free-solid-svg-icons'
 
 const EVENT_TYPE_OPTIONS: SelectOption[] = [
@@ -22,51 +22,55 @@ const LANGUAGE_OPTIONS: SelectOption[] = [
 ]
 
 const Settings = () => {
-  const { languageDirection, setLanguageDirection, eventSettings, setEventSettings } = useAppContext()
+  const { languageDirection, setLanguageDirection, eventSettings, updateEventSettings } = useAppContext()
   const isRtl = languageDirection === LanguageDirection.HEB
 
   const handleEventTypeChange = (value: string) => {
     const nextType = value as EventType | '__custom__'
     if (nextType === '__custom__') {
-      setEventSettings({
-        ...eventSettings,
+      updateEventSettings({
         eventType: EventType.CUSTOM,
       })
-      return
+    } else {
+      updateEventSettings({
+        eventType: nextType as EventType,
+      })
     }
-
-    const mappedType = nextType as EventType
-    setEventSettings({
-      ...eventSettings,
-      eventType: mappedType,
-    })
   }
 
   const handleCustomEventTypeChange = (value: string) => {
-    setEventSettings({
-      ...eventSettings,
+    updateEventSettings({
       customEventType: value,
     })
   }
-
   const handleOwnerNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEventSettings({
-      ...eventSettings,
+    updateEventSettings({
       ownerName: e.target.value,
     })
   }
-
   const handleBrideNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEventSettings({
-      ...eventSettings,
+    updateEventSettings({
       brideName: e.target.value,
     })
   }
 
   const handleGroomNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEventSettings({
-      ...eventSettings,
+    updateEventSettings({
       groomName: e.target.value,
+    })
+  }
+
+  const handleEventHallChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateEventSettings({
+      ...eventSettings,
+      eventHall: e.target.value,
+    })
+  }
+
+  const handleEventDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateEventSettings({
+      ...eventSettings,
+      eventDate: e.target.value,
     })
   }
 
@@ -78,15 +82,8 @@ const Settings = () => {
   const isWedding = eventSettings.eventType === EventType.WEDDING
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden font-sans" dir={languageDirection}>
-      <header className="flex items-center justify-between pb-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faGear} className="text-gray-500" />
-          <h1 className="text-xl font-semibold text-gray-800">{isRtl ? 'הגדרות' : 'Settings'}</h1>
-        </div>
-      </header>
-
-      <div className="mt-6 flex flex-col gap-6 overflow-auto">
+    <div className="flex w-full flex-col font-sans" dir={languageDirection}>
+      <div className="flex flex-col gap-6">
         <section className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
           <div className="mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faHeart} className="text-pink-500" />
@@ -154,6 +151,38 @@ const Settings = () => {
 
         <section className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
           <div className="mb-3 flex items-center gap-2">
+            <FontAwesomeIcon icon={faBuilding} className="text-amber-500" />
+            <h2 className="text-base font-semibold text-gray-800">{isRtl ? 'פרטי אירוע' : 'Event Details'}</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-600" dir={languageDirection}>
+                {isRtl ? 'אולם' : 'Event hall'}
+              </label>
+              <input
+                type="text"
+                value={eventSettings.eventHall || ''}
+                onChange={handleEventHallChange}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                placeholder={isRtl ? 'הכנס שם אולם' : 'Enter hall name'}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-600" dir={languageDirection}>
+                {isRtl ? 'תאריך אירוע' : 'Event date'}
+              </label>
+              <input
+                type="date"
+                value={eventSettings.eventDate || ''}
+                onChange={handleEventDateChange}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+          <div className="mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faLanguage} className="text-purple-500" />
             <h2 className="text-base font-semibold text-gray-800">{isRtl ? 'שפה' : 'Language'}</h2>
           </div>
@@ -167,7 +196,7 @@ const Settings = () => {
                 placeholder={isRtl ? 'בחר שפה' : 'Select language'}
               />
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-1.5 text-sm text-gray-600">
               {languageDirection === LanguageDirection.HEB ? (
                 <>
                   <FontAwesomeIcon icon={faStarOfDavid} className="text-blue-500" />

@@ -27,9 +27,9 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     <div className={`flex min-h-screen h-screen bg-gray-50 text-black ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
       <AppSidebar />
       <main className="flex-1 min-w-0 overflow-auto">
-        <div className="flex h-full w-full flex-col overflow-hidden font-sans p-6">
+        <div className="flex w-full flex-col overflow-hidden font-sans p-6">
           <AppHeader />
-          <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+          <div className="min-h-0 h-[calc(100vh-150px)] flex-1 overflow-auto">{children}</div>
         </div>
       </main>
     </div>
