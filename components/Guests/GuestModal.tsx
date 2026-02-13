@@ -6,6 +6,7 @@ import type { Guest } from '@/types/Guest'
 import { GuestStatus } from '@/types/Guest'
 import { parseNumber } from '@/lib/utils'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
+import Toggle from '@/components/Shared/Toggle'
 import { validatePhoneNumber, validateRealName, isNameInGuests, STATUS_OPTIONS } from './helper'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 
@@ -165,17 +166,8 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
-            <div className="flex items-center gap-2 md:col-span-2">
-              <input
-                type="checkbox"
-                id="manualApproval"
-                checked={manualApproval}
-                onChange={(e) => setManualApproval(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              />
-              <label htmlFor="manualApproval" className="text-sm font-medium text-gray-700">
-                אישור ידני
-              </label>
+            <div className="md:col-span-2">
+              <Toggle enabled={manualApproval} onChange={setManualApproval} label="אישור ידני" />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">

@@ -38,10 +38,11 @@ const GuestsFilters = ({
     <span className="whitespace-nowrap">צד:</span>
     <SelectDropdown
       value={sideFilter}
-      onChange={(value) => onSideFilterChange(sideFilterOptions.find((option) => option.value === value)?.label || '')}
+      onChange={onSideFilterChange}
       options={sideFilterOptions}
       placeholder="הכל"
       className="min-w-32"
+      searchable
     />
     <span className="whitespace-nowrap">סטטוס:</span>
     <SelectDropdown
@@ -50,6 +51,7 @@ const GuestsFilters = ({
       options={STATUS_FILTER_OPTIONS}
       placeholder="הכל"
       className="min-w-32"
+      searchable
     />
     <span className="whitespace-nowrap">קירבה:</span>
     <SelectDropdown
@@ -58,6 +60,7 @@ const GuestsFilters = ({
       options={categoryOptions}
       placeholder="הכל"
       className="min-w-32"
+      searchable
     />
   </div>
 )

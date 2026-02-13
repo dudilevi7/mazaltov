@@ -11,7 +11,7 @@ import DeleteModal from '@/components/DeleteModal'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faSpinner, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faSpinner, faTrash, faUpload, faFilterCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import type { Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels, importGuestsFromExcel } from './helper'
@@ -27,6 +27,13 @@ const Guests = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [isImportingExcel, setIsImportingExcel] = useState(false)
+
+  const clearAllFilters = () => {
+    setSideFilter('all')
+    setStatusFilter('all')
+    setCategoryFilter('all')
+    setSearchQuery('')
+  }
 
   const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
   const sideFilterOptions: SelectOption[] = useMemo(
@@ -53,11 +60,13 @@ const Guests = () => {
     })
   }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter])
 
+  const filteredGuestsByQuantityCount = useMemo(
+    () => filteredGuests.reduce((sum, guest) => sum + guest.quantity, 0),
+    [filteredGuests]
+  )
+
   const hasFiltersOrSearch =
-    searchQuery.trim() !== '' ||
-    sideFilter !== 'all' ||
-    statusFilter !== 'all' ||
-    categoryFilter !== 'all'
+    searchQuery.trim() !== '' || sideFilter !== 'all' || statusFilter !== 'all' || categoryFilter !== 'all'
 
   const openAdd = () => {
     setEditingGuest(null)
@@ -122,16 +131,28 @@ const Guests = () => {
           </CustomButton>
         </div>
 
-        <GuestsFilters
-          sideFilter={sideFilter}
-          onSideFilterChange={setSideFilter}
-          sideFilterOptions={sideFilterOptions}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          categoryFilter={categoryFilter}
-          onCategoryFilterChange={setCategoryFilter}
-          categoryOptions={categoryOptions}
-        />
+        <div className="flex items-center gap-2 flex-wrap">
+          <GuestsFilters
+            sideFilter={sideFilter}
+            onSideFilterChange={setSideFilter}
+            sideFilterOptions={sideFilterOptions}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            categoryFilter={categoryFilter}
+            onCategoryFilterChange={setCategoryFilter}
+            categoryOptions={categoryOptions}
+          />
+          {hasFiltersOrSearch && (
+            <CustomButton
+              size={ButtonSize.SM}
+              variant="white"
+              onClick={clearAllFilters}
+              icon={<FontAwesomeIcon icon={faFilterCircleXmark} />}
+              className="border border-gray-300 hover:border-gray-400 ms-2">
+              נקה מסננים
+            </CustomButton>
+          )}
+        </div>
 
         <div className="flex items-center gap-2 w-full">
           <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="חיפוש אורח" />
@@ -143,9 +164,7 @@ const Guests = () => {
             מחק הכל
           </CustomButton>
           {hasFiltersOrSearch && (
-            <span className="text-gray-500 text-sm ms-auto">
-              {filteredGuests.length} אורחים
-            </span>
+            <span className="text-gray-500 text-sm ms-auto">{filteredGuestsByQuantityCount} אורחים</span>
           )}
         </div>
 
