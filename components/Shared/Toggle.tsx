@@ -16,7 +16,7 @@ const Toggle = ({ enabled, onChange, label, className = '' }: ToggleProps) => (
       onChange={onChange}
       className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors  ${
         enabled ? 'bg-blue-500' : 'bg-gray-300'
-      } transition-all duration-300`}>
+      } transition-all duration-300 cursor-pointer`}>
       <span
         className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-300 absolute ${
           enabled ? 'right-0.5' : 'left-0.5'

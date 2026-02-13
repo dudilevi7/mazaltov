@@ -72,7 +72,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       name: name.trim(),
       quantity: Math.max(1, parseInt(quantity, 10) || 1),
       status,
-      side,
+      side: sideOptions.find((option) => option.value === side)?.label ?? '',
       table: tableNum > 0 ? tableNum : undefined,
       phoneNumber: phoneNumber.trim() || undefined,
       category: category.trim(),
@@ -122,7 +122,12 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">צד *</label>
-              <SelectDropdown value={side} onChange={(v) => setSide(v)} options={sideOptions} className="w-full" />
+              <SelectDropdown
+                value={side}
+                onChange={(value) => setSide(value)}
+                options={sideOptions}
+                className="w-full"
+              />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">שולחן (אופציונלי)</label>

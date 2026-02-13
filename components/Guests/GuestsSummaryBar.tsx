@@ -77,7 +77,7 @@ const GuestsSummaryBar = () => {
         onClick={() => setStatusFilter(statusFilter === GuestStatus.ACCEPTED ? 'all' : GuestStatus.ACCEPTED)}
         className={`flex items-center gap-1 px-2 py-1 rounded-md text-white text-sm transition-all cursor-pointer hover:shadow-md ${
           statusFilter === GuestStatus.ACCEPTED
-            ? 'bg-green-700 ring-2 ring-green-400'
+            ? 'bg-green-700 ring-1 ring-green-800'
             : 'bg-green-600 hover:bg-green-700'
         }`}>
         <FontAwesomeIcon icon={faCheck} />
@@ -86,7 +86,7 @@ const GuestsSummaryBar = () => {
       <button
         onClick={() => setStatusFilter(statusFilter === GuestStatus.DECLINED ? 'all' : GuestStatus.DECLINED)}
         className={`flex items-center gap-1 px-2 py-1 rounded-md text-white text-sm transition-all cursor-pointer hover:shadow-md ${
-          statusFilter === GuestStatus.DECLINED ? 'bg-red-700 ring-2 ring-red-400' : 'bg-red-600 hover:bg-red-700'
+          statusFilter === GuestStatus.DECLINED ? 'bg-red-700 ring-1 ring-red-800' : 'bg-red-600 hover:bg-red-700'
         }`}>
         <FontAwesomeIcon icon={faTimes} />
         <span>דחו הגעה - {stats.declined}</span>

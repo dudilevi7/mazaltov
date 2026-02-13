@@ -6,8 +6,8 @@ import SelectDropdown, { SelectOption } from '@/components/Shared/SelectDropdown
 import { GuestStatus } from '@/types/Guest'
 
 interface GuestsFiltersProps {
-  sideFilter: string
-  onSideFilterChange: (value: string) => void
+  sideFilter: SelectOption
+  onSideFilterChange: (value: SelectOption) => void
   sideFilterOptions: SelectOption[]
   statusFilter: string
   onStatusFilterChange: (value: string) => void
@@ -37,8 +37,12 @@ const GuestsFilters = ({
     <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
     <span className="whitespace-nowrap">צד:</span>
     <SelectDropdown
-      value={sideFilter}
-      onChange={onSideFilterChange}
+      value={sideFilter.value}
+      onChange={(value) =>
+        onSideFilterChange(
+          sideFilterOptions?.find((option) => option.value === value) ?? { value: 'all', label: 'הכל' }
+        )
+      }
       options={sideFilterOptions}
       placeholder="הכל"
       className="min-w-32"

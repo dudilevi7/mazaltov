@@ -87,7 +87,11 @@ const Guests = () => {
   }
 
   const handleToggleManualApproval = (guest: Guest, value: boolean) => {
-    updateGuest(guest.id, { ...guest, manualApproval: value, status: value ? GuestStatus.ACCEPTED : guest.status })
+    updateGuest(guest.id, {
+      ...guest,
+      manualApproval: value,
+      status: value ? GuestStatus.ACCEPTED : GuestStatus.PENDING,
+    })
   }
 
   const handleImportGuestsFromExcel = async () => {

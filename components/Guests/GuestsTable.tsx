@@ -89,7 +89,10 @@ const GuestsTable = ({
               href={row.phoneNumber ? getWhatsAppUrl(row.phoneNumber) : undefined}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-2 py-1 text-green-600 hover:bg-green-50 transition-colors h-8 w-8"
+              className={`inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-2 py-2 text-green-600
+               hover:bg-green-50 transition-colors h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed ${
+                 !row.phoneNumber ? 'opacity-50 cursor-not-allowed' : ''
+               }`}
               aria-label="WhatsApp">
               <FontAwesomeIcon icon={faWhatsapp} className="h-4 w-4" />
             </a>
@@ -98,7 +101,7 @@ const GuestsTable = ({
             size={ButtonSize.SM}
             variant="white"
             onClick={() => onEdit(row)}
-            className="hover:bg-blue-500 hover:text-white transition-colors duration-300"
+            className="hover:bg-blue-500! hover:text-white transition-colors duration-300"
             icon={<FontAwesomeIcon icon={faPen} />}>
             ערוך
           </CustomButton>
