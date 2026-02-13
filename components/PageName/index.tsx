@@ -52,9 +52,9 @@ const PageName = () => {
   const title = isRtl ? config.labelHe : config.labelEn
 
   return (
-    <div className="flex items-center gap-2 text-gray-700 animate-fade-in-0.5">
-      <FontAwesomeIcon icon={config.icon} className="text-lg text-gray-700" />
-      <span className="text-base font-semibold">{title}</span>
+    <div className="flex items-center gap-1 animate-fade-in-0.5 border-t-2 border-gray-200 py-0.5 px-2">
+      <FontAwesomeIcon icon={config.icon} className="text-base text-gray-700" />
+      <span className="text-gray-700 font-semibold">{title}</span>
     </div>
   )
 }
