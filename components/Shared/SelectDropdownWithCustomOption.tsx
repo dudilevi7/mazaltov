@@ -13,6 +13,7 @@ interface SelectDropdownWithCustomOptionProps {
   customOptionLabel?: string
   customOptionValue?: string
   placeholder?: string
+  customPlaceholder?: string
   className?: string
 }
 
@@ -25,32 +26,28 @@ const SelectDropdownWithCustomOption = ({
   customOptionLabel = 'אחר',
   customOptionValue = '__custom__',
   placeholder = '',
+  customPlaceholder = 'הכנס סוג אירוע מותאם',
   className = '',
 }: SelectDropdownWithCustomOptionProps) => {
   const { languageDirection } = useAppContext()
 
   const extendedOptions = useMemo<SelectOption[]>(
     () => [...options, { value: customOptionValue, label: customOptionLabel }],
-    [options, customOptionLabel, customOptionValue],
+    [options, customOptionLabel, customOptionValue]
   )
 
   const isCustomSelected = value === customOptionValue
 
   return (
     <div className={`flex flex-col gap-2 ${className}`} dir={languageDirection}>
-      <SelectDropdown
-        value={value}
-        onChange={onValueChange}
-        options={extendedOptions}
-        placeholder={placeholder}
-      />
+      <SelectDropdown value={value} onChange={onValueChange} options={extendedOptions} placeholder={placeholder} />
       {isCustomSelected && (
         <input
           type="text"
           value={customValue}
           onChange={(e) => onCustomValueChange(e.target.value)}
           className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
-          placeholder="הכנס סוג אירוע מותאם"
+          placeholder={customPlaceholder}
         />
       )}
     </div>
@@ -58,4 +55,3 @@ const SelectDropdownWithCustomOption = ({
 }
 
 export default SelectDropdownWithCustomOption
-

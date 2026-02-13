@@ -6,9 +6,12 @@ import type { Guest } from '@/types/Guest'
 import { GuestStatus } from '@/types/Guest'
 import { parseNumber } from '@/lib/utils'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
+import SelectDropdownWithCustomOption from '@/components/Shared/SelectDropdownWithCustomOption'
 import Toggle from '@/components/Shared/Toggle'
 import { validatePhoneNumber, validateRealName, isNameInGuests, STATUS_OPTIONS } from './helper'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
+
+const CUSTOM_CATEGORY_VALUE = '__custom__'
 
 export interface GuestFormData {
   name: string
@@ -46,7 +49,31 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   const isPhoneValid = useMemo(() => validatePhoneNumber(phoneNumber || ''), [phoneNumber])
   const isRealName = useMemo(() => validateRealName(name || ''), [name])
   const nameExists = useMemo(() => isNameInGuests(name, existingGuests, guest?.id), [name, existingGuests, guest?.id])
-  const canSubmit = isPhoneValid && isRealName && !nameExists && side && category.trim().length > 0
+
+  const categoryOptions = useMemo<SelectOption[]>(() => {
+    const set = new Set<string>()
+    existingGuests.forEach((g) => {
+      const c = (g.category || '').trim()
+      if (c) set.add(c)
+    })
+    return Array.from(set)
+      .sort((a, b) => a.localeCompare(b))
+      .map((c) => ({ value: c, label: c }))
+  }, [existingGuests])
+
+  const quantityNum = parseNumber(quantity) || 0
+  const hasValidQuantity = quantityNum >= 1
+  const categorySelectValue = categoryOptions.some((o) => o.value === category) ? category : CUSTOM_CATEGORY_VALUE
+  const categoryCustomValue = categorySelectValue === CUSTOM_CATEGORY_VALUE ? category : ''
+
+  const canSubmit =
+    name.trim().length > 0 &&
+    isPhoneValid &&
+    isRealName &&
+    !nameExists &&
+    side &&
+    hasValidQuantity &&
+    category.trim().length > 0
 
   useEffect(() => {
     if (isOpen) {
@@ -152,13 +179,17 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">קירבה *</label>
-              <input
-                dir="rtl"
-                type="text"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required
+              <SelectDropdownWithCustomOption
+                value={categorySelectValue}
+                onValueChange={(v) => setCategory(v === CUSTOM_CATEGORY_VALUE ? categoryCustomValue : v)}
+                customValue={categoryCustomValue}
+                onCustomValueChange={setCategory}
+                options={categoryOptions}
+                customOptionLabel="אחר"
+                customOptionValue={CUSTOM_CATEGORY_VALUE}
+                placeholder="בחר או הזן קירבה"
+                customPlaceholder="צור קירבה"
+                className="w-full"
               />
             </div>
             <div>
