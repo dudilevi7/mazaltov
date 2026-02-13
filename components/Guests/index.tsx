@@ -12,28 +12,36 @@ import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faSpinner, faTrash, faUpload, faFilterCircleXmark } from '@fortawesome/free-solid-svg-icons'
-import type { Guest } from '@/types/Guest'
+import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels, importGuestsFromExcel } from './helper'
 
 const Guests = () => {
-  const { guests, addGuest, updateGuest, clearGuests, deleteGuest, setGuests } = useGuestsContext()
+  const {
+    guests,
+    addGuest,
+    updateGuest,
+    clearGuests,
+    deleteGuest,
+    setGuests,
+    searchQuery,
+    setSearchQuery,
+    sideFilter,
+    setSideFilter,
+    statusFilter,
+    setStatusFilter,
+    categoryFilter,
+    setCategoryFilter,
+    filteredGuests,
+    filteredGuestsByQuantityCount,
+    clearAllFilters,
+    hasFiltersOrSearch,
+  } = useGuestsContext()
   const { languageDirection, eventSettings } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sideFilter, setSideFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [categoryFilter, setCategoryFilter] = useState('all')
   const [isImportingExcel, setIsImportingExcel] = useState(false)
-
-  const clearAllFilters = () => {
-    setSideFilter('all')
-    setStatusFilter('all')
-    setCategoryFilter('all')
-    setSearchQuery('')
-  }
 
   const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
   const sideFilterOptions: SelectOption[] = useMemo(
@@ -44,29 +52,6 @@ const Guests = () => {
     const categories = Array.from(new Set(guests.map((g) => g.category.trim()).filter(Boolean)))
     return [{ value: 'all', label: 'הכל' }, ...categories.map((c) => ({ value: c, label: c }))]
   }, [guests])
-
-  const filteredGuests = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim()
-    return guests.filter((guest) => {
-      const matchSearch =
-        !q ||
-        guest.name.toLowerCase().includes(q) ||
-        (guest.category || '').toLowerCase().includes(q) ||
-        (guest.phoneNumber || '').includes(q)
-      const matchSide = sideFilter === 'all' || guest.side === sideFilter
-      const matchStatus = statusFilter === 'all' || guest.status === statusFilter
-      const matchCategory = categoryFilter === 'all' || guest.category === categoryFilter
-      return matchSearch && matchSide && matchStatus && matchCategory
-    })
-  }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter])
-
-  const filteredGuestsByQuantityCount = useMemo(
-    () => filteredGuests.reduce((sum, guest) => sum + guest.quantity, 0),
-    [filteredGuests]
-  )
-
-  const hasFiltersOrSearch =
-    searchQuery.trim() !== '' || sideFilter !== 'all' || statusFilter !== 'all' || categoryFilter !== 'all'
 
   const openAdd = () => {
     setEditingGuest(null)
@@ -99,6 +84,10 @@ const Guests = () => {
 
   const handleDeleteGuest = (guest: Guest) => {
     deleteGuest(guest.id)
+  }
+
+  const handleToggleManualApproval = (guest: Guest, value: boolean) => {
+    updateGuest(guest.id, { ...guest, manualApproval: value, status: value ? GuestStatus.ACCEPTED : guest.status })
   }
 
   const handleImportGuestsFromExcel = async () => {
@@ -174,6 +163,7 @@ const Guests = () => {
             sideLabels={getSideLabels(eventSettings)}
             onEdit={openEdit}
             onDeleteGuest={handleDeleteGuest}
+            onToggleManualApproval={handleToggleManualApproval}
           />
         </div>
       </div>

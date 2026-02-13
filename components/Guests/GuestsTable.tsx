@@ -4,6 +4,7 @@ import CustomTable, { CustomTableColumn } from '@/components/Shared/CustomTable'
 import type { Guest } from '@/types/Guest'
 import { getWhatsAppUrl, STATUS_LABELS } from './helper'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import Toggle from '@/components/Shared/Toggle'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
@@ -17,6 +18,7 @@ interface GuestsTableProps {
   emptyMessage?: string
   onEdit?: (guest: Guest) => void
   onDeleteGuest?: (guest: Guest) => void
+  onToggleManualApproval?: (guest: Guest, value: boolean) => void
 }
 
 const GuestsTable = ({
@@ -25,6 +27,7 @@ const GuestsTable = ({
   emptyMessage = 'אין אורחים',
   onEdit = () => {},
   onDeleteGuest = () => {},
+  onToggleManualApproval = () => {},
 }: GuestsTableProps) => {
   const [showDeleteSpecificGuestModal, setShowDeleteSpecificGuestModal] = useState(false)
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null)
@@ -72,7 +75,9 @@ const GuestsTable = ({
     {
       key: 'manualApproval',
       label: 'אישור ידני',
-      render: (row: Guest) => (row.manualApproval ? 'כן' : 'לא'),
+      render: (row: Guest) => (
+        <Toggle enabled={row.manualApproval} onChange={(value) => onToggleManualApproval(row, value)} />
+      ),
     },
     {
       key: 'actions',
@@ -93,7 +98,7 @@ const GuestsTable = ({
             size={ButtonSize.SM}
             variant="white"
             onClick={() => onEdit(row)}
-            className="hover:!bg-blue-500 hover:text-white transition-colors duration-300"
+            className="hover:bg-blue-500 hover:text-white transition-colors duration-300"
             icon={<FontAwesomeIcon icon={faPen} />}>
             ערוך
           </CustomButton>

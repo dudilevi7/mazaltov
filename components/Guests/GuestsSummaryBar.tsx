@@ -23,7 +23,7 @@ const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
 ]
 
 const GuestsSummaryBar = () => {
-  const { guests } = useGuestsContext()
+  const { guests, statusFilter, setStatusFilter } = useGuestsContext()
   const { eventSettings } = useAppContext()
 
   const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
@@ -59,9 +59,9 @@ const GuestsSummaryBar = () => {
     <div className="mb-4 flex flex-wrap items-center gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3">
       <div className="flex items-center gap-2 text-gray-700">
         <FontAwesomeIcon icon={faUsers} className="text-blue-500" />
-        <span className="font-medium">סה&quot;כ אורחים:</span>
+        <span className="font-medium text-sm">סה&quot;כ אורחים:</span>
         <span>{stats.total}</span>
-        <span className="border-s-1 border-gray-400 h-5"></span>
+        <span className="border-s border-gray-400 h-5"></span>
       </div>
       <div className="flex items-center gap-3 text-gray-700 text-sm">
         {sideOptions.map((opt) => (
@@ -73,14 +73,24 @@ const GuestsSummaryBar = () => {
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1 bg-green-600 px-2 py-1 rounded-md text-white text-sm">
+      <button
+        onClick={() => setStatusFilter(statusFilter === GuestStatus.ACCEPTED ? 'all' : GuestStatus.ACCEPTED)}
+        className={`flex items-center gap-1 px-2 py-1 rounded-md text-white text-sm transition-all cursor-pointer hover:shadow-md ${
+          statusFilter === GuestStatus.ACCEPTED
+            ? 'bg-green-700 ring-2 ring-green-400'
+            : 'bg-green-600 hover:bg-green-700'
+        }`}>
         <FontAwesomeIcon icon={faCheck} />
         <span>אישרו הגעה - {stats.accepted}</span>
-      </div>
-      <div className="flex items-center gap-1 bg-red-600 px-2 py-1 rounded-md text-white text-sm">
+      </button>
+      <button
+        onClick={() => setStatusFilter(statusFilter === GuestStatus.DECLINED ? 'all' : GuestStatus.DECLINED)}
+        className={`flex items-center gap-1 px-2 py-1 rounded-md text-white text-sm transition-all cursor-pointer hover:shadow-md ${
+          statusFilter === GuestStatus.DECLINED ? 'bg-red-700 ring-2 ring-red-400' : 'bg-red-600 hover:bg-red-700'
+        }`}>
         <FontAwesomeIcon icon={faTimes} />
         <span>דחו הגעה - {stats.declined}</span>
-      </div>
+      </button>
       <div className="ms-auto" />
       <CustomButton
         size={ButtonSize.SM}
