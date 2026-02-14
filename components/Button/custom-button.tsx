@@ -33,7 +33,7 @@ const CustomButton = ({
   className = '',
   type = 'button',
   variant = 'default',
-  size = ButtonSize.MD,
+  size = ButtonSize.SM,
   icon,
   disabled = false,
 }: CustomButtonProps) => {

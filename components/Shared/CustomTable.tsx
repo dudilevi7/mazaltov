@@ -24,7 +24,7 @@ const CustomTable = <T,>({
   return (
     <div className={`overflow-auto rounded-lg border border-gray-200 ${className}`}>
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-100">
+        <thead className="bg-linear-to-b from-gray-50 to-gray-100">
           <tr>
             {columns.map((col) => (
               <th
