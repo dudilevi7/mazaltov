@@ -123,7 +123,7 @@ const Guests = () => {
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden font-sans" dir={languageDirection}>
-      <div className="flex flex-col gap-4 min-h-0 flex-1">
+      <div className="flex flex-col gap-3 min-h-0 flex-1">
         <GuestsSummaryBar />
 
         <div className="flex items-center gap-2">
