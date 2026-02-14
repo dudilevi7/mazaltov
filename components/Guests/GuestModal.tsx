@@ -38,7 +38,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState<string>('1')
   const [status, setStatus] = useState<GuestStatus>(GuestStatus.PENDING)
-  const [side, setSide] = useState<string>('')
+  const [side, setSide] = useState<SelectOption | null>({ value: '', label: '' })
   const [table, setTable] = useState<string>('0')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [category, setCategory] = useState('')
@@ -80,7 +80,11 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       setName(guest?.name || '')
       setQuantity(guest ? String(guest.quantity) : '1')
       setStatus(guest?.status ?? GuestStatus.PENDING)
-      setSide(guest?.side ?? sideOptions[0]?.value ?? '')
+      setSide(
+        guest?.side
+          ? (sideOptions.find((opt) => opt.label.trim() === guest.side.trim()) ?? null)
+          : (sideOptions[0] ?? null)
+      )
       setTable(guest?.table !== undefined ? String(guest.table) : '0')
       setPhoneNumber(guest?.phoneNumber || '')
       setCategory(guest?.category || '')
@@ -99,7 +103,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       name: name.trim(),
       quantity: Math.max(1, parseInt(quantity, 10) || 1),
       status,
-      side: sideOptions.find((option) => option.value === side)?.label ?? '',
+      side: side?.label ?? '',
       table: tableNum > 0 ? tableNum : undefined,
       phoneNumber: phoneNumber.trim() || undefined,
       category: category.trim(),
@@ -150,8 +154,8 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">צד *</label>
               <SelectDropdown
-                value={side}
-                onChange={(value) => setSide(value)}
+                value={side?.value ?? sideOptions[0]?.value ?? ''}
+                onChange={(value) => setSide(sideOptions.find((opt) => opt.value === value) ?? null)}
                 options={sideOptions}
                 className="w-full"
               />

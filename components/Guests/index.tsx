@@ -11,10 +11,18 @@ import DeleteModal from '@/components/DeleteModal'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faSpinner, faTrash, faUpload, faFilterCircleXmark } from '@fortawesome/free-solid-svg-icons'
-import { GuestStatus, type Guest } from '@/types/Guest'
+import {
+  faPlus,
+  faSpinner,
+  faTrash,
+  faUpload,
+  faFilterCircleXmark,
+  faFileDownload,
+} from '@fortawesome/free-solid-svg-icons'
+import { GuestStatus, type Guest, GuestSide } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
-import { getSideOptions, getSideLabels, importGuestsFromExcel } from './helper'
+import { getSideOptions, getSideLabels, importGuestsFromExcel, exportToIplanTemplate } from './helper'
+import { EventType } from '@/types/Settings'
 
 const Guests = () => {
   const {
@@ -42,6 +50,18 @@ const Guests = () => {
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [isImportingExcel, setIsImportingExcel] = useState(false)
+
+  const guestSideByName = useMemo(() => {
+    if (eventSettings.eventType === EventType.WEDDING && eventSettings.brideName && eventSettings.groomName) {
+      return {
+        [eventSettings.brideName as string]: 'כלה',
+        [eventSettings.groomName as string]: 'חתן',
+      }
+    }
+    return {
+      [eventSettings.ownerName as string]: 'חתן',
+    }
+  }, [eventSettings])
 
   const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
   const sideFilterOptions: SelectOption[] = useMemo(
@@ -121,6 +141,13 @@ const Guests = () => {
               />
             }>
             ייבא מאקסל{' '}
+          </CustomButton>
+          <CustomButton
+            size={ButtonSize.SM}
+            className="bg-gray-700 hover:bg-gray-800 text-white"
+            onClick={() => exportToIplanTemplate(guests, guestSideByName, eventSettings)}
+            icon={<FontAwesomeIcon icon={faFileDownload} />}>
+            ייצא ל IPlan
           </CustomButton>
         </div>
 
