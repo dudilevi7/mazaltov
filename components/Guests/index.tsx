@@ -149,6 +149,13 @@ const Guests = () => {
             icon={<FontAwesomeIcon icon={faFileDownload} />}>
             ייצא ל IPlan
           </CustomButton>
+          <CustomButton
+            size={ButtonSize.SM}
+            variant="red"
+            onClick={() => setShowDeleteAllModal(true)}
+            icon={<FontAwesomeIcon icon={faTrash} />}>
+            מחק הכל
+          </CustomButton>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -176,13 +183,7 @@ const Guests = () => {
 
         <div className="flex items-center gap-2 w-full">
           <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="חיפוש אורח" />
-          <CustomButton
-            size={ButtonSize.SM}
-            variant="red"
-            onClick={() => setShowDeleteAllModal(true)}
-            icon={<FontAwesomeIcon icon={faTrash} />}>
-            מחק הכל
-          </CustomButton>
+
           {hasFiltersOrSearch && (
             <span className="text-gray-500 text-sm ms-auto">{filteredGuestsByQuantityCount} אורחים</span>
           )}

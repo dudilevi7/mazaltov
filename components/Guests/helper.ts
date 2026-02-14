@@ -68,19 +68,35 @@ const STATUS_LABELS: Record<GuestStatus, string> = {
   [GuestStatus.DECLINED]: 'דחה',
 }
 
-const exportGuestsToCsv = (guests: Guest[], columns: { key: keyof Guest; label: string }[]): string => {
-  const header = columns.map((c) => c.label).join(',')
-  const rows = guests.map((g) =>
-    columns
-      .map((c) => {
-        const val = g[c.key]
-        if (val === undefined || val === null) return ''
-        const str = String(val)
-        return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str
-      })
-      .join(',')
-  )
-  return [header, ...rows].join('\n')
+const exportGuestsToExcel = (
+  guests: Guest[],
+  columns: { key: keyof Guest; label: string }[],
+  sideLabels?: Record<string, string>
+): void => {
+  const rows = guests.map((g) => {
+    const obj: Record<string, string | number | boolean | undefined> = {}
+    columns.forEach((c) => {
+      let val = g[c.key]
+      if (c.key === 'side' && sideLabels && typeof val === 'string') {
+        val = sideLabels[val] ?? val
+      }
+      obj[c.label] = val === undefined || val === null ? '' : val
+    })
+    return obj
+  })
+  const sheet = XLSX.utils.json_to_sheet(rows)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, sheet, 'אורחים')
+  const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
+  const blob = new Blob([arrayBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `guests-${moment().format('DD-MM-YYYY')}.xlsx`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 const importGuestsFromExcel = async (): Promise<Guest[]> => {
@@ -90,16 +106,15 @@ const importGuestsFromExcel = async (): Promise<Guest[]> => {
   const xls = XLSX.read(data, { type: 'array' })
   const sheet = xls.Sheets[xls.SheetNames[0]]
   const guests = XLSX.utils.sheet_to_json(sheet)
-  console.log({ guests })
   return guests.map((guest: any, index: number) => ({
     name: guest['שם'],
     phoneNumber: guest['טלפון'],
-    quantity: guest['כמות מוזמנים'],
+    quantity: guest['כמות מוזמנים'] || guest['כמות'],
     side: guest['צד'],
-    category: guest['קבוצה'],
+    category: guest['קבוצה'] || guest['קירבה'],
     gift: guest['מתנה'],
-    status: GuestStatus.PENDING,
-    manualApproval: false,
+    status: guest['סטטוס'] || GuestStatus.PENDING,
+    manualApproval: guest['אישור ידני'] || false,
     id: index + 1,
     createdAt: new Date().getTime(),
     updatedAt: new Date().getTime(),
@@ -176,7 +191,7 @@ export {
   isNameInGuests,
   STATUS_OPTIONS,
   STATUS_LABELS,
-  exportGuestsToCsv,
+  exportGuestsToExcel,
   importGuestsFromExcel,
   exportToIplanTemplate,
 }

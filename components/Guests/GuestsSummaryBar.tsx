@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUsers, faUser, faCheck, faTimes, faFileExcel, faUserGroup } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { useMemo } from 'react'
-import { exportGuestsToCsv, getSideOptions, getSideLabels } from './helper'
+import { exportGuestsToExcel, getSideOptions, getSideLabels } from './helper'
 import type { Guest } from '@/types/Guest'
 
 const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
@@ -45,14 +45,7 @@ const GuestsSummaryBar = () => {
   }, [guests, sideOptions, sideLabels])
 
   const handleDownloadExcel = () => {
-    const csv = exportGuestsToCsv(guests, DISPLAY_COLUMNS)
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `guests-${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+    exportGuestsToExcel(guests, DISPLAY_COLUMNS, sideLabels)
   }
 
   return (
