@@ -48,7 +48,9 @@ const ProviderCardContent = ({
       {comments && (
         <div className="flex flex-col mt-1 gap-2">
           <span className="text-gray-500 text-xs self-start">הערות</span>
-          <p className="bg-gray-100 p-2 rounded-md border border-gray-200 text-sm text-gray-800 font-bold whitespace-pre-wrap min-h-20">
+          <p
+            className="bg-gray-100 p-2 rounded-md border border-gray-200 text-sm text-gray-800 font-bold whitespace-pre-wrap min-h-20
+          border-e-5">
             {comments}
           </p>
         </div>
