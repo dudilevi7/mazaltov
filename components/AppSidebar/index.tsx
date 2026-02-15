@@ -13,9 +13,11 @@ import {
   faCoins,
   faGear,
   faHandshake,
+  faRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import Tooltip from '../Tooltip'
+import useSupabase from '@/hooks/useSupabase'
 
 interface SidebarItem {
   id: string
@@ -36,6 +38,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 
 const AppSidebar = () => {
   const { languageDirection, isSidebarOpen, setSidebarOpen } = useAppContext()
+  const { signOut } = useSupabase()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -93,6 +96,19 @@ const AppSidebar = () => {
             )
           })}
         </nav>
+        <div className="absolute bottom-28 left-[50%] transform -translate-x-1/2 z-50">
+          <Tooltip
+            content={!isSidebarOpen ? (isRtl ? 'יציאה' : 'Logout') : ''}
+            place={!isSidebarOpen ? (isRtl ? 'right' : 'left') : 'top'}>
+            <button
+              type="button"
+              onClick={() => signOut()}
+              className="flex items-center gap-2 rounded-md text-gray-500 hover:text-red-600 w-full cursor-pointer">
+              <FontAwesomeIcon icon={faRightFromBracket} className="shrink-0" />
+              {isSidebarOpen && <span className="animate-fade-in-0.5">{isRtl ? 'יציאה' : 'Logout'}</span>}
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
       <button
