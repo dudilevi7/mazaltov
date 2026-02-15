@@ -50,6 +50,16 @@ const Settings = () => {
     })
   }
 
+  const handleBridePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateEventSettings({ bridePhone: e.target.value })
+  }
+  const handleGroomPhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateEventSettings({ groomPhone: e.target.value })
+  }
+  const handleOwnerPhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateEventSettings({ ownerPhone: e.target.value })
+  }
+
   const handleEventHallChange = (e: ChangeEvent<HTMLInputElement>) => {
     updateEventSettings({
       ...eventSettings,
@@ -109,6 +119,16 @@ const Settings = () => {
                   className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
                   placeholder={isRtl ? 'הכנס שם כלה' : 'Enter bride name'}
                 />
+                <label className="text-xs font-medium text-gray-600 mt-1" dir={languageDirection}>
+                  {isRtl ? 'טלפון כלה' : 'Bride phone'}
+                </label>
+                <input
+                  type="tel"
+                  value={eventSettings.bridePhone || ''}
+                  onChange={handleBridePhoneChange}
+                  className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  placeholder={isRtl ? 'הכנס טלפון כלה' : 'Enter bride phone'}
+                />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-gray-600" dir={languageDirection}>
@@ -120,6 +140,16 @@ const Settings = () => {
                   onChange={handleGroomNameChange}
                   className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
                   placeholder={isRtl ? 'הכנס שם חתן' : 'Enter groom name'}
+                />
+                <label className="text-xs font-medium text-gray-600 mt-1" dir={languageDirection}>
+                  {isRtl ? 'טלפון חתן' : 'Groom phone'}
+                </label>
+                <input
+                  type="tel"
+                  value={eventSettings.groomPhone || ''}
+                  onChange={handleGroomPhoneChange}
+                  className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  placeholder={isRtl ? 'הכנס טלפון חתן' : 'Enter groom phone'}
                 />
               </div>
             </div>
@@ -134,6 +164,16 @@ const Settings = () => {
                 onChange={handleOwnerNameChange}
                 className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
                 placeholder={isRtl ? 'הכנס שם בעל שמחה' : 'Enter owner name'}
+              />
+              <label className="text-xs font-medium text-gray-600 mt-1" dir={languageDirection}>
+                {isRtl ? 'טלפון בעל השמחה' : 'Owner phone'}
+              </label>
+              <input
+                type="tel"
+                value={eventSettings.ownerPhone || ''}
+                onChange={handleOwnerPhoneChange}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                placeholder={isRtl ? 'הכנס טלפון בעל שמחה' : 'Enter owner phone'}
               />
             </div>
           )}

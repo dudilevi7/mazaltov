@@ -1,11 +1,16 @@
 'use client'
+
+import { useRef, useEffect, useState } from 'react'
 import { Todo, TodoStatus } from '@/types/Todo'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Tooltip from '@/components/Tooltip'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser, faSpinner, faCheck, faClock } from '@fortawesome/free-solid-svg-icons'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { formatDateDDMMYY, formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 import { useAppContext } from '@/context/AppContext'
+import { getEventOwnerPhones } from '@/components/Settings/helper'
+import { getWhatsAppUrl } from '@/components/Guests/helper'
 
 const STATUS_LABELS: Record<TodoStatus, string> = {
   [TodoStatus.PENDING]: 'ממתין',
@@ -22,7 +27,24 @@ interface TodoItemProps {
 }
 
 const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: TodoItemProps) => {
-  const { languageDirection } = useAppContext()
+  const { languageDirection, eventSettings } = useAppContext()
+  const [whatsappOpen, setWhatsappOpen] = useState(false)
+  const whatsappRef = useRef<HTMLDivElement>(null)
+  const ownerPhones = getEventOwnerPhones(eventSettings)
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (whatsappRef.current && !whatsappRef.current.contains(e.target as Node)) setWhatsappOpen(false)
+    }
+    if (whatsappOpen) document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [whatsappOpen])
+
+  const openWhatsApp = (phone: string) => {
+    window.open(getWhatsAppUrl(phone, todo.name), '_blank')
+    setWhatsappOpen(false)
+  }
+
   return (
     <li
       className="relative flex items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm shadow-gray-500"
@@ -66,7 +88,37 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
 
           <span className="text-sm text-gray-500">{todo.updatedBy} </span>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 gap-2 flex-wrap">
+          {ownerPhones.length > 0 && (
+            <div className="relative" ref={whatsappRef}>
+              <CustomButton
+                size={ButtonSize.SM}
+                variant="white"
+                className="hover:!text-green-500"
+                onClick={() =>
+                  ownerPhones.length === 1 ? openWhatsApp(ownerPhones[0].phone) : setWhatsappOpen((o) => !o)
+                }>
+                <FontAwesomeIcon icon={faWhatsapp} className="mr-1" />
+                WhatsApp
+              </CustomButton>
+              {ownerPhones.length > 1 && whatsappOpen && (
+                <div
+                  className="absolute top-full right-0 mt-1 z-10 min-w-[140px] rounded-lg border border-gray-200 bg-white py-1 shadow-lg animate-fade-in"
+                  dir={languageDirection}>
+                  {ownerPhones.map(({ label, phone }) => (
+                    <button
+                      key={phone}
+                      type="button"
+                      onClick={() => openWhatsApp(phone)}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer">
+                      <FontAwesomeIcon icon={faWhatsapp} className="text-[#25D366]" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {todo.status !== TodoStatus.COMPLETED && (
             <CustomButton
               size={ButtonSize.SM}

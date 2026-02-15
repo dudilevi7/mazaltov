@@ -1,6 +1,22 @@
 import { LanguageDirection } from '@/types/General'
-import { EventType } from '@/types/Settings'
+import { EventSettings, EventType } from '@/types/Settings'
 import { SelectOption } from '../Shared/SelectDropdown'
+
+export interface EventOwnerPhone {
+  label: string
+  phone: string
+}
+
+export const getEventOwnerPhones = (s: EventSettings): EventOwnerPhone[] => {
+  const out: EventOwnerPhone[] = []
+  if (s.eventType === EventType.WEDDING) {
+    if (s.bridePhone?.trim()) out.push({ label: s.brideName?.trim() || 'כלה', phone: s.bridePhone.trim() })
+    if (s.groomPhone?.trim()) out.push({ label: s.groomName?.trim() || 'חתן', phone: s.groomPhone.trim() })
+  } else {
+    if (s.ownerPhone?.trim()) out.push({ label: s.ownerName?.trim() || 'מארגן', phone: s.ownerPhone.trim() })
+  }
+  return out
+}
 
 const EVENT_TYPE_DISPLAY_NAME_HEB: Record<EventType, string> = {
   [EventType.WEDDING]: 'חתונה',
