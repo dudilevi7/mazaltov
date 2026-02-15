@@ -41,7 +41,12 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
   }, [whatsappOpen])
 
   const openWhatsApp = (phone: string) => {
-    window.open(getWhatsAppUrl(phone, todo.name), '_blank')
+    const message = `מזכיר לגבי ${todo.name} - ${todo.description}
+    ${todo.reminderTimestamp > 0 ? `תזכורת: ${formatDateDDMMYYHHMM(todo.reminderTimestamp)}` : ''}
+    ${todo.providerId && providerName ? `ספק: ${providerName}` : ''}
+    ${todo.updatedBy ? `עודכן על ידי: ${todo.updatedBy}` : ''}
+    `
+    window.open(getWhatsAppUrl(phone, message), '_blank')
     setWhatsappOpen(false)
   }
 
@@ -93,10 +98,10 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
             <div className="relative" ref={whatsappRef}>
               <CustomButton
                 size={ButtonSize.SM}
-                variant="white"
-                className="hover:!text-green-500"
+                className="!bg-linear-to-b from-white to-gray-100 !border !border-gray-200
+                 !text-green-500 hover:!text-green-600"
                 onClick={() =>
-                  ownerPhones.length === 1 ? openWhatsApp(ownerPhones[0].phone) : setWhatsappOpen((o) => !o)
+                  ownerPhones.length === 1 ? openWhatsApp(ownerPhones[0].phone) : setWhatsappOpen(!whatsappOpen)
                 }>
                 <FontAwesomeIcon icon={faWhatsapp} className="mr-1" />
                 WhatsApp
