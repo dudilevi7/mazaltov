@@ -1,10 +1,12 @@
-"use client";
-import { useState, useEffect } from "react";
-import DatePicker from "react-datepicker";
-import { Todo, TodoStatus } from "@/types/Todo";
-import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock } from "@fortawesome/free-solid-svg-icons";
+'use client'
+
+import { useState, useEffect, useMemo } from 'react'
+import DatePicker from 'react-datepicker'
+import { Todo, TodoStatus } from '@/types/Todo'
+import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import { useAppContext } from '@/context/AppContext'
+import SelectDropdown from '@/components/Shared/SelectDropdown'
+import { getEventOwnerOptions } from './helper'
 
 interface TodoModalProps {
   isOpen: boolean;
@@ -42,25 +44,28 @@ export default function TodoModal({
   const [reminderDate, setReminderDate] = useState<Date | null>(
     todo?.reminderTimestamp ? new Date(todo.reminderTimestamp) : null
   );
-  const [updatedBy, setUpdatedBy] = useState(todo?.updatedBy || "");
+  const [updatedBy, setUpdatedBy] = useState(todo?.updatedBy || '')
+  const { eventSettings } = useAppContext()
+  const ownerOptions = useMemo(() => getEventOwnerOptions(eventSettings), [eventSettings])
 
-  const isEdit = !!todo;
+  const isEdit = !!todo
 
   useEffect(() => {
     if (isOpen) {
-      setName(todo?.name || initialData?.name || "");
-      setDescription(todo?.description || initialData?.description || "");
-      setStatus(todo?.status ?? initialData?.status ?? TodoStatus.PENDING);
+      setName(todo?.name || initialData?.name || '')
+      setDescription(todo?.description || initialData?.description || '')
+      setStatus(todo?.status ?? initialData?.status ?? TodoStatus.PENDING)
       setReminderDate(
         todo?.reminderTimestamp
           ? new Date(todo.reminderTimestamp)
           : initialData?.reminderTimestamp
             ? new Date(initialData.reminderTimestamp)
             : null
-      );
-      setUpdatedBy(todo?.updatedBy || initialData?.updatedBy || "");
+      )
+      const nextUpdatedBy = todo?.updatedBy || initialData?.updatedBy || ''
+      setUpdatedBy(nextUpdatedBy || (ownerOptions[0]?.value ?? ''))
     }
-  }, [isOpen, todo, initialData]);
+  }, [isOpen, todo, initialData, ownerOptions])
 
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -141,15 +146,15 @@ export default function TodoModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-gray-700 text-right">
               עודכן על ידי
             </label>
-            <input
-              type="text"
+            <SelectDropdown
               value={updatedBy}
-              dir="rtl"
-              onChange={(e) => setUpdatedBy(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              onChange={setUpdatedBy}
+              options={ownerOptions}
+              placeholder="בחר אחראי"
+              className="w-full"
             />
           </div>
           <div className="flex gap-2 justify-end pt-2">
