@@ -3,12 +3,10 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { Todo } from '../types/Todo'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
 import { LanguageDirection } from '@/types/General'
-import {
-  MAZAL_TOV_TODOS_KEY,
-  MAZAL_TOV_EVENT_SETTINGS_KEY,
-  MAZAL_TOV_SIDEBAR_OPEN_KEY,
-} from '@/constants/localStorage'
+import { MAZAL_TOV_TODOS_KEY, MAZAL_TOV_EVENT_SETTINGS_KEY, MAZAL_TOV_SIDEBAR_OPEN_KEY } from '@/constants/localStorage'
 import { EventSettings, EventType } from '@/types/Settings'
+import { ShowToastParams, ToastData, ToastType } from '@/types/Toast'
+import Toast from '@/components/Toast'
 
 interface AppContextType {
   languageDirection: LanguageDirection
@@ -23,6 +21,9 @@ interface AppContextType {
   updateEventSettings: (updates: Partial<EventSettings>) => void
   isSidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
+  toast: ToastData | null
+  showToast: (params: ShowToastParams) => void
+  hideToast: () => void
 }
 export const AppContext = createContext<AppContextType>({
   languageDirection: LanguageDirection.HEB,
@@ -49,14 +50,16 @@ export const AppContext = createContext<AppContextType>({
   updateEventSettings: () => {},
   isSidebarOpen: true,
   setSidebarOpen: () => {},
+  toast: null,
+  showToast: () => {},
+  hideToast: () => {},
 })
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [todos, setTodos] = useState<Todo[]>([])
   const [languageDirection, setLanguageDirection] = useState<LanguageDirection>(LanguageDirection.HEB)
   const [rowDirectionClassName, setRowDirectionClassName] = useState<string>('flex-row-reverse')
-  const generateEventId = () =>
-    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ''
+  const generateEventId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '')
   const defaultEventSettings: EventSettings = {
     eventId: generateEventId(),
     eventType: EventType.WEDDING,
@@ -71,6 +74,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     eventDate: '',
   }
   const [eventSettings, setEventSettings] = useState<EventSettings>(defaultEventSettings)
+  const [toast, setToast] = useState<ToastData | null>(null)
+
+  const showToast = (params: ShowToastParams) => {
+    setToast({ ...params, id: Date.now() })
+  }
+
+  const hideToast = () => setToast(null)
+
   const [isSidebarOpen, setSidebarOpenState] = useState<boolean>(() => {
     const stored = getFromLocalStorage(MAZAL_TOV_SIDEBAR_OPEN_KEY, null)
     return stored !== null ? stored : true
@@ -145,8 +156,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         updateEventSettings,
         isSidebarOpen,
         setSidebarOpen,
+        toast,
+        showToast,
+        hideToast,
       }}>
       {children}
+      <Toast />
     </AppContext.Provider>
   )
 }
