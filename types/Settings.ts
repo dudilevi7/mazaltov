@@ -6,6 +6,7 @@ enum EventType {
 }
 
 interface EventSettings {
+  eventId: string
   eventType: EventType
   customEventType?: string
   ownerName?: string

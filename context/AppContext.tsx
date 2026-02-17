@@ -29,6 +29,7 @@ export const AppContext = createContext<AppContextType>({
   setLanguageDirection: () => {},
   rowDirectionClassName: '',
   eventSettings: {
+    eventId: '',
     eventType: EventType.WEDDING,
     ownerName: '',
     brideName: '',
@@ -54,7 +55,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [todos, setTodos] = useState<Todo[]>([])
   const [languageDirection, setLanguageDirection] = useState<LanguageDirection>(LanguageDirection.HEB)
   const [rowDirectionClassName, setRowDirectionClassName] = useState<string>('flex-row-reverse')
+  const generateEventId = () =>
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ''
   const defaultEventSettings: EventSettings = {
+    eventId: generateEventId(),
     eventType: EventType.WEDDING,
     ownerName: '',
     brideName: '',
@@ -79,7 +83,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
-    setEventSettings(getFromLocalStorage(MAZAL_TOV_EVENT_SETTINGS_KEY, defaultEventSettings))
+    const stored = getFromLocalStorage(MAZAL_TOV_EVENT_SETTINGS_KEY, defaultEventSettings)
+    const eventId = stored?.eventId?.trim() || generateEventId()
+    const withEventId = { ...defaultEventSettings, ...stored, eventId }
+    setEventSettings(withEventId)
+    if (!stored?.eventId?.trim()) {
+      setToLocalStorage(MAZAL_TOV_EVENT_SETTINGS_KEY, withEventId)
+    }
   }, [])
 
   useEffect(() => {
