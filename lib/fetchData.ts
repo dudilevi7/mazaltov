@@ -26,7 +26,7 @@ const fetchData = async <TBody = unknown, TResponse = unknown>(
     ...headers,
   }
   if (token) {
-    requestHeaders['Authorization'] = `Bearer ${token}`
+    requestHeaders['X-Supabase-Auth'] = token
   }
 
   const config: RequestInit = {

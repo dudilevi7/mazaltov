@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faInfo, faXmark, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faInfo, faXmark, faCheck, faExclamation, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { useAppContext } from '@/context/AppContext'
 import { ToastType } from '@/types/Toast'
 
@@ -18,7 +18,7 @@ const TOAST_CONFIG: Record<ToastType, { icon: typeof faInfo; bgClass: string; ic
     iconClass: 'text-white',
   },
   [ToastType.ERROR]: {
-    icon: faXmark,
+    icon: faTriangleExclamation,
     bgClass: 'bg-linear-to-r from-red-400 to-red-500 border-none shadow-md shadow-red-500 ',
     iconClass: 'text-white',
   },

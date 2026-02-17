@@ -50,3 +50,23 @@ export const LANGUAGE_OPTIONS: SelectOption[] = [
   { value: LanguageDirection.HEB, label: 'עברית' },
   { value: LanguageDirection.ENG, label: 'English' },
 ]
+
+const EVENT_SETTINGS_KEYS: (keyof EventSettings)[] = [
+  'eventId', 'eventType', 'customEventType', 'ownerName', 'brideName', 'groomName',
+  'bridePhone', 'groomPhone', 'ownerPhone', 'eventHall', 'eventDate',
+]
+
+export const eventSettingsEquals = (a: EventSettings, b: EventSettings): boolean => {
+  return EVENT_SETTINGS_KEYS.every((k) => (a[k] ?? '') === (b[k] ?? ''))
+}
+
+export const hasEventData = (s: EventSettings): boolean => {
+  return !!(
+    (s.brideName ?? '').trim() ||
+    (s.groomName ?? '').trim() ||
+    (s.ownerName ?? '').trim() ||
+    (s.customEventType ?? '').trim() ||
+    (s.eventHall ?? '').trim() ||
+    (s.eventDate ?? '').trim()
+  )
+}
