@@ -1,19 +1,65 @@
 'use client'
 
-import { ChangeEvent } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
-import { EventType } from '@/types/Settings'
+import { EventSettings, EventType } from '@/types/Settings'
 import SelectDropdownWithCustomOption from '@/components/Shared/SelectDropdownWithCustomOption'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHeart, faUser, faUserGroup, faLanguage, faBuilding } from '@fortawesome/free-solid-svg-icons'
+import { faHeart, faUser, faUserGroup, faLanguage, faBuilding, faSave } from '@fortawesome/free-solid-svg-icons'
 import { faFlagUsa, faStarOfDavid } from '@fortawesome/free-solid-svg-icons'
-import { EVENT_TYPE_OPTIONS, LANGUAGE_OPTIONS } from './helper'
+import { EVENT_TYPE_OPTIONS, LANGUAGE_OPTIONS, eventSettingsEquals, hasEventData } from './helper'
+import useSupabase from '@/hooks/useSupabase'
+import fetchData, { METHODS } from '@/lib/fetchData'
+import { ToastType } from '@/types/Toast'
+import SpinnerLoader from '../Shared/SpinnerLoader'
 
 const Settings = () => {
-  const { languageDirection, setLanguageDirection, eventSettings, updateEventSettings } = useAppContext()
+  const { user } = useSupabase()
+  const {
+    languageDirection,
+    setLanguageDirection,
+    eventSettings,
+    eventSettingsVersion,
+    updateEventSettings,
+    showToast,
+    isLoadingEventSettings,
+  } = useAppContext()
+  const [lastSavedSnapshot, setLastSavedSnapshot] = useState<EventSettings>(eventSettings)
+
+  useEffect(() => {
+    setLastSavedSnapshot(eventSettings)
+  }, [eventSettingsVersion])
+
   const isRtl = languageDirection === LanguageDirection.HEB
+  const dirty = !eventSettingsEquals(eventSettings, lastSavedSnapshot)
+  const hasData = hasEventData(eventSettings)
+  const canSave = !!user && hasData && dirty
+
+  const handleSave = async () => {
+    if (!canSave) return
+    try {
+      const updated = await fetchData<EventSettings, EventSettings>({
+        url: '/api/event',
+        method: METHODS.PUT,
+        body: eventSettings,
+      })
+      updateEventSettings(updated)
+      setLastSavedSnapshot(updated)
+      showToast({
+        type: ToastType.SUCCESS,
+        title: isRtl ? 'נשמר' : 'Saved',
+        message: isRtl ? 'ההגדרות נשמרו בהצלחה' : 'Settings saved successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: isRtl ? 'שגיאה' : 'Error',
+        message: isRtl ? 'שמירה נכשלה' : 'Save failed',
+      })
+    }
+  }
 
   const handleEventTypeChange = (value: string) => {
     const nextType = value as EventType | '__custom__'
@@ -81,8 +127,24 @@ const Settings = () => {
 
   const isWedding = eventSettings.eventType === EventType.WEDDING
 
+  if (isLoadingEventSettings) {
+    return <SpinnerLoader size="lg" isLoadingPage />
+  }
+
   return (
     <div className="flex w-full flex-col font-sans" dir={languageDirection}>
+      {user && (
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:enabled:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+            <FontAwesomeIcon icon={faSave} />
+            {isRtl ? 'שמור' : 'Save'}
+          </button>
+        </div>
+      )}
       <div className="flex flex-col gap-6">
         <section className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
           <div className="mb-3 flex items-center gap-2">

@@ -52,12 +52,21 @@ export const LANGUAGE_OPTIONS: SelectOption[] = [
 ]
 
 const EVENT_SETTINGS_KEYS: (keyof EventSettings)[] = [
-  'eventId', 'eventType', 'customEventType', 'ownerName', 'brideName', 'groomName',
-  'bridePhone', 'groomPhone', 'ownerPhone', 'eventHall', 'eventDate',
+  'eventId',
+  'eventType',
+  'customEventType',
+  'ownerName',
+  'brideName',
+  'groomName',
+  'bridePhone',
+  'groomPhone',
+  'ownerPhone',
+  'eventHall',
+  'eventDate',
 ]
 
-export const eventSettingsEquals = (a: EventSettings, b: EventSettings): boolean => {
-  return EVENT_SETTINGS_KEYS.every((k) => (a[k] ?? '') === (b[k] ?? ''))
+export const eventSettingsEquals = (current: EventSettings, lastSnapshot: EventSettings): boolean => {
+  return EVENT_SETTINGS_KEYS.every((k) => (current[k] ?? '') === (lastSnapshot[k] ?? ''))
 }
 
 export const hasEventData = (s: EventSettings): boolean => {
