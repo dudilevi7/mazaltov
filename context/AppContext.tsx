@@ -3,12 +3,14 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { Todo } from '../types/Todo'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
 import { LanguageDirection } from '@/types/General'
-import { MAZAL_TOV_TODOS_KEY, MAZAL_TOV_SIDEBAR_OPEN_KEY } from '@/constants/localStorage'
+import { MAZAL_TOV_SIDEBAR_OPEN_KEY } from '@/constants/localStorage'
 import { EventSettings, EventType } from '@/types/Settings'
 import { ShowToastParams, ToastData, ToastType } from '@/types/Toast'
 import Toast from '@/components/Toast'
 import useSupabase from '@/hooks/useSupabase'
 import fetchData, { METHODS } from '@/lib/fetchData'
+import { API_URL } from '@/constants'
+import { API_ROUTES } from '@/constants/apiRoutes'
 
 interface AppContextType {
   languageDirection: LanguageDirection
@@ -28,6 +30,7 @@ interface AppContextType {
   showToast: (params: ShowToastParams) => void
   hideToast: () => void
   isLoadingEventSettings: boolean
+  isLoadingTodos: boolean
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -60,6 +63,7 @@ export const AppContext = createContext<AppContextType>({
   showToast: () => {},
   hideToast: () => {},
   isLoadingEventSettings: false,
+  isLoadingTodos: false,
 })
 
 const getDefaultEventSettings = (): EventSettings => {
@@ -89,6 +93,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [eventSettingsVersion, setEventSettingsVersion] = useState(0)
   const [toast, setToast] = useState<ToastData | null>(null)
   const [isLoadingEventSettings, setIsLoadingEventSettings] = useState<boolean>(false)
+  const [isLoadingTodos, setIsLoadingTodos] = useState<boolean>(false)
 
   const showToast = (params: ShowToastParams) => {
     setToast({ ...params, id: Date.now() })
@@ -107,13 +112,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   useEffect(() => {
-    setTodos(getFromLocalStorage(MAZAL_TOV_TODOS_KEY, []))
-  }, [])
-
-  useEffect(() => {
     if (isAuthLoading || !isAuthenticated) return
 
     fetchEvents()
+    fetchTasks()
   }, [user?.id, isAuthLoading, isAuthenticated])
 
   useEffect(() => {
@@ -125,58 +127,106 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoadingEventSettings(true)
     try {
       const data = await fetchData<unknown, EventSettings>({
-        url: '/api/event',
+        url: `${API_URL}${API_ROUTES.EVENT}`,
         method: METHODS.GET,
       })
       setEventSettings(data)
       setEventSettingsVersion((v) => v + 1)
     } catch (err) {
       const message = err instanceof Error ? err.message : ''
-      if (message.includes('404')) {
-        try {
-          const created = await fetchData<EventSettings, EventSettings>({
-            url: '/api/event',
-            method: METHODS.POST,
-            body: defaultEventSettings,
-          })
-          setEventSettings(created)
-          setEventSettingsVersion((v) => v + 1)
-        } catch {
-          showToast({
-            type: ToastType.ERROR,
-            title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
-            message: languageDirection === LanguageDirection.HEB ? 'שגיאה ביצירת אירוע' : 'Failed to create event',
-          })
-        }
-      }
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message:
+          languageDirection === LanguageDirection.HEB ? 'שגיאה בטעינת הגדרות אירוע' : 'Failed to load event settings',
+      })
     } finally {
       setIsLoadingEventSettings(false)
     }
   }
-  const addTodo = (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = Date.now()
-    const newTodo: Todo = {
-      ...todo,
-      id: now,
-      createdAt: now,
-      updatedAt: now,
+
+  const fetchTasks = async () => {
+    if (!user?.id) return
+    setIsLoadingTodos(true)
+    try {
+      const data = await fetchData<unknown, Todo[]>({
+        url: `${API_URL}${API_ROUTES.TASKS}`,
+        method: METHODS.GET,
+      })
+      setTodos(Array.isArray(data) ? data : [])
+    } catch {
+      setTodos([])
+    } finally {
+      setIsLoadingTodos(false)
     }
-    const newTodos = [...todos, newTodo]
-    setTodos(newTodos)
-    setToLocalStorage(MAZAL_TOV_TODOS_KEY, newTodos)
   }
 
-  const updateTodo = (id: number, updates: Partial<Omit<Todo, 'id' | 'createdAt'>>) => {
-    const now = Date.now()
-    const updatedTodos = todos.map((t) => (t.id === id ? { ...t, ...updates, updatedAt: now } : t))
-    setTodos(updatedTodos)
-    setToLocalStorage(MAZAL_TOV_TODOS_KEY, updatedTodos)
+  const addTodo = async (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const created = await fetchData<Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>, Todo>({
+        url: `${API_URL}${API_ROUTES.TASKS}`,
+        method: METHODS.POST,
+        body: todo,
+      })
+      setTodos((prev) => [...prev, created])
+      showToast({
+        type: ToastType.SUCCESS,
+        title: languageDirection === LanguageDirection.HEB ? 'משימה נוספה' : 'Task added',
+        message: languageDirection === LanguageDirection.HEB ? 'משימה נוספה בהצלחה' : 'Task added successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message: languageDirection === LanguageDirection.HEB ? 'שגיאה בהוספת משימה' : 'Failed to add task',
+      })
+    }
   }
 
-  const removeTodo = (id: number) => {
-    const updatedTodos = todos.filter((t) => t.id !== id)
-    setTodos(updatedTodos)
-    setToLocalStorage(MAZAL_TOV_TODOS_KEY, updatedTodos)
+  const updateTodo = async (id: number, updates: Partial<Omit<Todo, 'id' | 'createdAt'>>) => {
+    const existing = todos.find((t) => t.id === id)
+    if (!existing) return
+    const payload: Todo = { ...existing, ...updates, updatedAt: Date.now() }
+    try {
+      const updated = await fetchData<Todo, Todo>({
+        url: `${API_URL}${API_ROUTES.TASKS}`,
+        method: METHODS.PUT,
+        body: payload,
+      })
+      setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)))
+      showToast({
+        type: ToastType.SUCCESS,
+        title: languageDirection === LanguageDirection.HEB ? 'משימה עודכנה' : 'Task updated',
+        message: languageDirection === LanguageDirection.HEB ? 'משימה עודכנה בהצלחה' : 'Task updated successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message: languageDirection === LanguageDirection.HEB ? 'שגיאה בעדכון משימה' : 'Failed to update task',
+      })
+    }
+  }
+
+  const removeTodo = async (id: number) => {
+    try {
+      const deleted = await fetchData<unknown, unknown>({
+        url: `${API_URL}${API_ROUTES.TASKS}?id=${id}`,
+        method: METHODS.DELETE,
+      })
+      setTodos((prev) => prev.filter((t) => t.id !== id))
+      showToast({
+        type: ToastType.SUCCESS,
+        title: languageDirection === LanguageDirection.HEB ? 'משימה נמחקה' : 'Task deleted',
+        message: languageDirection === LanguageDirection.HEB ? 'משימה נמחקה בהצלחה' : 'Task deleted successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message: languageDirection === LanguageDirection.HEB ? 'שגיאה במחיקת משימה' : 'Failed to delete task',
+      })
+    }
   }
 
   const updateEventSettings = (updates: Partial<EventSettings>) => {
@@ -206,6 +256,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         showToast,
         hideToast,
         isLoadingEventSettings,
+        isLoadingTodos,
       }}>
       {children}
       <Toast />

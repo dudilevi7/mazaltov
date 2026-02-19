@@ -8,9 +8,10 @@ import { Todo, TodoStatus } from '@/types/Todo'
 import TasksHeader from './header'
 import TasksFilters from './filters'
 import TasksContent from './content'
+import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 
 const Tasks = () => {
-  const { todos, addTodo, updateTodo, removeTodo, languageDirection } = useAppContext()
+  const { todos, addTodo, updateTodo, removeTodo, languageDirection, isLoadingTodos } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
   const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null)
@@ -20,11 +21,8 @@ const Tasks = () => {
 
   const filteredTodos = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
-    const sorted = [...todos].sort((a, b) =>
-      sortByDate ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
-    )
-    const byStatus =
-      selectedStatus === 'all' ? sorted : sorted.filter((todo) => todo.status === selectedStatus)
+    const sorted = [...todos].sort((a, b) => (sortByDate ? b.createdAt - a.createdAt : a.createdAt - b.createdAt))
+    const byStatus = selectedStatus === 'all' ? sorted : sorted.filter((todo) => todo.status === selectedStatus)
     if (!q) return byStatus
     return byStatus.filter(
       (todo) =>
@@ -34,14 +32,8 @@ const Tasks = () => {
     )
   }, [todos, searchQuery, sortByDate, selectedStatus])
 
-  const incompleteTodos = useMemo(
-    () => filteredTodos.filter((t) => t.status !== TodoStatus.COMPLETED),
-    [filteredTodos]
-  )
-  const completedTodos = useMemo(
-    () => filteredTodos.filter((t) => t.status === TodoStatus.COMPLETED),
-    [filteredTodos]
-  )
+  const incompleteTodos = useMemo(() => filteredTodos.filter((t) => t.status !== TodoStatus.COMPLETED), [filteredTodos])
+  const completedTodos = useMemo(() => filteredTodos.filter((t) => t.status === TodoStatus.COMPLETED), [filteredTodos])
 
   const handleOpenCreate = () => {
     setEditingTodo(null)
@@ -58,11 +50,11 @@ const Tasks = () => {
     setEditingTodo(null)
   }
 
-  const handleSave = (data: TodoFormData) => {
+  const handleSave = async (data: TodoFormData) => {
     if (editingTodo) {
-      updateTodo(editingTodo.id, data)
+      await updateTodo(editingTodo.id, data)
     } else {
-      addTodo(data)
+      await addTodo(data)
     }
     handleCloseModal()
   }
@@ -86,13 +78,13 @@ const Tasks = () => {
     updateTodo(todo.id, { status: newStatus })
   }
 
+  if (isLoadingTodos) {
+    return <SpinnerLoader size="lg" isLoadingPage />
+  }
+
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden font-sans">
-      <TasksHeader
-        onAddClick={handleOpenCreate}
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+      <TasksHeader onAddClick={handleOpenCreate} searchValue={searchQuery} onSearchChange={setSearchQuery} />
       <TasksFilters
         sortByDate={sortByDate}
         onSortByDate={() => setSortByDate((p) => !p)}
