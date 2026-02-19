@@ -14,6 +14,8 @@ import useSupabase from '@/hooks/useSupabase'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import { ToastType } from '@/types/Toast'
 import SpinnerLoader from '../Shared/SpinnerLoader'
+import { API_URL } from '@/constants'
+import { API_ROUTES } from '@/constants/apiRoutes'
 
 const Settings = () => {
   const { user } = useSupabase()
@@ -41,7 +43,7 @@ const Settings = () => {
     if (!canSave) return
     try {
       const updated = await fetchData<EventSettings, EventSettings>({
-        url: '/api/event',
+        url: `${API_URL}${API_ROUTES.EVENT}`,
         method: METHODS.PUT,
         body: eventSettings,
       })
