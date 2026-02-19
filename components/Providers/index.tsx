@@ -7,13 +7,14 @@ import ProvidersModal, { ProviderFormData } from '@/components/Providers/modal'
 import ProviderCard from '@/components/ProviderCard'
 import ProviderTasksModal from '@/components/ProviderCard/ProviderTasksModal'
 import ProvidersHeader from '@/components/Providers/header'
+import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import { useProvidersContext } from '@/context/ProvidersContext'
 import { useAppContext } from '@/context/AppContext'
 import { PaidFilterStatus, Provider } from '@/types/Provider'
 import { getIsPaid } from './helper'
 
 const Providers = () => {
-  const { providers, addProvider, updateProvider, removeProvider } = useProvidersContext()
+  const { providers, addProvider, updateProvider, removeProvider, isLoadingProviders } = useProvidersContext()
   const { addTodo, todos, rowDirectionClassName } = useAppContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedService, setSelectedService] = useState<string>('')
@@ -63,11 +64,11 @@ const Providers = () => {
     setEditingProvider(null)
   }
 
-  const handleSave = (data: ProviderFormData) => {
+  const handleSave = async (data: ProviderFormData) => {
     if (editingProvider) {
-      updateProvider(editingProvider.id, data)
+      await updateProvider(editingProvider.id, data)
     } else {
-      addProvider(data)
+      await addProvider(data)
     }
     handleCloseModal()
   }
@@ -76,9 +77,9 @@ const Providers = () => {
     setProviderToDelete(provider)
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (providerToDelete) {
-      removeProvider(providerToDelete.id)
+      await removeProvider(providerToDelete.id)
       setProviderToDelete(null)
     }
   }
@@ -98,8 +99,8 @@ const Providers = () => {
     setIsTaskModalOpen(true)
   }
 
-  const handleTaskSave = (data: TodoFormData) => {
-    addTodo({
+  const handleTaskSave = async (data: TodoFormData) => {
+    await addTodo({
       ...data,
       providerId: providerForTask?.id,
     })
@@ -121,6 +122,10 @@ const Providers = () => {
     })
     return map
   }, [todos])
+
+  if (isLoadingProviders) {
+    return <SpinnerLoader size="lg" isLoadingPage />
+  }
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden font-sans">
