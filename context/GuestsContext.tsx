@@ -1,10 +1,17 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useMemo } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, useMemo } from 'react'
 import type { Guest } from '@/types/Guest'
-import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
+import { getFromLocalStorage } from '@/lib/utils'
 import { MAZAL_TOV_GUESTS_KEY } from '@/constants/localStorage'
 import { SelectOption } from '@/components/Shared/SelectDropdown'
+import useSupabase from '@/hooks/useSupabase'
+import fetchData, { METHODS } from '@/lib/fetchData'
+import { API_URL } from '@/constants'
+import { API_ROUTES } from '@/constants/apiRoutes'
+import { LanguageDirection } from '@/types/General'
+import { ToastType } from '@/types/Toast'
+import { useAppContext } from './AppContext'
 
 interface GuestsContextType {
   guests: Guest[]
@@ -26,12 +33,17 @@ interface GuestsContextType {
   filteredGuestsByQuantityCount: number
   clearAllFilters: () => void
   hasFiltersOrSearch: boolean
+  isLoadingGuests: boolean
 }
 
 const GuestsContext = createContext<GuestsContextType | undefined>(undefined)
 
 const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useSupabase()
+  const { languageDirection, showToast } = useAppContext()
   const [guests, setGuests] = useState<Guest[]>([])
+  const [isLoadingGuests, setIsLoadingGuests] = useState<boolean>(false)
+
   const [searchQuery, setSearchQuery] = useState('')
   const [sideFilter, setSideFilter] = useState<SelectOption>({
     value: 'all',
@@ -41,43 +53,96 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
   const [categoryFilter, setCategoryFilter] = useState('all')
 
   useEffect(() => {
-    setGuests(getFromLocalStorage(MAZAL_TOV_GUESTS_KEY, []))
-  }, [])
+    if (isAuthLoading || !isAuthenticated) return
+    fetchGuests()
+  }, [user?.id, isAuthLoading, isAuthenticated])
 
-  const persistGuests = (nextGuests: Guest[]) => {
-    setGuests(nextGuests)
-    setToLocalStorage(MAZAL_TOV_GUESTS_KEY, nextGuests)
-  }
-
-  const addGuest = (guest: Omit<Guest, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = Date.now()
-    const newGuest: Guest = {
-      ...guest,
-      id: now,
-      createdAt: now,
-      updatedAt: now,
+  const fetchGuests = async () => {
+    if (!user?.id) return
+    setIsLoadingGuests(true)
+    try {
+      const data = await fetchData<unknown, Guest[]>({
+        url: `${API_URL}${API_ROUTES.GUESTS}`,
+        method: METHODS.GET,
+      })
+      const fetched = Array.isArray(data) ? data : []
+      setGuests(fetched)
+    } catch {
+      setGuests([])
+    } finally {
+      setIsLoadingGuests(false)
     }
-    persistGuests([...guests, newGuest])
   }
 
-  const deleteGuest = (id: number) => {
-    const nextGuests = guests.filter((g) => g.id !== id)
-    persistGuests(nextGuests)
+  const addGuest = async (guest: Omit<Guest, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const created = await fetchData<Omit<Guest, 'id' | 'createdAt' | 'updatedAt'>, Guest>({
+        url: `${API_URL}${API_ROUTES.GUESTS}`,
+        method: METHODS.POST,
+        body: guest,
+      })
+      setGuests((prev) => [...prev, created])
+      showToast({
+        type: ToastType.SUCCESS,
+        title: languageDirection === LanguageDirection.HEB ? 'הצלחה' : 'Success',
+        message: languageDirection === LanguageDirection.HEB ? 'אורח נוסף בהצלחה' : 'Guest added successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message: languageDirection === LanguageDirection.HEB ? 'שגיאה בהוספת אורח' : 'Failed to add guest',
+      })
+    }
   }
 
-  const updateGuest = (id: number, updates: Partial<Omit<Guest, 'id' | 'createdAt'>>) => {
-    const now = Date.now()
-    const nextGuests = guests.map((g) => (g.id === id ? { ...g, ...updates, updatedAt: now } : g))
-    persistGuests(nextGuests)
+  const updateGuest = async (id: number, updates: Partial<Omit<Guest, 'id' | 'createdAt'>>) => {
+    try {
+      const updated = await fetchData<Partial<Guest>, Guest>({
+        url: `${API_URL}${API_ROUTES.GUESTS}?id=${id}`,
+        method: METHODS.PUT,
+        body: updates,
+      })
+      setGuests((prev) => prev.map((g) => (g.id === id ? updated : g)))
+      showToast({
+        type: ToastType.SUCCESS,
+        title: languageDirection === LanguageDirection.HEB ? 'הצלחה' : 'Success',
+        message: languageDirection === LanguageDirection.HEB ? 'אורח עודכן בהצלחה' : 'Guest updated successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message: languageDirection === LanguageDirection.HEB ? 'שגיאה בעדכון אורח' : 'Failed to update guest',
+      })
+    }
   }
 
-  const removeGuest = (id: number) => {
-    const nextGuests = guests.filter((g) => g.id !== id)
-    persistGuests(nextGuests)
+  const removeGuest = async (id: number) => {
+    try {
+      await fetchData<unknown, unknown>({
+        url: `${API_URL}${API_ROUTES.GUESTS}?id=${id}`,
+        method: METHODS.DELETE,
+      })
+      setGuests((prev) => prev.filter((g) => g.id !== id))
+      showToast({
+        type: ToastType.SUCCESS,
+        title: languageDirection === LanguageDirection.HEB ? 'הצלחה' : 'Success',
+        message: languageDirection === LanguageDirection.HEB ? 'אורח נמחק בהצלחה' : 'Guest deleted successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message: languageDirection === LanguageDirection.HEB ? 'שגיאה במחיקת אורח' : 'Failed to delete guest',
+      })
+    }
   }
+
+  const deleteGuest = removeGuest
 
   const clearGuests = () => {
-    persistGuests([])
+    setGuests([])
   }
 
   const filteredGuests = useMemo(() => {
@@ -114,7 +179,7 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
     <GuestsContext.Provider
       value={{
         guests,
-        setGuests: persistGuests,
+        setGuests,
         addGuest,
         updateGuest,
         removeGuest,
@@ -132,6 +197,7 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
         filteredGuestsByQuantityCount,
         clearAllFilters,
         hasFiltersOrSearch,
+        isLoadingGuests,
       }}>
       {children}
     </GuestsContext.Provider>

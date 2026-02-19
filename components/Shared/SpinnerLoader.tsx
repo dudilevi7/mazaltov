@@ -17,7 +17,7 @@ const sizeClasses: Record<SpinnerSize, string> = {
   lg: 'h-6 w-6',
 }
 
-const SpinnerLoader = ({ className = '', size = 'md', isLoadingPage = false }: SpinnerLoaderProps) => {
+const SpinnerLoader = ({ className = '', size = 'md', isLoadingPage }: SpinnerLoaderProps) => {
   const { languageDirection } = useAppContext()
   const isRtl = languageDirection === LanguageDirection.HEB
   if (isLoadingPage) {

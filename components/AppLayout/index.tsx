@@ -7,6 +7,7 @@ import { LanguageDirection } from '@/types/General'
 import useSupabase from '@/hooks/useSupabase'
 import AppSidebar from '@/components/AppSidebar'
 import AppHeader from '@/components/AppHeader'
+import SpinnerLoader from '../Shared/SpinnerLoader'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -39,7 +40,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+        <SpinnerLoader size="lg" isLoadingPage />
       </div>
     )
   }

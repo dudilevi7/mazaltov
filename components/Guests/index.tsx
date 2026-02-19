@@ -8,6 +8,7 @@ import GuestModal, { GuestFormData } from './GuestModal'
 import GuestsFilters from './filters'
 import GuestsTable from './GuestsTable'
 import DeleteModal from '@/components/DeleteModal'
+import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -44,6 +45,7 @@ const Guests = () => {
     filteredGuestsByQuantityCount,
     clearAllFilters,
     hasFiltersOrSearch,
+    isLoadingGuests,
   } = useGuestsContext()
   const { languageDirection, eventSettings } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -119,6 +121,10 @@ const Guests = () => {
     const guests = await importGuestsFromExcel()
     setGuests(guests)
     setIsImportingExcel(false)
+  }
+
+  if (isLoadingGuests) {
+    return <SpinnerLoader size="lg" isLoadingPage />
   }
 
   return (
