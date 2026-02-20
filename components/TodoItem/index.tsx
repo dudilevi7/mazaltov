@@ -80,12 +80,12 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
           {todo.reminderTimestamp > 0 && (
             <div className="flex flex-row items-center gap-1">
               <div className="border-e border-gray-500 h-4"></div>
-              <Tooltip content={formatDateDDMMYYHHMM(todo.reminderTimestamp)}>
-                <div className="flex items-center gap-0.5">
-                  <span>תזכורת</span>
-                  <FontAwesomeIcon icon={faClock} className="text-gray-500" />
-                </div>
-              </Tooltip>
+              <div className="flex items-center gap-0.5">
+                <span>תזכורת ב - </span>
+                <span className="bg-blue-500 text-white px-1 rounded-md">
+                  {formatDateDDMMYYHHMM(todo.reminderTimestamp)}
+                </span>
+              </div>
             </div>
           )}
         </div>

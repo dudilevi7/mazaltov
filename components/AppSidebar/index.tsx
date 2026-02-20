@@ -18,6 +18,7 @@ import {
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import Tooltip from '../Tooltip'
 import useSupabase from '@/hooks/useSupabase'
+import UserDetails from './UserDetails'
 
 interface SidebarItem {
   id: string
@@ -96,7 +97,8 @@ const AppSidebar = () => {
             )
           })}
         </nav>
-        <div className="absolute bottom-28 left-[50%] transform -translate-x-1/2 z-50">
+        <div className="absolute bottom-28 left-[50%] transform -translate-x-1/2 z-50 flex flex-col items-center gap-4">
+          <UserDetails />
           <Tooltip
             content={!isSidebarOpen ? (isRtl ? 'יציאה' : 'Logout') : ''}
             place={!isSidebarOpen ? (isRtl ? 'right' : 'left') : 'top'}>
