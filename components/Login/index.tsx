@@ -7,7 +7,7 @@ import useSupabase from '@/hooks/useSupabase'
 import Logo from '../AppHeader/Logo'
 
 const Login = () => {
-  const { signIn } = useSupabase()
+  const { signIn, isAuthenticated } = useSupabase()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -23,6 +23,10 @@ const Login = () => {
       setError(err.message)
       return
     }
+  }
+
+  if (isAuthenticated) {
+    return <div className="flex flex-col min-h-screen bg-gray-50" />
   }
 
   return (

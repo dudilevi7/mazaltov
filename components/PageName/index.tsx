@@ -45,15 +45,11 @@ const PageName = () => {
 
   const config = PAGE_CONFIGS.find((cfg) => pathname.startsWith(cfg.path)) || null
 
-  if (!config) {
-    return null
-  }
-
-  const title = isRtl ? config.labelHe : config.labelEn
+  const title = isRtl ? config?.labelHe : config?.labelEn
 
   return (
     <div className="flex items-center gap-1 animate-fade-in-0.5 border-t-2 border-gray-200 py-0.5 px-2">
-      <FontAwesomeIcon icon={config.icon} className="text-base text-gray-700" />
+      {config && <FontAwesomeIcon icon={config.icon} className="text-base text-gray-700" />}
       <span className="text-gray-700 font-semibold">{title}</span>
     </div>
   )
