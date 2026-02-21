@@ -1,9 +1,7 @@
 import { useAppContext } from '@/context/AppContext'
 import { getEventDisplayName } from './helper'
 import moment from 'moment'
-import { EventType } from '@/types/Settings'
 import { getEventTypeDisplayName } from '../Settings/helper'
-import { useState } from 'react'
 import { LanguageDirection } from '@/types/General'
 
 const EventDetails = () => {
@@ -17,12 +15,14 @@ const EventDetails = () => {
          text-gray-700 px-3 py-1.5 rounded-e-md z-50 animate-fade-in-0.5 shadow-lg shadow-blue-500/20`}
       dir={languageDirection}>
       <div className="flex flex-row gap-0.5 font-bold">
-        <span className="text-sm rounded-md">{eventTypeDisplayName}</span>
-        <span className="text-sm rounded-md">-</span>
-        <span className="text-sm rounded-md">{getEventDisplayName(eventSettings)}</span>
+        <span className="text-sm rounded-md">{eventTypeDisplayName || ''}</span>
+        <span className="text-sm rounded-md">{eventTypeDisplayName ? '-' : ''}</span>
+        <span className="text-sm rounded-md">{getEventDisplayName(eventSettings) || ''}</span>
       </div>
-      <span className="text-xs rounded-md">{eventSettings.eventHall}</span>
-      <span className="text-xs rounded-md">{moment(eventSettings.eventDate).format('DD/MM/YYYY')}</span>
+      {eventSettings.eventHall && <span className="text-xs rounded-md">{eventSettings.eventHall}</span>}
+      {eventSettings.eventDate && (
+        <span className="text-xs rounded-md">{moment(eventSettings.eventDate).format('DD/MM/YYYY')}</span>
+      )}
     </div>
   )
 }

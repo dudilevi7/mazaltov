@@ -20,7 +20,7 @@ import {
   faFilterCircleXmark,
   faFileDownload,
 } from '@fortawesome/free-solid-svg-icons'
-import { GuestStatus, type Guest, GuestSide } from '@/types/Guest'
+import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels, importGuestsFromExcel, exportToIplanTemplate } from './helper'
 import { EventType } from '@/types/Settings'
@@ -43,6 +43,7 @@ const Guests = () => {
     setCategoryFilter,
     filteredGuests,
     filteredGuestsByQuantityCount,
+    filteredPhoneNumbersCount,
     clearAllFilters,
     hasFiltersOrSearch,
     isLoadingGuests,
@@ -190,8 +191,12 @@ const Guests = () => {
         <div className="flex items-center gap-2 w-full">
           <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="חיפוש אורח" />
 
-          {hasFiltersOrSearch && (
-            <span className="text-gray-500 text-sm ms-auto">{filteredGuestsByQuantityCount} אורחים</span>
+          <span className="text-gray-500 text-sm ms-auto">{filteredGuestsByQuantityCount} אורחים</span>
+          {filteredPhoneNumbersCount > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-sm ms-auto">|</span>
+              <span className="text-gray-500 text-sm ms-auto">{filteredPhoneNumbersCount} רשומות</span>
+            </div>
           )}
         </div>
 

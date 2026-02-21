@@ -1,9 +1,7 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, useState, useMemo } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo } from 'react'
 import type { Guest } from '@/types/Guest'
-import { getFromLocalStorage } from '@/lib/utils'
-import { MAZAL_TOV_GUESTS_KEY } from '@/constants/localStorage'
 import { SelectOption } from '@/components/Shared/SelectDropdown'
 import useSupabase from '@/hooks/useSupabase'
 import fetchData, { METHODS } from '@/lib/fetchData'
@@ -29,8 +27,11 @@ interface GuestsContextType {
   setStatusFilter: (status: string) => void
   categoryFilter: string
   setCategoryFilter: (category: string) => void
+  setShowNonPhoneNumbersFilter: (show: boolean) => void
   filteredGuests: Guest[]
   filteredGuestsByQuantityCount: number
+  filteredPhoneNumbersCount: number
+  showNonPhoneNumbersFilter: boolean
   clearAllFilters: () => void
   hasFiltersOrSearch: boolean
   isLoadingGuests: boolean
@@ -43,6 +44,7 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
   const { languageDirection, showToast } = useAppContext()
   const [guests, setGuests] = useState<Guest[]>([])
   const [isLoadingGuests, setIsLoadingGuests] = useState<boolean>(false)
+  const [showNonPhoneNumbersFilter, setShowNonPhoneNumbersFilter] = useState<boolean>(false)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [sideFilter, setSideFilter] = useState<SelectOption>({
@@ -156,12 +158,19 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
       const matchSide = sideFilter.value === 'all' || guest.side === sideFilter.label
       const matchStatus = statusFilter === 'all' || guest.status === statusFilter
       const matchCategory = categoryFilter === 'all' || guest.category === categoryFilter
-      return matchSearch && matchSide && matchStatus && matchCategory
+      const matchNonPhoneNumbers = showNonPhoneNumbersFilter
+        ? !guest.phoneNumber || guest.phoneNumber.trim() === ''
+        : true
+      return matchSearch && matchSide && matchStatus && matchCategory && matchNonPhoneNumbers
     })
-  }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter])
+  }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter, showNonPhoneNumbersFilter])
 
   const filteredGuestsByQuantityCount = useMemo(
     () => filteredGuests.reduce((sum, guest) => sum + guest.quantity, 0),
+    [filteredGuests]
+  )
+  const filteredPhoneNumbersCount = useMemo(
+    () => filteredGuests.filter((guest) => guest.phoneNumber).length,
     [filteredGuests]
   )
 
@@ -195,6 +204,9 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
         setCategoryFilter,
         filteredGuests,
         filteredGuestsByQuantityCount,
+        filteredPhoneNumbersCount,
+        showNonPhoneNumbersFilter,
+        setShowNonPhoneNumbersFilter,
         clearAllFilters,
         hasFiltersOrSearch,
         isLoadingGuests,

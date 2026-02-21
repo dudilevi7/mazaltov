@@ -32,6 +32,7 @@ const useSupabase = (): UseSupabaseReturn => {
     setUser(supabaseSession?.user ?? null)
     setIsLoading(false)
   }
+
   useEffect(() => {
     getSession()
 
