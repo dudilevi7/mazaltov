@@ -3,7 +3,7 @@
 import type { ShoppingItem } from '@/types/ShoppingItem'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faPen } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faPen, faUser } from '@fortawesome/free-solid-svg-icons'
 import { formatCurrency } from '@/lib/utils'
 import { CATEGORY_LABELS } from './ShoppingModal'
 
@@ -53,6 +53,12 @@ const ShoppingListItem = ({ item, onToggle, onEdit, onDelete }: ShoppingListItem
           <p className={`mt-0.5 text-xs truncate ${item.isPurchased ? 'text-gray-300' : 'text-gray-500'}`}>
             {item.notes}
           </p>
+        )}
+        {item.createdBy && (
+          <div className={`mt-0.5 flex items-center gap-1 text-xs ${item.isPurchased ? 'text-gray-300' : 'text-gray-400'}`}>
+            <FontAwesomeIcon icon={faUser} className="h-2.5 w-2.5" />
+            <span>{item.createdBy}</span>
+          </div>
         )}
       </div>
 

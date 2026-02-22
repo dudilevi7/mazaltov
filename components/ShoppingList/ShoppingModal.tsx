@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { ShoppingItem } from '@/types/ShoppingItem'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import SelectDropdown from '@/components/Shared/SelectDropdown'
+import { useAppContext } from '@/context/AppContext'
+import { getEventOwnerOptions } from '@/components/TodoModal/helper'
 
 export interface ShoppingFormData {
   name: string
@@ -11,6 +14,7 @@ export interface ShoppingFormData {
   notes: string
   estimatedPrice: number
   isPurchased: boolean
+  createdBy: string
 }
 
 interface ShoppingModalProps {
@@ -41,6 +45,9 @@ const ShoppingModal = ({ isOpen, onClose, onSave, item }: ShoppingModalProps) =>
   const [category, setCategory] = useState('')
   const [notes, setNotes] = useState('')
   const [estimatedPrice, setEstimatedPrice] = useState(0)
+  const [createdBy, setCreatedBy] = useState('')
+  const { eventSettings } = useAppContext()
+  const ownerOptions = useMemo(() => getEventOwnerOptions(eventSettings), [eventSettings])
 
   const isEdit = !!item
 
@@ -51,8 +58,10 @@ const ShoppingModal = ({ isOpen, onClose, onSave, item }: ShoppingModalProps) =>
       setCategory(item?.category || '')
       setNotes(item?.notes || '')
       setEstimatedPrice(item?.estimatedPrice ?? 0)
+      const nextCreatedBy = item?.createdBy || ''
+      setCreatedBy(nextCreatedBy || (ownerOptions[0]?.value ?? ''))
     }
-  }, [isOpen, item])
+  }, [isOpen, item, ownerOptions])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,6 +72,7 @@ const ShoppingModal = ({ isOpen, onClose, onSave, item }: ShoppingModalProps) =>
       notes,
       estimatedPrice,
       isPurchased: item?.isPurchased ?? false,
+      createdBy,
     })
   }
 
@@ -123,6 +133,16 @@ const ShoppingModal = ({ isOpen, onClose, onSave, item }: ShoppingModalProps) =>
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 text-right">נוסף על ידי</label>
+            <SelectDropdown
+              value={createdBy}
+              onChange={setCreatedBy}
+              options={ownerOptions}
+              placeholder="בחר אחראי"
+              className="w-full"
+            />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">הערות</label>
