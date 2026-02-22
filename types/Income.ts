@@ -1,6 +1,6 @@
-interface Income {
-  numberOfGuests: number;
-  avgGiftPerGuest: number;
+interface EstimatedIncome {
+  numberOfGuests: number
+  avgGiftPerGuest: number
 }
 
-export type { Income };
+export type { EstimatedIncome }

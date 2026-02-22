@@ -5,6 +5,7 @@ import AppProvider from '../context/AppContext'
 import { ProvidersProvider } from '@/context/ProvidersContext'
 import { BudgetProvider } from '@/context/BudgetContext'
 import { GuestsProvider } from '@/context/GuestsContext'
+import { ShoppingProvider } from '@/context/ShoppingContext'
 import AppLayout from '@/components/AppLayout'
 
 const geistSans = Geist({
@@ -32,11 +33,13 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AppProvider>
           <ProvidersProvider>
-            <BudgetProvider>
-              <GuestsProvider>
-                <AppLayout>{children}</AppLayout>
-              </GuestsProvider>
-            </BudgetProvider>
+            <GuestsProvider>
+              <ShoppingProvider>
+                <BudgetProvider>
+                  <AppLayout>{children}</AppLayout>
+                </BudgetProvider>
+              </ShoppingProvider>
+            </GuestsProvider>
           </ProvidersProvider>
         </AppProvider>
       </body>
