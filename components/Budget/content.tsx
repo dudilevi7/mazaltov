@@ -13,10 +13,19 @@ interface BudgetContentProps {
 
 const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) => {
   const { languageDirection } = useAppContext()
-  const { income, totalPrice, balance, biggestProvider, estimatedTotal } = useBudgetContext()
+  const {
+    estimatedIncome,
+    totalPrice,
+    balance,
+    biggestProvider,
+    estimatedTotal,
+    guestsIncome,
+    guestsWithGiftCount,
+    avgGiftPerGuestActual,
+  } = useBudgetContext()
   return (
     <div className="flex flex-col gap-6 animate-fade-in-0.5">
-      {(income || totalPrice > 0) && (
+      {(estimatedIncome || totalPrice > 0 || guestsIncome > 0) && (
         <div
           className={`rounded-lg p-4 shadow-sm border flex items-center gap-2 ${
             balance >= 0 ? 'bg-green-100 border-green-200' : 'bg-red-100 border-red-200'
@@ -39,7 +48,22 @@ const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) 
           </CustomButton>
         </div>
 
-        {income && (
+        {guestsIncome > 0 && (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faMoneyBillAlt} className="text-green-600" />
+              <span className="font-semibold text-gray-900">
+                הכנסות אורחים סה&quot;כ: {formatCurrency(guestsIncome)}
+              </span>
+            </div>
+            <span className="text-sm text-gray-600">אורחים: {guestsWithGiftCount}</span>
+            <span className="text-sm text-gray-600">מתנה ממוצעת לאורח: {formatCurrency(avgGiftPerGuestActual)}</span>
+          </div>
+        )}
+
+        {guestsIncome > 0 && estimatedIncome && <hr className="border-gray-200 my-2" />}
+
+        {estimatedIncome && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <FontAwesomeIcon icon={faMoneyBillAlt} className="text-gray-500" />
@@ -47,8 +71,10 @@ const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) 
                 הכנסות משוערות סה&quot;כ: {formatCurrency(estimatedTotal)}
               </span>
             </div>
-            <span className="text-sm text-gray-600">אורחים: {income.numberOfGuests}</span>
-            <span className="text-sm text-gray-600">מתנה ממוצעת לאורח: {formatCurrency(income.avgGiftPerGuest)}</span>
+            <span className="text-sm text-gray-600">אורחים: {estimatedIncome.numberOfGuests}</span>
+            <span className="text-sm text-gray-600">
+              מתנה ממוצעת לאורח: {formatCurrency(estimatedIncome.avgGiftPerGuest)}
+            </span>
           </div>
         )}
       </div>
@@ -66,7 +92,7 @@ const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) 
         </div>
       )}
 
-      {!biggestProvider && totalPrice === 0 && !income && (
+      {!biggestProvider && totalPrice === 0 && !estimatedIncome && (
         <div className="rounded-lg bg-gray-100 p-6 text-center text-gray-500">
           אין נתוני תקציב. הוסף ספקים בדף הספקים והכנסות משוערות.
         </div>

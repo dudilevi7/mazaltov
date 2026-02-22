@@ -1,19 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMoneyBillAlt } from '@fortawesome/free-solid-svg-icons'
-import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
-import ProgressBar from '@/components/Shared/ProgressBar'
 import IncomesModal from '@/components/Budget/IncomesModal'
-import { useAppContext } from '@/context/AppContext'
 import { useBudgetContext } from '@/context/BudgetContext'
-import { formatCurrency } from '@/lib/utils'
 import BudgetProgressBar from './BudgetProgressBar'
 import BudgetContent from './content'
 
 const Budget = () => {
-  const { income, setIncome } = useBudgetContext()
+  const { estimatedIncome, setEstimatedIncome } = useBudgetContext()
   const [isIncomesModalOpen, setIsIncomesModalOpen] = useState(false)
 
   return (
@@ -26,10 +20,10 @@ const Budget = () => {
         isOpen={isIncomesModalOpen}
         onClose={() => setIsIncomesModalOpen(false)}
         onSave={(data) => {
-          setIncome(data)
+          setEstimatedIncome(data)
           setIsIncomesModalOpen(false)
         }}
-        income={income}
+        estimatedIncome={estimatedIncome}
       />
     </div>
   )

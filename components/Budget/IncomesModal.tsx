@@ -1,38 +1,38 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
-import type { Income } from "@/types/Income";
-import { parseNumber } from "@/lib/utils";
+import { useEffect, useState } from 'react'
+import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import type { EstimatedIncome } from '@/types/Income'
+import { parseNumber } from '@/lib/utils'
 
 interface IncomesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: Income) => void;
-  income?: Income | null;
+  isOpen: boolean
+  onClose: () => void
+  onSave: (data: EstimatedIncome) => void
+  estimatedIncome?: EstimatedIncome | null
 }
 
-const IncomesModal = ({ isOpen, onClose, onSave, income }: IncomesModalProps) => {
-  const [numberOfGuests, setNumberOfGuests] = useState<string>("");
-  const [avgGiftPerGuest, setAvgGiftPerGuest] = useState<string>("");
+const IncomesModal = ({ isOpen, onClose, onSave, estimatedIncome }: IncomesModalProps) => {
+  const [numberOfGuests, setNumberOfGuests] = useState<string>('')
+  const [avgGiftPerGuest, setAvgGiftPerGuest] = useState<string>('')
 
   useEffect(() => {
     if (isOpen) {
-      setNumberOfGuests(income ? String(income.numberOfGuests) : "");
-      setAvgGiftPerGuest(income ? String(income.avgGiftPerGuest) : "");
+      setNumberOfGuests(estimatedIncome ? String(estimatedIncome.numberOfGuests) : '')
+      setAvgGiftPerGuest(estimatedIncome ? String(estimatedIncome.avgGiftPerGuest) : '')
     }
-  }, [isOpen, income]);
+  }, [isOpen, estimatedIncome])
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     onSave({
       numberOfGuests: parseNumber(numberOfGuests),
       avgGiftPerGuest: parseNumber(avgGiftPerGuest),
-    });
-    onClose();
-  };
+    })
+    onClose()
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
@@ -52,9 +52,7 @@ const IncomesModal = ({ isOpen, onClose, onSave, income }: IncomesModalProps) =>
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              מתנה ממוצעת לאורח
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">מתנה ממוצעת לאורח</label>
             <input
               dir="rtl"
               type="number"
@@ -76,7 +74,7 @@ const IncomesModal = ({ isOpen, onClose, onSave, income }: IncomesModalProps) =>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default IncomesModal;
+export default IncomesModal
