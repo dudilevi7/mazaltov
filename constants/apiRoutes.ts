@@ -3,4 +3,5 @@ export const API_ROUTES = {
   TASKS: '/api/tasks',
   PROVIDERS: '/api/providers',
   GUESTS: '/api/guests',
+  SHOPPING: '/api/shopping',
 }
