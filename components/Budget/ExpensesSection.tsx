@@ -5,7 +5,9 @@ import { useBudgetContext } from '@/context/BudgetContext'
 import { formatCurrency } from '@/lib/utils'
 import ProviderPaymentChip from './ProviderPaymentChip'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons'
+import { faCircleInfo, faFileExcel } from '@fortawesome/free-solid-svg-icons'
+import CustomButton, { ButtonSize } from '../Button/custom-button'
+import { exportExpensesToExcel } from './helper'
 
 const ExpensesSection = () => {
   const { languageDirection } = useAppContext()
@@ -13,7 +15,18 @@ const ExpensesSection = () => {
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-200" dir={languageDirection}>
-      <h2 className="mb-3 text-lg font-semibold text-gray-800">הוצאות</h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-gray-800">הוצאות</h2>
+        {providers.length > 0 && (
+          <CustomButton
+            size={ButtonSize.SM}
+            variant="white"
+            onClick={() => exportExpensesToExcel(providers, languageDirection)}
+            icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
+            ייצוא לאקסל
+          </CustomButton>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2 mb-4">
         <div className="flex gap-2 text-sm">
