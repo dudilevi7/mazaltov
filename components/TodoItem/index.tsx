@@ -5,7 +5,7 @@ import { Todo, TodoStatus } from '@/types/Todo'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Tooltip from '@/components/Tooltip'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser, faSpinner, faCheck, faClock } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faSpinner, faCheck, faClock, faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { formatDateDDMMYY, formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 import { useAppContext } from '@/context/AppContext'
@@ -75,16 +75,14 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
           }`}>
           {STATUS_LABELS[todo.status]}
         </span>
-        <div className="flex flex-row items-center gap-1 text-xs text-gray-600">
+        <div className="flex flex-row items-center gap-1 text-xs text-gray-600 flex-wrap">
           <span>נוצר ב -{formatDateDDMMYY(todo.createdAt)}</span>
           {todo.reminderTimestamp > 0 && (
             <div className="flex flex-row items-center gap-1">
               <div className="border-e border-gray-500 h-4"></div>
               <div className="flex items-center gap-0.5">
                 <span>תזכורת ב - </span>
-                <span className="bg-blue-500 text-white px-1 rounded-md">
-                  {formatDateDDMMYYHHMM(todo.reminderTimestamp)}
-                </span>
+                <span className="text-gray-900 font-bold">{formatDateDDMMYYHHMM(todo.reminderTimestamp)}</span>
               </div>
             </div>
           )}
@@ -131,24 +129,27 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
             <CustomButton
               size={ButtonSize.SM}
               className="bg-green-500 hover:bg-green-600 text-white"
-              onClick={() => onStatusChange?.(todo, TodoStatus.COMPLETED)}>
-              <FontAwesomeIcon icon={faCheck} className="mr-1" />
+              onClick={() => onStatusChange?.(todo, TodoStatus.COMPLETED)}
+              icon={<FontAwesomeIcon icon={faCheck} className="mr-1" />}>
               הושלם
             </CustomButton>
           )}
           <CustomButton
             size={ButtonSize.SM}
             className="!bg-amber-200 hover:!bg-amber-300 !text-gray-900"
+            icon={<FontAwesomeIcon icon={faSpinner} className="mr-1" />}
             onClick={() => onStatusChange?.(todo, TodoStatus.IN_PROGRESS)}>
-            <FontAwesomeIcon icon={faSpinner} className="mr-1" />
             בתהליך
           </CustomButton>
-          <CustomButton size={ButtonSize.SM} onClick={() => onEdit(todo)}>
-            ערוך
-          </CustomButton>
-          <CustomButton size={ButtonSize.SM} variant="red" onClick={() => onDelete(todo)}>
-            מחק
-          </CustomButton>
+
+          <div className="flex shrink-0 gap-1">
+            <CustomButton size={ButtonSize.SM} onClick={() => onEdit(todo)}>
+              <FontAwesomeIcon icon={faPen} className="h-3 w-3" />
+            </CustomButton>
+            <CustomButton size={ButtonSize.SM} variant="red" onClick={() => onDelete(todo)}>
+              <FontAwesomeIcon icon={faTrash} className="h-3 w-3" />
+            </CustomButton>
+          </div>
         </div>
       </div>
     </li>

@@ -2,7 +2,15 @@
 
 import { usePathname } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faListCheck, faHandshake, faCalendarDays, faUsers, faCoins, faGear } from '@fortawesome/free-solid-svg-icons'
+import {
+  faListCheck,
+  faHandshake,
+  faCalendarDays,
+  faUsers,
+  faCoins,
+  faGear,
+  faGift,
+} from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
@@ -29,6 +37,7 @@ const PAGE_CONFIGS: PageConfig[] = [
     icon: faCalendarDays,
   },
   { path: '/guests', labelHe: 'אורחים', labelEn: 'Guests', icon: faUsers },
+  { path: '/gifts', labelHe: 'מתנות', labelEn: 'Gifts', icon: faGift },
   { path: '/budget', labelHe: 'תקציב', labelEn: 'Budget', icon: faCoins },
   {
     path: '/settings',
