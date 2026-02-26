@@ -8,9 +8,10 @@ import Toggle from '@/components/Shared/Toggle'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import DeleteModal from '../DeleteModal'
 import Tooltip from '@/components/Tooltip'
+import { useGiftsContext } from '@/context/GiftsContext'
 
 interface GuestsTableProps {
   guests: Guest[]
@@ -29,8 +30,16 @@ const GuestsTable = ({
   onDeleteGuest = () => {},
   onToggleManualApproval = () => {},
 }: GuestsTableProps) => {
+  const { gifts } = useGiftsContext()
   const [showDeleteSpecificGuestModal, setShowDeleteSpecificGuestModal] = useState(false)
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null)
+  const giftSumByGuestId = useMemo(() => {
+    const map: Record<number, number> = {}
+    gifts.forEach((g) => {
+      if (g.guestId) map[g.guestId] = (map[g.guestId] || 0) + g.amount
+    })
+    return map
+  }, [gifts])
 
   const onDeleteClick = (guest: Guest) => {
     setGuestToDelete(guest)
@@ -71,7 +80,7 @@ const GuestsTable = ({
       render: (row: Guest) => row.phoneNumber || '–',
     },
     { key: 'category', label: 'קירבה' },
-    { key: 'gift', label: 'מתנה', render: (row: Guest) => String(row.gift) },
+    { key: 'gift', label: 'מתנה', render: (row: Guest) => String(giftSumByGuestId[row.id] ?? 0) },
     {
       key: 'manualApproval',
       label: 'אישור ידני',

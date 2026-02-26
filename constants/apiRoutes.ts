@@ -4,4 +4,5 @@ export const API_ROUTES = {
   PROVIDERS: '/api/providers',
   GUESTS: '/api/guests',
   SHOPPING: '/api/shopping',
+  GIFTS: '/api/gifts',
 }
