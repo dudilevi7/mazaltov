@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useProvidersContext } from '@/context/ProvidersContext'
 import { useGuestsContext } from '@/context/GuestsContext'
+import { useGiftsContext } from '@/context/GiftsContext'
 import type { Provider } from '@/types/Provider'
 import type { EstimatedIncome } from '@/types/Income'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
@@ -28,6 +29,7 @@ const BudgetContext = createContext<BudgetContextType | undefined>(undefined)
 const BudgetProvider = ({ children }: { children: React.ReactNode }) => {
   const { providers } = useProvidersContext()
   const { guests } = useGuestsContext()
+  const { gifts } = useGiftsContext()
   const [estimatedIncome, setEstimatedIncomeState] = useState<EstimatedIncome | null>(null)
 
   useEffect(() => {
@@ -48,8 +50,9 @@ const BudgetProvider = ({ children }: { children: React.ReactNode }) => {
 
     const estimatedTotal = estimatedIncome ? estimatedIncome.numberOfGuests * estimatedIncome.avgGiftPerGuest : 0
 
-    const guestsIncome = guests.reduce((sum, g) => sum + (g.gift || 0), 0)
-    const guestsWithGiftCount = guests.filter((g) => g.gift > 0).length
+    const guestsIncome = gifts.reduce((sum, g) => sum + (g.amount || 0), 0)
+    const guestIdsWithGifts = new Set(gifts.filter((g) => g.guestId && g.amount > 0).map((g) => g.guestId))
+    const guestsWithGiftCount = guestIdsWithGifts.size
     const avgGiftPerGuestActual = guestsWithGiftCount > 0 ? guestsIncome / guestsWithGiftCount : 0
 
     const balance = (guestsIncome > 0 ? guestsIncome : estimatedTotal) - totalPrice
@@ -68,7 +71,7 @@ const BudgetProvider = ({ children }: { children: React.ReactNode }) => {
       guestsWithGiftCount,
       avgGiftPerGuestActual,
     }
-  }, [providers, estimatedIncome, guests])
+  }, [providers, estimatedIncome, guests, gifts])
 
   return <BudgetContext.Provider value={value}>{children}</BudgetContext.Provider>
 }

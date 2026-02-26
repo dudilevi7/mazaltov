@@ -20,10 +20,7 @@ const ShoppingListItem = ({ item, onToggle, onEdit, onDelete }: ShoppingListItem
   return (
     <li
       className={`group flex items-center gap-3 rounded-lg p-3 transition-all
-        ${item.isPurchased
-          ? 'bg-gray-50 opacity-70'
-          : 'bg-white inset-shadow-sm shadow-gray-200 hover:shadow-md'
-        }`}
+        ${item.isPurchased ? 'bg-gray-50 opacity-70' : 'bg-white inset-shadow-sm shadow-gray-200 hover:shadow-md'}`}
       dir="rtl">
       <input
         type="checkbox"
@@ -34,8 +31,7 @@ const ShoppingListItem = ({ item, onToggle, onEdit, onDelete }: ShoppingListItem
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span
-            className={`font-medium text-gray-900 ${item.isPurchased ? 'line-through text-gray-400' : ''}`}>
+          <span className={`font-medium text-gray-900 ${item.isPurchased ? 'line-through text-gray-400' : ''}`}>
             {item.name}
           </span>
           {item.quantity > 1 && (
@@ -55,7 +51,8 @@ const ShoppingListItem = ({ item, onToggle, onEdit, onDelete }: ShoppingListItem
           </p>
         )}
         {item.createdBy && (
-          <div className={`mt-0.5 flex items-center gap-1 text-xs ${item.isPurchased ? 'text-gray-300' : 'text-gray-400'}`}>
+          <div
+            className={`mt-0.5 flex items-center gap-1 text-xs ${item.isPurchased ? 'text-gray-300' : 'text-gray-400'}`}>
             <FontAwesomeIcon icon={faUser} className="h-2.5 w-2.5" />
             <span>{item.createdBy}</span>
           </div>
@@ -68,7 +65,7 @@ const ShoppingListItem = ({ item, onToggle, onEdit, onDelete }: ShoppingListItem
         </span>
       )}
 
-      <div className="flex shrink-0 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex shrink-0 gap-1">
         <CustomButton size={ButtonSize.SM} variant="white" onClick={() => onEdit(item)}>
           <FontAwesomeIcon icon={faPen} className="h-3 w-3" />
         </CustomButton>

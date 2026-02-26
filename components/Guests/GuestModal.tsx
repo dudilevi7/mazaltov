@@ -42,7 +42,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   const [table, setTable] = useState<string>('0')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [category, setCategory] = useState('')
-  const [gift, setGift] = useState<string>('0')
   const [manualApproval, setManualApproval] = useState(false)
 
   const isEdit = !!guest
@@ -88,7 +87,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       setTable(guest?.table !== undefined ? String(guest.table) : '0')
       setPhoneNumber(guest?.phoneNumber || '')
       setCategory(guest?.category || '')
-      setGift(guest ? String(guest.gift) : '0')
       setManualApproval(guest?.manualApproval ?? false)
     }
   }, [isOpen, guest, sideOptions])
@@ -107,7 +105,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       table: tableNum > 0 ? tableNum : undefined,
       phoneNumber: phoneNumber.trim() || undefined,
       category: category.trim(),
-      gift: parseNumber(gift),
+      gift: 0,
       manualApproval,
     })
     onClose()
@@ -194,16 +192,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
                 placeholder="בחר או הזן קירבה"
                 customPlaceholder="צור קירבה"
                 className="w-full"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">מתנה</label>
-              <input
-                type="number"
-                min="0"
-                value={gift}
-                onChange={(e) => setGift(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div className="md:col-span-2">

@@ -13,6 +13,7 @@ import {
   faCoins,
   faGear,
   faHandshake,
+  faGift,
   faRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
@@ -33,6 +34,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'providers', labelHe: 'ספקים', labelEn: 'Providers', icon: faHandshake, route: '/providers' },
   { id: 'calendar', labelHe: 'לוח שנה', labelEn: 'Calendar', icon: faCalendarDays, route: '/calendar' },
   { id: 'guests', labelHe: 'אורחים', labelEn: 'Guests', icon: faUsers, route: '/guests' },
+  { id: 'gifts', labelHe: 'מתנות', labelEn: 'Gifts', icon: faGift, route: '/gifts' },
   { id: 'budget', labelHe: 'תקציב', labelEn: 'Budget', icon: faCoins, route: '/budget' },
   { id: 'settings', labelHe: 'הגדרות', labelEn: 'Settings', icon: faGear, route: '/settings' },
 ]
