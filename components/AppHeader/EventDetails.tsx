@@ -8,7 +8,10 @@ const EventDetails = () => {
   const { eventSettings, languageDirection, isSidebarOpen } = useAppContext()
   const eventTypeDisplayName = getEventTypeDisplayName(eventSettings.eventType, languageDirection)
   const placementOfDetails = languageDirection === LanguageDirection.HEB ? 'right-0' : 'left-0'
-  if (!isSidebarOpen) return null
+  const isOwnerNames = eventSettings.ownerName || (eventSettings.brideName && eventSettings.groomName)
+  if (!isSidebarOpen || !isOwnerNames) {
+    return null
+  }
   return (
     <div
       className={`absolute bottom-8 ${placementOfDetails} flex flex-col bg-linear-to-r from-blue-200 to-blue-300

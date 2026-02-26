@@ -54,9 +54,9 @@ const SelectDropdown = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
           afterLeave={() => setSearchQuery('')}>
-          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
+          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full rounded-md bg-white  text-sm shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
             {searchable && (
-              <div className="sticky top-0 bg-white px-2 py-2 border-b border-gray-200">
+              <div className="sticky top-0 bg-white px-2 py-2 border-b border-gray-200 mt-1">
                 <div className="relative">
                   <FontAwesomeIcon
                     icon={faSearch}
@@ -68,7 +68,7 @@ const SelectDropdown = ({
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="חיפוש..."
-                    className="w-full rounded-md border border-gray-300 py-1.5 pr-8 pl-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-md border border-gray-300 py-1.5 pr-8 pl-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 h-7"
                     dir="rtl"
                   />
                 </div>
@@ -83,7 +83,7 @@ const SelectDropdown = ({
                     key={option.value}
                     className={({ active }) =>
                       `relative cursor-pointer select-none py-1.5 px-3 ${
-                        active ? 'bg-blue-100 text-gray-900' : 'text-gray-900'
+                        active ? 'bg-linear-to-b from-blue-50 to-blue-100 text-gray-900' : 'text-gray-900'
                       }`
                     }
                     value={option.value}>

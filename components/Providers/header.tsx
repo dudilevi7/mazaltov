@@ -49,9 +49,9 @@ const ProvidersHeader = ({
         <CustomButton onClick={onAddClick}>הוסף ספק</CustomButton>
         <SearchBar value={searchValue} onChange={onSearchChange} placeholder="חיפוש ספק" />
       </div>
-      <div className={`absolute top-14 right-0 flex items-center gap-2 text-sm text-gray-700 w-fit`}>
+      <div className={`flex items-center gap-2 text-sm text-gray-700 w-fit`}>
         <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-wrap flex-row items-center gap-2">
           <span>שירות</span>
           <SelectDropdown
             value={serviceValue}

@@ -144,7 +144,7 @@ const Providers = () => {
         />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto mt-10">
+      <div className="min-h-0 flex-1 overflow-auto">
         {filteredProviders.length === 0 ? (
           <div className="rounded-lg bg-gray-100 p-6 text-center text-gray-500">
             אין ספקים. הוסף ספק חדש כדי להתחיל.
