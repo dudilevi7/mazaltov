@@ -87,6 +87,7 @@ const exportGuestsToExcel = (
     return obj
   })
   const sheet = XLSX.utils.json_to_sheet(rows)
+  sheet['!cols'] = columns.map((c) => ({ wch: 18 }))
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, sheet, 'אורחים')
   const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
@@ -154,6 +155,7 @@ const exportToIplanTemplate = async (
   const arrayBuffer = await res.arrayBuffer()
   const workbook = XLSX.read(arrayBuffer, { type: 'buffer' })
   const sheet = workbook.Sheets[workbook.SheetNames[0]]
+  sheet['!cols'] = Object.keys(iplanColumnsNamesMapToGuest).map((key) => ({ wch: 18 }))
   const rows = XLSX.utils.sheet_to_json(sheet)
   if (Array.isArray(rows) && rows.length === 0) {
     return

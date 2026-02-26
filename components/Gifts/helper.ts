@@ -35,14 +35,15 @@ export const formatCurrency = (amount: number): string =>
 export const exportGiftsToExcel = (gifts: Gift[]): void => {
   const rows = gifts.map((gift) => ({
     'שם אורח': gift.guestName,
-    'צד': gift.guestSide,
-    'קירבה': gift.guestCategory,
-    'סכום': gift.amount,
-    'סוג': GIFT_TYPE_LABELS[gift.type] ?? gift.type,
-    'תיאור': gift.description,
-    'עודכן': gift.updatedAt ? moment(gift.updatedAt).format('DD/MM/YYYY') : '',
+    צד: gift.guestSide,
+    קירבה: gift.guestCategory,
+    סכום: gift.amount,
+    סוג: GIFT_TYPE_LABELS[gift.type] ?? gift.type,
+    תיאור: gift.description,
+    עודכן: gift.updatedAt ? moment(gift.updatedAt).format('DD/MM/YYYY') : '',
   }))
   const sheet = XLSX.utils.json_to_sheet(rows.reverse())
+  sheet['!cols'] = [{ wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 30 }, { wch: 12 }]
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, sheet, 'מתנות')
   const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })

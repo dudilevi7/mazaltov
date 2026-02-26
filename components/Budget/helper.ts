@@ -35,6 +35,7 @@ const exportExpensesToExcel = (providers: Provider[], languageDirection: Languag
   })
   const rowsByRTLorLTR = isRTL ? rows.reverse() : rows
   const sheet = XLSX.utils.json_to_sheet(rowsByRTLorLTR)
+  sheet['!cols'] = EXPENSES_COLUMNS.map((col) => ({ wch: 18 }))
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, sheet, isRTL ? 'הוצאות' : 'Expenses')
   const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
