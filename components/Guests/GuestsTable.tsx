@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react'
 import DeleteModal from '../DeleteModal'
 import Tooltip from '@/components/Tooltip'
 import { useGiftsContext } from '@/context/GiftsContext'
+import GuestGiftCell from './GuestGiftCell'
 
 interface GuestsTableProps {
   guests: Guest[]
@@ -33,10 +34,16 @@ const GuestsTable = ({
   const { gifts } = useGiftsContext()
   const [showDeleteSpecificGuestModal, setShowDeleteSpecificGuestModal] = useState(false)
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null)
-  const giftSumByGuestId = useMemo(() => {
-    const map: Record<number, number> = {}
-    gifts.forEach((g) => {
-      if (g.guestId) map[g.guestId] = (map[g.guestId] || 0) + g.amount
+  const giftsIdAndAmountByGuestId = useMemo(() => {
+    const map: Record<number, { giftId: string; amount: number }> = {}
+    gifts.forEach((gift) => {
+      const { guestId, amount, id: giftId } = gift
+      if (guestId && amount > 0) {
+        map[guestId] = {
+          giftId: giftId.toString(),
+          amount,
+        }
+      }
     })
     return map
   }, [gifts])
@@ -80,7 +87,17 @@ const GuestsTable = ({
       render: (row: Guest) => row.phoneNumber || '–',
     },
     { key: 'category', label: 'קירבה' },
-    { key: 'gift', label: 'מתנה', render: (row: Guest) => String(giftSumByGuestId[row.id] ?? 0) },
+    {
+      key: 'gift',
+      label: 'מתנה',
+      render: (row: Guest) => (
+        <GuestGiftCell
+          guest={row}
+          amount={giftsIdAndAmountByGuestId[row.id]?.amount ?? 0}
+          giftId={giftsIdAndAmountByGuestId[row.id]?.giftId}
+        />
+      ),
+    },
     {
       key: 'manualApproval',
       label: 'אישור ידני',
