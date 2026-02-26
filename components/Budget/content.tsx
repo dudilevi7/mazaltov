@@ -6,7 +6,6 @@ import { faInfoCircle, faMoneyBillAlt } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '../Button/custom-button'
 import ExpensesSection from './ExpensesSection'
 import Tooltip from '../Tooltip'
-
 interface BudgetContentProps {
   setIsIncomesModalOpen: (isOpen: boolean) => void
 }
@@ -23,6 +22,7 @@ const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) 
     guestsWithGiftCount,
     avgGiftPerGuestActual,
   } = useBudgetContext()
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in-0.5">
       {(estimatedIncome || totalPrice > 0 || guestsIncome > 0) && (
@@ -36,7 +36,7 @@ const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) 
             מאזן: {formatCurrency(balance)}
           </span>
           <Tooltip content="מאזן הוא ההפרש בין התוצאות להכנסות המשוערות">
-            <FontAwesomeIcon icon={faInfoCircle} className="text-red-500 hover:text-red-700 cursor-pointer text-sm" />
+            <FontAwesomeIcon icon={faInfoCircle} className={balance >= 0 ? 'text-green-600' : 'text-red-600'} />
           </Tooltip>
         </div>
       )}
