@@ -5,7 +5,10 @@
   --background: #ffffff;
   --foreground: #171717;
 }
-
+@theme {
+  --breakpoint-phone: 350px;
+  --breakpoint-tablet: 500px;
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

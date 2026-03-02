@@ -19,11 +19,14 @@ import {
   faUpload,
   faFilterCircleXmark,
   faFileDownload,
+  faChartPie,
 } from '@fortawesome/free-solid-svg-icons'
 import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels, importGuestsFromExcel, exportToIplanTemplate } from './helper'
 import { EventType } from '@/types/Settings'
+import CustomSlideover from '@/components/Shared/CustomSlideover'
+import GuestsStatistics from './GuestsStatistics'
 
 const Guests = () => {
   const {
@@ -53,6 +56,7 @@ const Guests = () => {
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [isImportingExcel, setIsImportingExcel] = useState(false)
+  const [isStatisticsOpen, setIsStatisticsOpen] = useState(false)
 
   const guestSideByName = useMemo(() => {
     if (eventSettings.eventType === EventType.WEDDING && eventSettings.brideName && eventSettings.groomName) {
@@ -163,6 +167,13 @@ const Guests = () => {
             icon={<FontAwesomeIcon icon={faTrash} />}>
             מחק הכל
           </CustomButton>
+          <CustomButton
+            size={ButtonSize.SM}
+            className="bg-indigo-500 hover:bg-indigo-600 text-white"
+            onClick={() => setIsStatisticsOpen(true)}
+            icon={<FontAwesomeIcon icon={faChartPie} />}>
+            סטטיסטיקות
+          </CustomButton>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -226,6 +237,10 @@ const Guests = () => {
         onConfirm={handleConfirmDeleteAll}
         title="כל האורחים"
       />
+
+      <CustomSlideover isOpen={isStatisticsOpen} onClose={() => setIsStatisticsOpen(false)} title="סטטיסטיקות אורחים">
+        <GuestsStatistics />
+      </CustomSlideover>
     </div>
   )
 }
