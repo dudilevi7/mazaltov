@@ -3,7 +3,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { Todo, TodoStatus } from '@/types/Todo'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
-import Tooltip from '@/components/Tooltip'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser, faSpinner, faCheck, faClock, faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
@@ -99,13 +98,13 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
             <div className="relative" ref={whatsappRef}>
               <CustomButton
                 size={ButtonSize.SM}
+                tooltip="שלח תזכורת בוואטסאפ"
                 className="!bg-linear-to-b from-white to-gray-100 !border !border-gray-200
                  !text-green-500 hover:!text-green-600"
                 onClick={() =>
                   ownerPhones.length === 1 ? openWhatsApp(ownerPhones[0].phone) : setWhatsappOpen(!whatsappOpen)
                 }>
-                <FontAwesomeIcon icon={faWhatsapp} className="mr-1" />
-                WhatsApp
+                <FontAwesomeIcon icon={faWhatsapp} className="h-3 w-3" size="lg" />
               </CustomButton>
               {ownerPhones.length > 1 && whatsappOpen && (
                 <div
@@ -128,18 +127,18 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
           {todo.status !== TodoStatus.COMPLETED && (
             <CustomButton
               size={ButtonSize.SM}
+              tooltip="הושלם"
               className="bg-green-500 hover:bg-green-600 text-white"
-              onClick={() => onStatusChange?.(todo, TodoStatus.COMPLETED)}
-              icon={<FontAwesomeIcon icon={faCheck} className="mr-1" />}>
-              הושלם
+              onClick={() => onStatusChange?.(todo, TodoStatus.COMPLETED)}>
+              <FontAwesomeIcon icon={faCheck} className="h-3 w-3" />
             </CustomButton>
           )}
           <CustomButton
             size={ButtonSize.SM}
-            className="!bg-amber-200 hover:!bg-amber-300 !text-gray-900"
-            icon={<FontAwesomeIcon icon={faSpinner} className="mr-1" />}
+            className="!bg-amber-200 hover:!bg-amber-300  !text-gray-900"
+            tooltip="בתהליך"
             onClick={() => onStatusChange?.(todo, TodoStatus.IN_PROGRESS)}>
-            בתהליך
+            <FontAwesomeIcon icon={faSpinner} className="h-3 w-3" />
           </CustomButton>
 
           <div className="flex shrink-0 gap-1">

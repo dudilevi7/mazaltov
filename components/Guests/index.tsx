@@ -137,7 +137,7 @@ const Guests = () => {
       <div className="flex flex-col gap-3 min-h-0 flex-1">
         <GuestsSummaryBar />
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CustomButton size={ButtonSize.SM} onClick={openAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
             הוסף אורח
           </CustomButton>

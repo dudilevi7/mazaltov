@@ -41,7 +41,7 @@ const CustomSlideover = ({ isOpen, onClose, title, children, className = '' }: C
                 leave="transform transition ease-in duration-200"
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full">
-                <Dialog.Panel className={`pointer-events-auto w-[50vw] phone:w-[100vw] tablet:w-[50vw] ${className}`}>
+                <Dialog.Panel className={`pointer-events-auto w-[50vw] phone:w-screen tablet:w-[50vw] ${className}`}>
                   <div className="flex h-full flex-col overflow-y-auto bg-white shadow-xl">
                     {title && (
                       <div

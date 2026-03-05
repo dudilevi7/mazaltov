@@ -1,3 +1,5 @@
+import Tooltip from '../Tooltip'
+
 export enum ButtonSize {
   SM = 'sm',
   MD = 'md',
@@ -17,7 +19,7 @@ const sizeStyles: Record<ButtonSize, string> = {
 }
 
 interface CustomButtonProps {
-  children: React.ReactNode
+  children?: React.ReactNode
   onClick?: () => void
   className?: string
   type?: 'button' | 'submit' | 'reset'
@@ -25,6 +27,7 @@ interface CustomButtonProps {
   size?: ButtonSize
   icon?: React.ReactNode
   disabled?: boolean
+  tooltip?: string
 }
 
 const CustomButton = ({
@@ -36,16 +39,19 @@ const CustomButton = ({
   size = ButtonSize.SM,
   icon,
   disabled = false,
+  tooltip,
 }: CustomButtonProps) => {
   return (
-    <button
-      type={type}
-      className={`cursor-pointer inline-flex items-center gap-1 ${variantStyles[variant]} ${sizeStyles[size]} ${className} ${disabled ? 'opacity-50 !cursor-not-allowed' : ''}`}
-      onClick={onClick}
-      disabled={disabled}>
-      {icon && <span className="flex items-center">{icon}</span>}
-      <span>{children}</span>
-    </button>
+    <Tooltip content={tooltip}>
+      <button
+        type={type}
+        className={`cursor-pointer inline-flex items-center gap-1 ${variantStyles[variant]} ${sizeStyles[size]} ${className} ${disabled ? 'opacity-50 !cursor-not-allowed' : ''}`}
+        onClick={onClick}
+        disabled={disabled}>
+        {icon && <span className="flex items-center">{icon}</span>}
+        <span>{children}</span>
+      </button>
+    </Tooltip>
   )
 }
 export default CustomButton
