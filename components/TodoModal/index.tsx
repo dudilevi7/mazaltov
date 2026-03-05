@@ -7,6 +7,9 @@ import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { useAppContext } from '@/context/AppContext'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import { getEventOwnerOptions } from './helper'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { buildGoogleCalendarUrl } from '../TodoItem/helper'
 
 interface TodoModalProps {
   isOpen: boolean
@@ -74,7 +77,11 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
       comments: todo?.comments,
     })
   }
-
+  const handleAddTaskToGoogleCalendar = () => {
+    if (!name) return
+    const reminderTimestamp = reminderDate ? reminderDate.getTime() : 0
+    window.open(buildGoogleCalendarUrl(name, description, reminderTimestamp), '_blank')
+  }
   if (!isOpen) return null
 
   return (
@@ -128,6 +135,17 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
               isClearable
             />
           </div>
+          <div className="flex justify-end">
+            <CustomButton
+              type="button"
+              disabled={!name}
+              className="bg-blue-gradient !text-white inline-flex justify-end items-center gap-2
+             hover:!text-gray-700 transition-colors duration-300"
+              icon={<FontAwesomeIcon icon={faGoogle} className="h-4 w-4" />}
+              onClick={handleAddTaskToGoogleCalendar}>
+              הוסף לגוגל קלנדר
+            </CustomButton>
+          </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 text-right">עודכן על ידי</label>
             <SelectDropdown
@@ -138,6 +156,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
               className="w-full"
             />
           </div>
+
           <div className="flex gap-2 justify-end pt-2">
             <CustomButton size={ButtonSize.SM} type="button" onClick={onClose}>
               ביטול

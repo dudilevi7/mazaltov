@@ -5,8 +5,10 @@ import { Todo, TodoStatus } from '@/types/Todo'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes, faSave } from '@fortawesome/free-solid-svg-icons'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { formatDateDDMMYY, formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 import { useAppContext } from '@/context/AppContext'
+import { buildGoogleCalendarUrl } from './helper'
 
 const STATUS_LABELS: Record<TodoStatus, string> = {
   [TodoStatus.PENDING]: 'ממתין',
@@ -36,17 +38,30 @@ const TodoDetailModal = ({ todo, providerName, onClose, onSaveComments }: TodoDe
     onSaveComments(todo, comments)
   }
 
+  const handleAddToCalendar = () => {
+    window.open(buildGoogleCalendarUrl(todo.name, todo.description, todo.reminderTimestamp), '_blank')
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-lg rounded-lg bg-white shadow-xl animate-fade-in" dir={languageDirection}>
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">פרטי משימה</h2>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md text-gray-400 hover:text-gray-600 transition-colors"
-            onClick={onClose}>
-            <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              title="הוסף לגוגל קלנדר"
+              className="cursor-pointer rounded-md text-gray-400 hover:text-blue-500 transition-colors"
+              onClick={handleAddToCalendar}>
+              <FontAwesomeIcon icon={faGoogle} className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="cursor-pointer rounded-md text-gray-400 hover:text-gray-600 transition-colors"
+              onClick={onClose}>
+              <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 px-6 py-5">
@@ -89,12 +104,12 @@ const TodoDetailModal = ({ todo, providerName, onClose, onSaveComments }: TodoDe
             {todo.updatedBy && (
               <div className="flex flex-row gap-1 items-center">
                 <span className="text-xs font-medium text-gray-500">עודכן על ידי</span>
-                <span className="text-gray-700">{todo.updatedBy}</span>
+                <span className="text-gray-700 text-xs font-bold ">{todo.updatedBy}</span>
               </div>
             )}
             <div className="flex flex-row gap-1 items-center">
               <span className="text-xs font-medium text-gray-500">נוצר ב</span>
-              <span className="text-gray-700">{formatDateDDMMYY(todo.createdAt)}</span>
+              <span className="text-gray-700 text-xs font-bold ">{formatDateDDMMYY(todo.createdAt)}</span>
             </div>
             {todo.reminderTimestamp > 0 && (
               <div className="flex flex-row gap-1 items-center">

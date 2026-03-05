@@ -1,6 +1,7 @@
 import Tooltip from '../Tooltip'
 
 export enum ButtonSize {
+  XS = 'xs',
   SM = 'sm',
   MD = 'md',
   LG = 'lg',
@@ -13,6 +14,7 @@ const variantStyles = {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
+  [ButtonSize.XS]: 'px-2 py-[5px] text-xs rounded',
   [ButtonSize.SM]: 'px-3 py-1.5 text-sm rounded',
   [ButtonSize.MD]: 'px-4 py-2 rounded-md',
   [ButtonSize.LG]: 'px-6 py-3 text-lg rounded-lg',

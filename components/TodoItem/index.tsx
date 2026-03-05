@@ -52,9 +52,8 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange, onView
 
   return (
     <li
-      className="relative flex items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm border border-gray-200 cursor-pointer"
-      dir={languageDirection}
-      onClick={() => onView?.(todo)}>
+      className="relative flex items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm border border-gray-200"
+      dir={languageDirection}>
       <div className="flex flex-col gap-1">
         <div className="flex flex-row items-center gap-1.5 mb-1">
           <h3 className="font-medium text-gray-900">{todo.name}</h3>
@@ -95,11 +94,11 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange, onView
 
           <span className="text-sm text-gray-500">{todo.updatedBy} </span>
         </div>
-        <div className="flex shrink-0 gap-2 flex-wrap">
+        <div className="flex shrink-0 gap-1.5 flex-wrap">
           {ownerPhones.length > 0 && (
             <div className="relative" ref={whatsappRef}>
               <CustomButton
-                size={ButtonSize.SM}
+                size={ButtonSize.XS}
                 tooltip="שלח תזכורת בוואטסאפ"
                 className="!bg-linear-to-b from-white to-gray-100 !border !border-gray-200
                  !text-green-500 hover:!text-green-600"
@@ -128,7 +127,7 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange, onView
           )}
           {todo.status !== TodoStatus.COMPLETED && (
             <CustomButton
-              size={ButtonSize.SM}
+              size={ButtonSize.XS}
               tooltip="הושלם"
               className="bg-green-500 hover:bg-green-600 text-white"
               onClick={() => onStatusChange?.(todo, TodoStatus.COMPLETED)}>
@@ -136,25 +135,25 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange, onView
             </CustomButton>
           )}
           <CustomButton
-            size={ButtonSize.SM}
+            size={ButtonSize.XS}
             className="!bg-amber-200 hover:!bg-amber-300  !text-gray-900"
             tooltip="בתהליך"
             onClick={() => onStatusChange?.(todo, TodoStatus.IN_PROGRESS)}>
             <FontAwesomeIcon icon={faSpinner} className="h-3 w-3" />
           </CustomButton>
 
-          <div className="flex shrink-0 gap-1">
+          <div className="flex shrink-0 gap-1.5 border-r border-gray-200 pr-2">
             <CustomButton
-              size={ButtonSize.SM}
-              className="!bg-blue-gradient !text-white"
+              size={ButtonSize.XS}
+              className="bg-blue-gradient !text-white hover:!text-gray-700 transition-colors duration-300 hover:scale-105"
               tooltip="צפה בפרטים"
               onClick={() => onView?.(todo)}>
               <FontAwesomeIcon icon={faEye} className="h-3 w-3" />
             </CustomButton>
-            <CustomButton size={ButtonSize.SM} onClick={() => onEdit(todo)}>
+            <CustomButton size={ButtonSize.XS} onClick={() => onEdit(todo)}>
               <FontAwesomeIcon icon={faPen} className="h-3 w-3" />
             </CustomButton>
-            <CustomButton size={ButtonSize.SM} variant="red" onClick={() => onDelete(todo)}>
+            <CustomButton size={ButtonSize.XS} variant="red" onClick={() => onDelete(todo)}>
               <FontAwesomeIcon icon={faTrash} className="h-3 w-3" />
             </CustomButton>
           </div>
