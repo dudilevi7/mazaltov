@@ -40,6 +40,7 @@ const CalendarPage = () => {
     } else {
       addTodo({
         ...data,
+        comments: data.comments || '',
         reminderTimestamp: data.reminderTimestamp || selectedDate.getTime(),
       })
     }

@@ -12,6 +12,7 @@ import { useProvidersContext } from '@/context/ProvidersContext'
 import { useAppContext } from '@/context/AppContext'
 import { PaidFilterStatus, Provider } from '@/types/Provider'
 import { getIsPaid } from './helper'
+import { Todo } from '@/types/Todo'
 
 const Providers = () => {
   const { providers, addProvider, updateProvider, removeProvider, isLoadingProviders } = useProvidersContext()
@@ -102,6 +103,7 @@ const Providers = () => {
   const handleTaskSave = async (data: TodoFormData) => {
     await addTodo({
       ...data,
+      comments: data.comments || '',
       providerId: providerForTask?.id,
     })
     setIsTaskModalOpen(false)
@@ -113,7 +115,7 @@ const Providers = () => {
   }
 
   const providerTasksMap = useMemo(() => {
-    const map: Record<number, import('@/types/Todo').Todo[]> = {}
+    const map: Record<number, Todo[]> = {}
     todos.forEach((todo) => {
       if (todo.providerId != null) {
         if (!map[todo.providerId]) map[todo.providerId] = []
