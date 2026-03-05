@@ -11,6 +11,7 @@ interface Todo {
     reminderTimestamp: number;
     updatedBy: string;
     providerId?: number;
+    comments: string;
     createdAt: number;
     updatedAt: number;
 }

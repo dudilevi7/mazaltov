@@ -7,8 +7,9 @@ import { LanguageDirection } from '@/types/General'
 const EventDetails = () => {
   const { eventSettings, languageDirection, isSidebarOpen } = useAppContext()
   const eventTypeDisplayName = getEventTypeDisplayName(eventSettings.eventType, languageDirection)
+  const eventDisplayName = getEventDisplayName(eventSettings)
   const placementOfDetails = languageDirection === LanguageDirection.HEB ? 'right-0' : 'left-0'
-  if (!isSidebarOpen) return null
+  if (!isSidebarOpen || !eventDisplayName) return null
   return (
     <div
       className={`absolute bottom-8 ${placementOfDetails} flex flex-col bg-linear-to-r from-blue-200 to-blue-300

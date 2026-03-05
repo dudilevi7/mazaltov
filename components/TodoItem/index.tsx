@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from 'react'
 import { Todo, TodoStatus } from '@/types/Todo'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser, faSpinner, faCheck, faClock, faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faSpinner, faCheck, faClock, faPen, faTrash, faEye } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { formatDateDDMMYY, formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 import { useAppContext } from '@/context/AppContext'
@@ -23,9 +23,10 @@ interface TodoItemProps {
   onEdit: (todo: Todo) => void
   onDelete: (todo: Todo) => void
   onStatusChange?: (todo: Todo, newStatus: TodoStatus) => void
+  onView?: (todo: Todo) => void
 }
 
-const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: TodoItemProps) => {
+const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange, onView }: TodoItemProps) => {
   const { languageDirection, eventSettings } = useAppContext()
   const [whatsappOpen, setWhatsappOpen] = useState(false)
   const whatsappRef = useRef<HTMLDivElement>(null)
@@ -51,8 +52,9 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
 
   return (
     <li
-      className="relative flex items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm shadow-gray-500"
-      dir={languageDirection}>
+      className="relative flex items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 inset-shadow-sm border border-gray-200 cursor-pointer"
+      dir={languageDirection}
+      onClick={() => onView?.(todo)}>
       <div className="flex flex-col gap-1">
         <div className="flex flex-row items-center gap-1.5 mb-1">
           <h3 className="font-medium text-gray-900">{todo.name}</h3>
@@ -142,6 +144,13 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange }: Todo
           </CustomButton>
 
           <div className="flex shrink-0 gap-1">
+            <CustomButton
+              size={ButtonSize.SM}
+              className="!bg-blue-gradient !text-white"
+              tooltip="צפה בפרטים"
+              onClick={() => onView?.(todo)}>
+              <FontAwesomeIcon icon={faEye} className="h-3 w-3" />
+            </CustomButton>
             <CustomButton size={ButtonSize.SM} onClick={() => onEdit(todo)}>
               <FontAwesomeIcon icon={faPen} className="h-3 w-3" />
             </CustomButton>

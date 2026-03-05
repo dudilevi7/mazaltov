@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useAppContext } from '@/context/AppContext'
 import TodoModal, { TodoFormData } from '@/components/TodoModal'
 import DeleteModal from '@/components/DeleteModal'
+import TodoDetailModal from '@/components/TodoItem/TodoDetailModal'
 import { Todo, TodoStatus } from '@/types/Todo'
 import TasksHeader from './header'
 import TasksFilters from './filters'
@@ -12,6 +13,7 @@ import ShoppingList from '@/components/ShoppingList'
 import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faListCheck, faCartShopping } from '@fortawesome/free-solid-svg-icons'
+import { useProvidersContext } from '@/context/ProvidersContext'
 
 type TasksTab = 'tasks' | 'shopping'
 
@@ -26,9 +28,11 @@ const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
   const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null)
+  const [viewingTodo, setViewingTodo] = useState<Todo | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortByDate, setSortByDate] = useState<boolean>(false)
   const [selectedStatus, setSelectedStatus] = useState<TodoStatus | 'all'>('all')
+  const { providers } = useProvidersContext()
 
   const filteredTodos = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
@@ -62,10 +66,11 @@ const Tasks = () => {
   }
 
   const handleSave = async (data: TodoFormData) => {
+    const payload = { ...data, comments: data.comments ?? '' }
     if (editingTodo) {
-      await updateTodo(editingTodo.id, data)
+      await updateTodo(editingTodo.id, payload)
     } else {
-      await addTodo(data)
+      await addTodo(payload)
     }
     handleCloseModal()
   }
@@ -88,6 +93,14 @@ const Tasks = () => {
   const handleStatusChange = (todo: Todo, newStatus: TodoStatus) => {
     updateTodo(todo.id, { status: newStatus })
   }
+
+  const handleSaveComments = async (todo: Todo, comments: string) => {
+    await updateTodo(todo.id, { comments })
+    setViewingTodo(null)
+  }
+
+  const getProviderName = (providerId?: number): string | undefined =>
+    providerId ? providers.find((p) => p.id === providerId)?.name : undefined
 
   if (isLoadingTodos) {
     return <SpinnerLoader size="lg" isLoadingPage />
@@ -128,6 +141,7 @@ const Tasks = () => {
             onEdit={handleOpenEdit}
             onDelete={handleDeleteClick}
             onStatusChange={handleStatusChange}
+            onView={setViewingTodo}
           />
 
           {isModalOpen && (
@@ -140,6 +154,15 @@ const Tasks = () => {
             onConfirm={handleConfirmDelete}
             title={todoToDelete?.name || ''}
           />
+
+          {viewingTodo && (
+            <TodoDetailModal
+              todo={viewingTodo}
+              providerName={getProviderName(viewingTodo.providerId)}
+              onClose={() => setViewingTodo(null)}
+              onSaveComments={handleSaveComments}
+            />
+          )}
         </>
       )}
 

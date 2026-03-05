@@ -9,6 +9,7 @@ export type TaskRow = {
   reminder_timestamp: number | null
   updated_by: string
   provider_id: number | null
+  comments: string
   created_at: string
   updated_at: string
 }
@@ -24,6 +25,7 @@ export const mapTaskRowToTodo = (row: TaskRow): Todo => ({
   reminderTimestamp: row.reminder_timestamp ?? 0,
   updatedBy: row.updated_by ?? '',
   providerId: row.provider_id ?? undefined,
+  comments: row.comments ?? '',
   createdAt: row.created_at ? new Date(row.created_at).getTime() : 0,
   updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : 0,
 })
@@ -37,4 +39,5 @@ export const mapTodoToTaskRow = (
   reminder_timestamp: todo.reminderTimestamp ?? null,
   updated_by: todo.updatedBy ?? '',
   provider_id: todo.providerId ?? null,
+  comments: todo.comments ?? '',
 })

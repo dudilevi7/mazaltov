@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext'
 import type { ShoppingItem } from '@/types/ShoppingItem'
 import ShoppingModal, { type ShoppingFormData } from './ShoppingModal'
 import ShoppingListItem from './ShoppingListItem'
+import ShoppingDetailModal from './ShoppingDetailModal'
 import DeleteModal from '@/components/DeleteModal'
 import CustomButton from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
@@ -21,6 +22,7 @@ const ShoppingList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null)
   const [itemToDelete, setItemToDelete] = useState<ShoppingItem | null>(null)
+  const [viewingItem, setViewingItem] = useState<ShoppingItem | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -121,6 +123,7 @@ const ShoppingList = () => {
             onToggle={togglePurchased}
             onEdit={handleOpenEdit}
             onDelete={setItemToDelete}
+            onView={setViewingItem}
           />
         ))}
 
@@ -138,6 +141,7 @@ const ShoppingList = () => {
                 onToggle={togglePurchased}
                 onEdit={handleOpenEdit}
                 onDelete={setItemToDelete}
+                onView={setViewingItem}
               />
             ))}
           </>
@@ -159,6 +163,13 @@ const ShoppingList = () => {
         onConfirm={handleConfirmDelete}
         title={itemToDelete?.name || ''}
       />
+
+      {viewingItem && (
+        <ShoppingDetailModal
+          item={viewingItem}
+          onClose={() => setViewingItem(null)}
+        />
+      )}
     </div>
   )
 }

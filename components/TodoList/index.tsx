@@ -15,9 +15,10 @@ interface TodoListProps {
   onEdit: (todo: Todo) => void
   onDelete: (todo: Todo) => void
   onStatusChange?: (todo: Todo, newStatus: TodoStatus) => void
+  onView?: (todo: Todo) => void
 }
 
-const TodoList = ({ todos, onEdit, onDelete, onStatusChange }: TodoListProps) => {
+const TodoList = ({ todos, onEdit, onDelete, onStatusChange, onView }: TodoListProps) => {
   const { languageDirection } = useAppContext()
   const { providers } = useProvidersContext()
 
@@ -35,7 +36,7 @@ const TodoList = ({ todos, onEdit, onDelete, onStatusChange }: TodoListProps) =>
   return (
     <>
       {todos.map((todo) => (
-        <TodoItem key={todo.id} todo={todo} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
+        <TodoItem key={todo.id} todo={todo} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onView={onView} />
       ))}
     </>
   )

@@ -3,7 +3,7 @@
 import type { ShoppingItem } from '@/types/ShoppingItem'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faPen, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faPen, faUser, faEye } from '@fortawesome/free-solid-svg-icons'
 import { formatCurrency } from '@/lib/utils'
 import { CATEGORY_LABELS } from './ShoppingModal'
 
@@ -12,9 +12,10 @@ interface ShoppingListItemProps {
   onToggle: (item: ShoppingItem) => void
   onEdit: (item: ShoppingItem) => void
   onDelete: (item: ShoppingItem) => void
+  onView?: (item: ShoppingItem) => void
 }
 
-const ShoppingListItem = ({ item, onToggle, onEdit, onDelete }: ShoppingListItemProps) => {
+const ShoppingListItem = ({ item, onToggle, onEdit, onDelete, onView }: ShoppingListItemProps) => {
   const categoryLabel = CATEGORY_LABELS[item.category] || ''
 
   return (
@@ -66,6 +67,9 @@ const ShoppingListItem = ({ item, onToggle, onEdit, onDelete }: ShoppingListItem
       )}
 
       <div className="flex shrink-0 gap-1">
+        <CustomButton size={ButtonSize.SM} variant="white" tooltip="צפה בפרטים" onClick={() => onView?.(item)}>
+          <FontAwesomeIcon icon={faEye} className="h-3 w-3" />
+        </CustomButton>
         <CustomButton size={ButtonSize.SM} variant="white" onClick={() => onEdit(item)}>
           <FontAwesomeIcon icon={faPen} className="h-3 w-3" />
         </CustomButton>

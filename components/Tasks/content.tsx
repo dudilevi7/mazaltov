@@ -11,6 +11,7 @@ interface TasksContentProps {
   onEdit: (todo: Todo) => void
   onDelete: (todo: Todo) => void
   onStatusChange: (todo: Todo, newStatus: TodoStatus) => void
+  onView: (todo: Todo) => void
 }
 
 const TASK_LABEL: Record<LanguageDirection, string> = {
@@ -30,6 +31,7 @@ const TasksContent = ({
   onEdit,
   onDelete,
   onStatusChange,
+  onView,
 }: TasksContentProps) => {
   const totalCount = incompleteTodos.length + completedTodos.length
 
@@ -47,6 +49,7 @@ const TasksContent = ({
             onEdit={onEdit}
             onDelete={onDelete}
             onStatusChange={onStatusChange}
+            onView={onView}
           />
         )}
         {completedTodos.length > 0 && (
@@ -61,11 +64,12 @@ const TasksContent = ({
               onEdit={onEdit}
               onDelete={onDelete}
               onStatusChange={onStatusChange}
+              onView={onView}
             />
           </>
         )}
         {totalCount === 0 && (
-          <TodoList todos={[]} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
+          <TodoList todos={[]} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onView={onView} />
         )}
       </ul>
     </>

@@ -68,7 +68,7 @@ const AppSidebar = () => {
       } ${isSidebarOpen ? 'w-36' : 'w-12'}`}
       dir={isRtl ? 'rtl' : 'ltr'}>
       <div
-        className={`flex flex-col h-full ${isSidebarOpen ? 'py-4 px-3 animate-fade-in-0.5' : 'py-4 px-0 items-center'}`}>
+        className={`flex flex-col h-full ${isSidebarOpen ? 'py-4 px-0 animate-fade-in-0.5' : 'py-4 px-0 items-center'}`}>
         <nav className="flex flex-col gap-1">
           {SIDEBAR_ITEMS.map((item) => {
             const isActive = item.route && pathname?.startsWith(item.route)
@@ -80,19 +80,14 @@ const AppSidebar = () => {
                 key={item.id}>
                 <button
                   onClick={() => handleItemClick(item)}
-                  className={`flex items-center gap-2 rounded-md text-gray-700 hover:bg-blue-100 transition-colors ${
+                  className={`flex items-center gap-2 rounded-e-md text-gray-700 hover:bg-blue-100 transition-colors ${
                     isSidebarOpen
                       ? `w-full px-3 py-2 text-sm font-medium ${isRtl ? 'flex flex-row' : 'flex justify-start'}`
                       : 'w-10 h-10 justify-center rounded-s-none'
                   } ${isActive ? 'bg-blue-100' : 'text-gray-500'} cursor-pointer`}>
-                  <FontAwesomeIcon
-                    icon={item.icon}
-                    className={`shrink-0 ${isActive ? 'text-blue-500' : 'text-gray-500'}`}
-                  />
+                  <FontAwesomeIcon icon={item.icon} className={`shrink-0`} />
                   {isSidebarOpen && (
-                    <span className={`text-base animate-fade-in-0.5 ${isActive ? 'text-blue-500' : 'text-gray-500'}`}>
-                      {isRtl ? item.labelHe : item.labelEn}
-                    </span>
+                    <span className={`text-base animate-fade-in-0.5`}>{isRtl ? item.labelHe : item.labelEn}</span>
                   )}
                 </button>
               </Tooltip>

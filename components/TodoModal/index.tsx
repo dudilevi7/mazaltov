@@ -23,6 +23,7 @@ export interface TodoFormData {
   reminderTimestamp: number
   updatedBy: string
   providerId?: number
+  comments?: string
 }
 
 const STATUS_OPTIONS: { value: TodoStatus; label: string }[] = [
@@ -70,6 +71,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
       reminderTimestamp: reminderDate ? reminderDate.getTime() : 0,
       updatedBy,
       providerId: todo?.providerId ?? initialData?.providerId,
+      comments: todo?.comments,
     })
   }
 
