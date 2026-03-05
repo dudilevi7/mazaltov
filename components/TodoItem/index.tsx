@@ -145,7 +145,7 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange, onView
           <div className="flex shrink-0 gap-1.5 border-r border-gray-200 pr-2">
             <CustomButton
               size={ButtonSize.XS}
-              className="bg-blue-gradient !text-white hover:!text-gray-700 transition-colors duration-300 hover:scale-105"
+              className="bg-linear-to-r from-blue-200 to-blue-300 !text-white hover:!text-gray-700 transition-colors duration-300 hover:scale-105"
               tooltip="צפה בפרטים"
               onClick={() => onView?.(todo)}>
               <FontAwesomeIcon icon={faEye} className="h-3 w-3" />

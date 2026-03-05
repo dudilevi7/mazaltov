@@ -9,6 +9,7 @@ import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { formatDateDDMMYY, formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 import { useAppContext } from '@/context/AppContext'
 import { buildGoogleCalendarUrl } from './helper'
+import Tooltip from '@/components/Tooltip'
 
 const STATUS_LABELS: Record<TodoStatus, string> = {
   [TodoStatus.PENDING]: 'ממתין',
@@ -48,13 +49,11 @@ const TodoDetailModal = ({ todo, providerName, onClose, onSaveComments }: TodoDe
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">פרטי משימה</h2>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              title="הוסף לגוגל קלנדר"
-              className="cursor-pointer rounded-md text-gray-400 hover:text-blue-500 transition-colors"
-              onClick={handleAddToCalendar}>
-              <FontAwesomeIcon icon={faGoogle} className="h-4 w-4" />
-            </button>
+            <Tooltip
+              content="הוסף לגוגל קלנדר"
+              className="cursor-pointer rounded-md text-gray-400 hover:text-blue-500 transition-colors">
+              <FontAwesomeIcon icon={faGoogle} className="h-4 w-4" onClick={handleAddToCalendar} />
+            </Tooltip>
             <button
               type="button"
               className="cursor-pointer rounded-md text-gray-400 hover:text-gray-600 transition-colors"

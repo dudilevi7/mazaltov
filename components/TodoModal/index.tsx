@@ -139,7 +139,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
             <CustomButton
               type="button"
               disabled={!name}
-              className="bg-blue-gradient !text-white inline-flex justify-end items-center gap-2
+              className="bg-linear-to-r from-blue-200 to-blue-300 !text-white inline-flex justify-end items-center gap-2
              hover:!text-gray-700 transition-colors duration-300"
               icon={<FontAwesomeIcon icon={faGoogle} className="h-4 w-4" />}
               onClick={handleAddTaskToGoogleCalendar}>
