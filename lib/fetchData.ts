@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase/client'
 import type { FetchDataOptions } from '@/types/General'
 
-const getAuthToken = async (): Promise<string | null> => {
+export const getAuthToken = async (): Promise<string | null> => {
   const {
     data: { session },
   } = await supabase.auth.getSession()

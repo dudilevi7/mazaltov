@@ -11,6 +11,7 @@ import { faHeart, faUser, faUserGroup, faLanguage, faBuilding, faSave } from '@f
 import { faFlagUsa, faStarOfDavid } from '@fortawesome/free-solid-svg-icons'
 import { EVENT_TYPE_OPTIONS, LANGUAGE_OPTIONS, eventSettingsEquals, hasEventData } from './helper'
 import useSupabase from '@/hooks/useSupabase'
+import Invitation from './Invitation'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import { ToastType } from '@/types/Toast'
 import SpinnerLoader from '../Shared/SpinnerLoader'
@@ -305,6 +306,8 @@ const Settings = () => {
             </div>
           </div>
         </section>
+
+        <Invitation />
       </div>
     </div>
   )
