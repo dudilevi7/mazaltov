@@ -6,6 +6,7 @@ import type { Todo } from '@/types/Todo'
 import ProviderCardHeader from './header'
 import ProviderCardContent from './content'
 import ProviderCardFooter from './footer'
+import { getSuggestedServiceByLabel } from '@/constants/providers'
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   cash: 'מזומן',
@@ -32,13 +33,13 @@ const ProviderCard = ({
   onWatchProviderTasks,
 }: ProviderCardProps) => {
   const { languageDirection } = useAppContext()
-
+  const suggestedService = getSuggestedServiceByLabel(provider.service)
   return (
     <div
       className="flex flex-col justify-between rounded-lg bg-white p-4 border border-gray-200 animate-fade-in-0.5"
       dir={languageDirection}>
       <div className="flex flex-col gap-1">
-        <ProviderCardHeader provider={provider} />
+        <ProviderCardHeader provider={provider} suggestedService={suggestedService} />
         <ProviderCardContent
           provider={provider}
           providerTasks={providerTasks}

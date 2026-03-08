@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
+import SelectDropdownWithCustomOption from "@/components/Shared/SelectDropdownWithCustomOption";
 import type { Provider } from "@/types/Provider";
 import { PaymentMethod } from "@/types/Provider";
 import { parseNumber } from "@/lib/utils";
 import { validatePhoneNumber } from "./helper";
+import { SUGGESTED_SERVICES_OPTIONS, getSuggestedServiceByLabel } from "@/constants/providers";
 
 interface ProvidersModalProps {
   isOpen: boolean;
@@ -36,6 +38,7 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
+  const [customService, setCustomService] = useState("");
   const [price, setPrice] = useState<string>("");
   const [advancePayment, setAdvancePayment] = useState<string>("");
   const [comments, setComments] = useState("");
@@ -55,7 +58,10 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
     if (isOpen) {
       setName(provider?.name || "");
       setPhone(provider?.phone || "");
-      setService(provider?.service || "");
+      const existingService = provider?.service || "";
+      const isSuggested = !!getSuggestedServiceByLabel(existingService);
+      setService(isSuggested ? existingService : existingService ? "__custom__" : "");
+      setCustomService(isSuggested ? "" : existingService);
       setPrice(provider ? String(provider.price ?? "") : "");
       setAdvancePayment(provider ? String(provider.advancePayment ?? "") : "");
       setComments(provider?.comments || "");
@@ -65,13 +71,15 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
 
   if (!isOpen) return null;
 
+  const resolvedService = service === "__custom__" ? customService : service;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     onSave({
       name,
       phone: phone || undefined,
-      service,
+      service: resolvedService,
       price: parseNumber(price),
       advancePayment: parseNumber(advancePayment),
       toBePaid: computedToBePaid,
@@ -118,13 +126,14 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
             )}
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">שירות</label>
-              <input
-                dir="rtl"
-                type="text"
+              <SelectDropdownWithCustomOption
                 value={service}
-                onChange={(e) => setService(e.target.value)}
-                className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required
+                onValueChange={setService}
+                customValue={customService}
+                onCustomValueChange={setCustomService}
+                options={SUGGESTED_SERVICES_OPTIONS}
+                placeholder="בחר שירות"
+                customPlaceholder="הכנס שירות מותאם"
               />
             </div>
             <div>
