@@ -2,7 +2,7 @@
 
 import CustomTable, { CustomTableColumn } from '@/components/Shared/CustomTable'
 import type { Guest } from '@/types/Guest'
-import { getWhatsAppUrl, STATUS_LABELS } from './helper'
+import { STATUS_LABELS } from './helper'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Toggle from '@/components/Shared/Toggle'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -13,11 +13,13 @@ import DeleteModal from '../DeleteModal'
 import Tooltip from '@/components/Tooltip'
 import { useGiftsContext } from '@/context/GiftsContext'
 import GuestGiftCell from './GuestGiftCell'
+import WhatsAppInvitationModal from './WhatsAppInvitation'
 
 interface GuestsTableProps {
   guests: Guest[]
   sideLabels: Record<string, string>
   emptyMessage?: string
+  invitationUrl?: string | null
   onEdit?: (guest: Guest) => void
   onDeleteGuest?: (guest: Guest) => void
   onToggleManualApproval?: (guest: Guest, value: boolean) => void
@@ -27,6 +29,7 @@ const GuestsTable = ({
   guests,
   sideLabels,
   emptyMessage = 'אין אורחים',
+  invitationUrl = null,
   onEdit = () => {},
   onDeleteGuest = () => {},
   onToggleManualApproval = () => {},
@@ -34,6 +37,7 @@ const GuestsTable = ({
   const { gifts } = useGiftsContext()
   const [showDeleteSpecificGuestModal, setShowDeleteSpecificGuestModal] = useState(false)
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null)
+  const [guestForWhatsApp, setGuestForWhatsApp] = useState<Guest | null>(null)
   const giftsIdAndAmountByGuestId = useMemo(() => {
     const map: Record<number, { giftId: string; amount: number }> = {}
     gifts.forEach((gift) => {
@@ -111,17 +115,17 @@ const GuestsTable = ({
       render: (row: Guest) => (
         <div className="flex items-center gap-2">
           <Tooltip content="שלח הודעה בוואטסאפ" place="top">
-            <a
-              href={row.phoneNumber ? getWhatsAppUrl(row.phoneNumber) : undefined}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => setGuestForWhatsApp(row)}
               className={`inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-2 py-2 text-green-600
                hover:bg-green-50 transition-colors h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed ${
-                 !row.phoneNumber ? 'opacity-50 cursor-not-allowed' : ''
+                 !row.phoneNumber ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                }`}
-              aria-label="WhatsApp">
+              aria-label="WhatsApp"
+              disabled={!row.phoneNumber}>
               <FontAwesomeIcon icon={faWhatsapp} className="h-4 w-4" />
-            </a>
+            </button>
           </Tooltip>
           <CustomButton
             size={ButtonSize.SM}
@@ -152,6 +156,12 @@ const GuestsTable = ({
         onClose={onDeleteCancel}
         onConfirm={onDeleteConfirm}
         title={`אורח ${guestToDelete?.name}`}
+      />
+      <WhatsAppInvitationModal
+        isOpen={!!guestForWhatsApp}
+        onClose={() => setGuestForWhatsApp(null)}
+        guest={guestForWhatsApp}
+        invitationUrl={invitationUrl}
       />
     </>
   )
