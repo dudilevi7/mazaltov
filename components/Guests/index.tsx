@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import { useGuestsContext } from '@/context/GuestsContext'
 import { useAppContext } from '@/context/AppContext'
 import GuestsSummaryBar from './GuestsSummaryBar'
@@ -25,6 +25,9 @@ import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels, importGuestsFromExcel, exportToIplanTemplate } from './helper'
 import { EventType } from '@/types/Settings'
+import { API_URL } from '@/constants'
+import { API_ROUTES } from '@/constants/apiRoutes'
+import fetchData, { METHODS } from '@/lib/fetchData'
 import CustomSlideover from '@/components/Shared/CustomSlideover'
 import GuestsStatistics from './GuestsStatistics'
 
@@ -57,6 +60,23 @@ const Guests = () => {
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [isImportingExcel, setIsImportingExcel] = useState(false)
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false)
+  const [invitationUrl, setInvitationUrl] = useState<string | null>(null)
+
+  const fetchInvitationUrl = useCallback(async () => {
+    try {
+      const res = await fetchData<void, { url?: string }>({
+        url: `${API_URL}${API_ROUTES.INVITATION}`,
+        method: METHODS.GET,
+      })
+      if (res?.url) setInvitationUrl(res.url)
+    } catch {
+      setInvitationUrl(null)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchInvitationUrl()
+  }, [fetchInvitationUrl])
 
   const guestSideByName = useMemo(() => {
     if (eventSettings.eventType === EventType.WEDDING && eventSettings.brideName && eventSettings.groomName) {
@@ -215,6 +235,7 @@ const Guests = () => {
           <GuestsTable
             guests={filteredGuests}
             sideLabels={getSideLabels(eventSettings)}
+            invitationUrl={invitationUrl}
             onEdit={openEdit}
             onDeleteGuest={handleDeleteGuest}
             onToggleManualApproval={handleToggleManualApproval}
