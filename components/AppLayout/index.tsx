@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { redirect, usePathname, useRouter } from 'next/navigation'
 import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
 import useSupabase from '@/hooks/useSupabase'
@@ -25,7 +25,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   useEffect(() => {
     if (isLoading) return
     if (!isAuthenticated && pathname !== LOGIN_PATH) {
-      router.push(LOGIN_PATH)
+      redirect(LOGIN_PATH)
       return
     }
     if (isAuthenticated && pathname === LOGIN_PATH) {

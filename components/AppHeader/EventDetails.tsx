@@ -6,7 +6,11 @@ import { LanguageDirection } from '@/types/General'
 
 const EventDetails = () => {
   const { eventSettings, languageDirection, isSidebarOpen } = useAppContext()
-  const eventTypeDisplayName = getEventTypeDisplayName(eventSettings.eventType, languageDirection)
+  const eventTypeDisplayName = getEventTypeDisplayName(
+    eventSettings.eventType,
+    languageDirection,
+    eventSettings.customEventType
+  )
   const eventDisplayName = getEventDisplayName(eventSettings)
   const placementOfDetails = languageDirection === LanguageDirection.HEB ? 'right-0' : 'left-0'
   if (!isSidebarOpen || !eventDisplayName) return null

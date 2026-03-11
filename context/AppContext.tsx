@@ -135,10 +135,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (err) {
       const message = err instanceof Error ? err.message : ''
       showToast({
-        type: ToastType.ERROR,
-        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
-        message:
-          languageDirection === LanguageDirection.HEB ? 'שגיאה בטעינת הגדרות אירוע' : 'Failed to load event settings',
+        type: ToastType.INFO,
+        title: languageDirection === LanguageDirection.HEB ? 'הגדרות אירוע' : 'Event settings',
+        message: languageDirection === LanguageDirection.HEB ? 'הוסף הגדרות אירוע ' : 'Add event settings',
       })
     } finally {
       setIsLoadingEventSettings(false)

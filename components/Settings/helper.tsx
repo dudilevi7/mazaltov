@@ -31,13 +31,20 @@ const EVENT_TYPE_DISPLAY_NAME_ENG: Record<EventType, string> = {
   [EventType.CUSTOM]: '',
 }
 
-export const getEventTypeDisplayName = (eventType: EventType, languageDirection: LanguageDirection): string => {
+export const getEventTypeDisplayName = (
+  eventType: EventType,
+  languageDirection: LanguageDirection,
+  customEventType?: string
+): string => {
   const eventTypeDisplayName =
     languageDirection === LanguageDirection.HEB ? EVENT_TYPE_DISPLAY_NAME_HEB : EVENT_TYPE_DISPLAY_NAME_ENG
   if (eventTypeDisplayName[eventType]) {
     return eventTypeDisplayName[eventType]
   }
-  return eventType.toString().replace('_', ' ')
+  if (eventType === EventType.CUSTOM) {
+    return customEventType ?? ''
+  }
+  return ''
 }
 
 export const EVENT_TYPE_OPTIONS: { value: EventType; label: string }[] = [

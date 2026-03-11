@@ -86,7 +86,19 @@ export const PUT = async (request: NextRequest) => {
 
     const updates = { ...mapEventSettingsToSupabaseEventRow(body), updated_at: new Date().toISOString() }
 
-    const { data, error } = await supabase.from('events').update(updates).eq('user_id', userId).select().maybeSingle()
+    const { data, error } = await supabase
+      .from('events')
+      .upsert(
+        {
+          ...updates,
+          user_id: userId,
+        },
+        {
+          onConflict: 'user_id',
+        }
+      )
+      .select()
+      .maybeSingle()
 
     if (error) {
       return NextResponse.json({ message: error.message ?? 'Failed to update event' }, { status: 500 })
