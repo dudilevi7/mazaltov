@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEnvelope, faLock, faUserPlus, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faEnvelope, faLock, faUserPlus, faCheck, faXmark, faUser } from '@fortawesome/free-solid-svg-icons'
 import useSupabase from '@/hooks/useSupabase'
 import Logo from '../AppHeader/Logo'
 import { getPasswordRequirements, getPasswordStrength, allRequirementsMet, STRENGTH_CONFIG } from './helper'
@@ -11,6 +11,7 @@ import CustomButton from '../Button/custom-button'
 
 const Signup = () => {
   const { signUp, isAuthenticated } = useSupabase()
+  const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -45,7 +46,7 @@ const Signup = () => {
     }
 
     setIsSubmitting(true)
-    const { error: err } = await signUp(email, password)
+    const { error: err } = await signUp(email, password, displayName)
     setIsSubmitting(false)
 
     if (err) {
@@ -63,11 +64,11 @@ const Signup = () => {
   if (success) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-gray-50 px-4 animate-fade-in-0.5">
-        <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 shadow-sm text-center">
+        <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 pe-0 shadow-sm text-center">
           <Logo className="" />
-          <div className="mt-4 rounded-lg border border-dashed border-green-600 px-4 py-3 text-sm text-green-700 flex flex-col gap-2">
+          <div className="relative mt-4 rounded-s-lg  border border-e-0 border-gray-200 px-4 py-3 text-sm text-green-700 flex flex-col gap-2">
             <span> Account created! Check your email to confirm your account. </span>
-            <div className="h-[2px] w-[70%] mx-auto bg-linear-to-r from-green-600 to-green-700 rounded-full" />
+            <div className="h-[1px] w-[70%] mx-auto bg-linear-to-r from-green-600 to-green-700 rounded-full" />
             <span>בקשה לאימות נשלחה לאימייל שלך</span>
           </div>
           <Link
@@ -89,6 +90,27 @@ const Signup = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
+          <div>
+            <label htmlFor="signup-display-name" className="mb-1 block text-sm font-medium text-gray-700">
+              Display Name | שם תצוגה
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
+              </span>
+              <input
+                id="signup-display-name"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                autoComplete="name"
+                className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-3 text-gray-800 outline-none transition focus:border-gray-500 focus:ring-1 focus:ring-gray-400"
+                placeholder="Your name"
+              />
+            </div>
+          </div>
+
           <div>
             <label htmlFor="signup-email" className="mb-1 block text-sm font-medium text-gray-700">
               Email | אימייל
@@ -197,7 +219,11 @@ const Signup = () => {
           <CustomButton
             type="submit"
             disabled={
-              isSubmitting || !isRequirementsMet || (password.length > 0 && password !== confirmPassword) || !email
+              isSubmitting ||
+              !isRequirementsMet ||
+              (password.length > 0 && password !== confirmPassword) ||
+              !email ||
+              !displayName
             }
             className="w-full flex items-center justify-center !gap-2 rounded-lg bg-linear-to-r from-blue-500 to-blue-700
               px-4 py-2.5 font-medium text-white transition hover:from-blue-600 hover:to-blue-800 disabled:opacity-50 cursor-pointer"
