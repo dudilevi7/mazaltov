@@ -13,7 +13,7 @@ interface AppLayoutProps {
   children: React.ReactNode
 }
 
-const LOGIN_PATH = '/login'
+const AUTH_PATHS = ['/login', '/signup']
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const { languageDirection } = useAppContext()
@@ -21,21 +21,22 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const isRtl = languageDirection === LanguageDirection.HEB
   const router = useRouter()
   const pathname = usePathname()
+  const isAuthPage = AUTH_PATHS.includes(pathname)
 
   useEffect(() => {
     if (isLoading) return
-    if (!isAuthenticated && pathname !== LOGIN_PATH) {
-      redirect(LOGIN_PATH)
+    if (!isAuthenticated && !isAuthPage) {
+      redirect('/login')
       return
     }
-    if (isAuthenticated && pathname === LOGIN_PATH) {
+    if (isAuthenticated && isAuthPage) {
       router.push('/tasks')
       return
     }
     if (pathname === '/') {
       router.push('/tasks')
     }
-  }, [isLoading, isAuthenticated, pathname, router])
+  }, [isLoading, isAuthenticated, pathname, router, isAuthPage])
 
   if (isLoading) {
     return (
@@ -45,7 +46,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     )
   }
 
-  if (!isAuthenticated && pathname === LOGIN_PATH) {
+  if (!isAuthenticated && isAuthPage) {
     return <>{children}</>
   }
 
