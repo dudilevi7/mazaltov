@@ -5,7 +5,10 @@ import { LanguageDirection } from '@/types/General'
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: 'מזומן',
-  transfer: 'העברה',
+  transfer: 'העברה בנקאית',
+  bit: 'ביט',
+  paybox: 'פייבוקס',
+  credit_card: 'אשראי',
   check: 'צ׳ק',
   other: 'אחר',
 }

@@ -1,5 +1,8 @@
 enum PaymentMethod {
   CASH = 'cash',
+  BIT = 'bit',
+  PAYBOX = 'paybox',
+  CREDIT_CARD = 'credit_card',
   TRANSFER = 'transfer',
   CHECK = 'check',
   OTHER = 'other',

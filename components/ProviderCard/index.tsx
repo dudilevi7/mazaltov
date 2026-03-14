@@ -10,7 +10,10 @@ import { getSuggestedServiceByLabel } from '@/constants/providers'
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   cash: 'מזומן',
-  transfer: 'העברה',
+  bit: 'ביט',
+  paybox: 'פייבוקס',
+  credit_card: 'אשראי',
+  transfer: 'העברה בנקאית',
   check: 'צ׳ק',
   other: 'אחר',
 }

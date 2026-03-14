@@ -41,10 +41,7 @@ const GiftModal = ({ isOpen, onClose, onSave, gift, guests }: GiftModalProps) =>
   const isEdit = !!gift
 
   const guestOptions: SelectOption[] = useMemo(
-    () => [
-      { value: '', label: 'בחר אורח' },
-      ...guests.map((g) => ({ value: String(g.id), label: g.name })),
-    ],
+    () => [{ value: '', label: 'בחר אורח' }, ...guests.map((g) => ({ value: String(g.id), label: g.name }))],
     [guests]
   )
 
@@ -98,9 +95,14 @@ const GiftModal = ({ isOpen, onClose, onSave, gift, guests }: GiftModalProps) =>
                 searchable
               />
               {selectedGuest && (
-                <div className="mt-2 flex gap-3 text-xs text-gray-500">
-                  <span>צד: {selectedGuest.side}</span>
-                  <span>קירבה: {selectedGuest.category}</span>
+                <div className="mt-2 flex gap-2 text-xs text-gray-500">
+                  <span>
+                    צד: <span className="font-bold">{selectedGuest.side}</span>
+                  </span>
+                  <div className="border-l border-gray-300" />
+                  <span>
+                    קירבה: <span className="font-bold">{selectedGuest.category}</span>
+                  </span>
                 </div>
               )}
             </div>
