@@ -1,8 +1,20 @@
 import { GiftType } from '@/types/Gift'
 import type { Gift } from '@/types/Gift'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
 import moment from 'moment'
+
+const HEADER_STYLE = {
+  fill: { fgColor: { rgb: 'FF2563B5' }, patternType: 'solid' as const },
+  font: { color: { rgb: 'FFFFFFFF' }, bold: true, sz: 12 },
+}
+const SUMMARY_STYLE = {
+  fill: { fgColor: { rgb: 'FFE5E7EB' }, patternType: 'solid' as const },
+  font: { bold: true, sz: 12 },
+}
+const COLUMN_KEYS = ['שם אורח', 'צד', 'קירבה', 'סכום', 'סוג', 'תיאור', 'עודכן']
+const COLS_WIDTH = 16
+const NUM_SUMMARY_COLS = 7
 
 export const GIFT_TYPE_LABELS: Record<string, string> = {
   [GiftType.CASH]: 'מזומן',
@@ -41,7 +53,7 @@ export const GIFT_TYPE_COLORS: Record<string, string> = {
 export const formatCurrency = (amount: number): string =>
   amount.toLocaleString('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 })
 
-export const exportGiftsToExcel = (gifts: Gift[]): void => {
+export const exportGiftsToExcel = (gifts: Gift[], totalAmount: number, amountByType: Record<string, number>): void => {
   const rows = gifts.map((gift) => ({
     'שם אורח': gift.guestName,
     צד: gift.guestSide,
@@ -51,10 +63,20 @@ export const exportGiftsToExcel = (gifts: Gift[]): void => {
     תיאור: gift.description,
     עודכן: gift.updatedAt ? moment(gift.updatedAt).format('DD/MM/YYYY') : '',
   }))
-  const sheet = XLSX.utils.json_to_sheet(rows.reverse())
+  const sheet = XLSX.utils.json_to_sheet(rows)
+  sheet['!cols'] = COLUMN_KEYS.map(() => ({ wch: COLS_WIDTH }))
+  for (let c = 0; c < COLUMN_KEYS.length; c++) {
+    const ref = XLSX.utils.encode_cell({ r: 0, c })
+    if (sheet[ref]) sheet[ref].s = HEADER_STYLE
+  }
+
+  const summaryOrigin = 1 + rows.length
+  const averageGift = gifts.length > 0 ? totalAmount / gifts.length : 0
+  setGiftsSummaryToSheet(sheet, totalAmount, averageGift, amountByType, summaryOrigin)
+
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, sheet, 'מתנות')
-  const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
+  const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx', cellStyles: true })
   const blob = new Blob([arrayBuffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   })
@@ -64,4 +86,35 @@ export const exportGiftsToExcel = (gifts: Gift[]): void => {
   a.download = `gifts-${moment().format('DD-MM-YYYY')}.xlsx`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+const setGiftsSummaryToSheet = (
+  sheet: XLSX.WorkSheet,
+  totalAmount: number,
+  averageGift: number,
+  amountByType: Record<string, number>,
+  summaryOrigin: number
+) => {
+  const summaryRows: string[][] = [
+    ['', '', '', '', '', '', ''],
+    ['', '', '', '', '', formatCurrency(totalAmount), 'סה״כ מתנות'],
+    ['', '', '', '', '', formatCurrency(averageGift), 'מתנה ממוצעת'],
+    ...Object.entries(amountByType).map(([type, amount]) => [
+      '',
+      '',
+      '',
+      '',
+      '',
+      formatCurrency(amount),
+      GIFT_TYPE_LABELS[type],
+    ]),
+    ['', '', '', '', '', '', ''],
+  ]
+  XLSX.utils.sheet_add_aoa(sheet, summaryRows, { origin: summaryOrigin })
+  for (let r = 0; r < summaryRows.length; r++) {
+    for (let c = 0; c < NUM_SUMMARY_COLS; c++) {
+      const ref = XLSX.utils.encode_cell({ r: summaryOrigin + r, c })
+      if (sheet[ref]) sheet[ref].s = SUMMARY_STYLE
+    }
+  }
 }
