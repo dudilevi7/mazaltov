@@ -1,6 +1,9 @@
 enum GiftType {
   CASH = 'cash',
   CHECK = 'check',
+  BIT = 'bit',
+  PAYBOX = 'paybox',
+  CREDIT_CARD = 'credit_card',
   TRANSFER = 'transfer',
   PHYSICAL = 'physical',
   OTHER = 'other',

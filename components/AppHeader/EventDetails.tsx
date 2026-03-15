@@ -17,7 +17,7 @@ const EventDetails = () => {
   return (
     <div
       className={`absolute bottom-8 ${placementOfDetails} flex flex-col bg-linear-to-r from-blue-200 to-blue-300
-         text-gray-700 px-3 py-1.5 rounded-e-md z-50 animate-fade-in-0.5 shadow-lg shadow-blue-500/20`}
+         text-gray-700 px-3 py-1.5 rounded-e-md z-50 animate-fade-in-0.5 shadow-lg shadow-blue-500/20 max-w-[150px]`}
       dir={languageDirection}>
       <div className="flex flex-row gap-0.5 font-bold">
         <span className="text-sm rounded-md">{eventTypeDisplayName || ''}</span>

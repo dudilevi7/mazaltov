@@ -32,7 +32,7 @@ const GiftsSummaryBar = () => {
           <CustomButton
             size={ButtonSize.SM}
             variant="white"
-            onClick={() => exportGiftsToExcel(gifts)}
+            onClick={() => exportGiftsToExcel(gifts, totalAmount, amountByType)}
             icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
             ייצוא לאקסל
           </CustomButton>

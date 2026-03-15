@@ -1,13 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEnvelope, faLock, faRightToBracket } from '@fortawesome/free-solid-svg-icons'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import useSupabase from '@/hooks/useSupabase'
 import Logo from '../AppHeader/Logo'
+import CustomButton from '../Button/custom-button'
 
 const Login = () => {
-  const { signIn, isAuthenticated } = useSupabase()
+  const { signIn, signInWithGoogle, isAuthenticated } = useSupabase()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -36,10 +39,10 @@ const Login = () => {
           <Logo className="" />
           <p className="mt-1 text-sm text-gray-500">Sign in to manage your event</p>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
-              Email
+              Email | אימייל
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -59,7 +62,7 @@ const Login = () => {
           </div>
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
-              Password
+              Password | סיסמה
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -82,14 +85,36 @@ const Login = () => {
               {error}
             </p>
           )}
-          <button
+          <CustomButton
             type="submit"
             disabled={isSubmitting}
-            className="flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-blue-500 to-blue-700
-              px-4 py-2.5 font-medium text-white transition hover:from-blue-600 hover:to-blue-800 disabled:opacity-50 cursor-pointer">
-            <FontAwesomeIcon icon={faRightToBracket} className="h-4 w-4" />
+            className="w-full flex items-center justify-center !gap-2 rounded-lg bg-linear-to-r from-blue-500 to-blue-700
+              px-4 py-2.5 font-medium text-white transition hover:from-blue-600 hover:to-blue-800 disabled:opacity-50 cursor-pointer"
+            icon={<FontAwesomeIcon icon={faRightToBracket} className="h-4 w-4" />}>
             {isSubmitting ? 'Signing in...' : 'Sign in'}
-          </button>
+          </CustomButton>
+          {/* 7e43d410-6ffc-4a7e-bd81-2920f1cb07b3 */}
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+
+          <CustomButton
+            type="button"
+            onClick={() => signInWithGoogle()}
+            className="w-full flex items-center justify-center !gap-2 rounded-lg bg-linear-to-r from-gray-500 to-gray-700
+              px-4 py-2.5 font-medium !text-white transition hover:from-gray-600 hover:to-gray-800 cursor-pointer"
+            icon={<FontAwesomeIcon icon={faGoogle} className="h-4 w-4 text-white" />}>
+            Sign in with Google
+          </CustomButton>
+
+          <p className="text-center text-sm text-gray-500">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-800 transition">
+              Sign up | הירשם
+            </Link>
+          </p>
         </form>
       </div>
     </div>

@@ -1,13 +1,15 @@
 'use client'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBroom, faFilter } from '@fortawesome/free-solid-svg-icons'
-import CustomButton from '@/components/Button/custom-button'
+import { faFileExcel, faFilter, faFilterCircleXmark } from '@fortawesome/free-solid-svg-icons'
+import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import SelectDropdown, { SelectOption } from '@/components/Shared/SelectDropdown'
-import { PaidFilterStatus } from '@/types/Provider'
+import { PaidFilterStatus, Provider } from '@/types/Provider'
 import { paidStatusOptions } from './helper'
+import { exportExpensesToExcel } from '@/components/Budget/helper'
 import { useAppContext } from '@/context/AppContext'
+import { useProvidersContext } from '@/context/ProvidersContext'
 
 interface ProvidersHeaderProps {
   onAddClick: () => void
@@ -35,6 +37,7 @@ const ProvidersHeader = ({
   onPaidFilterChange,
 }: ProvidersHeaderProps) => {
   const { languageDirection } = useAppContext()
+  const { providers } = useProvidersContext()
   const dropdownOptions: SelectOption[] = [
     { value: '', label: 'הכל' },
     ...serviceOptions.map((service) => ({
@@ -43,15 +46,16 @@ const ProvidersHeader = ({
     })),
   ]
 
+  const hasFiltersOrSearch = serviceValue !== '' || searchValue !== '' || paidFilterValue !== PaidFilterStatus.ALL
   return (
-    <div className="flex flex-col gap-3 relative" dir={languageDirection}>
+    <div className="flex flex-col gap-3 w-full" dir={languageDirection}>
       <div className="flex flex-row items-center gap-3">
         <CustomButton onClick={onAddClick}>הוסף ספק</CustomButton>
         <SearchBar value={searchValue} onChange={onSearchChange} placeholder="חיפוש ספק" />
       </div>
-      <div className={`absolute top-14 right-0 flex items-center gap-2 text-sm text-gray-700 w-fit`}>
-        <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
+      <div className={`flex flex-wrap gap-2 text-sm text-gray-700`}>
         <div className="flex flex-row items-center gap-2">
+          <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
           <span>שירות</span>
           <SelectDropdown
             value={serviceValue}
@@ -61,7 +65,7 @@ const ProvidersHeader = ({
             className="min-w-40"
           />
         </div>
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="w-fit whitespace-nowrap">שולם/לא שולם</span>
           <SelectDropdown
             value={paidFilterValue}
@@ -71,13 +75,28 @@ const ProvidersHeader = ({
             className="min-w-40"
           />
         </div>
-        <div
-          className="mx-4 flex flex-row items-center gap-2 cursor-pointer
-         hover:bg-gray-200 hover:text-gray-900 rounded-md p-1"
-          onClick={onClearAll}>
-          <span className="whitespace-nowrap">נקה הכל</span>
-          <FontAwesomeIcon icon={faBroom} className="text-gray-500" />
-        </div>
+        {hasFiltersOrSearch && (
+          <CustomButton
+            size={ButtonSize.SM}
+            variant="white"
+            onClick={onClearAll}
+            icon={<FontAwesomeIcon icon={faFilterCircleXmark} />}
+            className="border border-gray-300 hover:border-gray-400 ms-2">
+            נקה מסננים
+          </CustomButton>
+        )}
+        {providers.length > 0 && (
+          <div className="ms-auto">
+            <CustomButton
+              size={ButtonSize.SM}
+              variant="white"
+              className="ms-auto"
+              onClick={() => exportExpensesToExcel(providers, languageDirection)}
+              icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
+              ייצוא לאקסל
+            </CustomButton>
+          </div>
+        )}
       </div>
     </div>
   )
