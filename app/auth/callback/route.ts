@@ -1,8 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase/constants'
 
 export const GET = async (request: NextRequest) => {
   const { searchParams, origin } = new URL(request.url)
@@ -14,7 +12,7 @@ export const GET = async (request: NextRequest) => {
 
   const response = NextResponse.redirect(`${origin}/tasks`)
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
         return request.cookies.getAll()
