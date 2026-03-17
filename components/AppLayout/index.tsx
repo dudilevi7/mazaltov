@@ -30,11 +30,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       return
     }
     if (isAuthenticated && isAuthPage) {
-      router.push('/tasks')
+      router.push('/dashboard')
       return
     }
     if (pathname === '/') {
-      router.push('/tasks')
+      router.push('/dashboard')
     }
   }, [isLoading, isAuthenticated, pathname, router, isAuthPage])
 

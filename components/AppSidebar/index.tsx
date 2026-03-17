@@ -15,6 +15,7 @@ import {
   faHandshake,
   faGift,
   faRightFromBracket,
+  faCalendar,
 } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import Tooltip from '../Tooltip'
@@ -30,6 +31,7 @@ interface SidebarItem {
 }
 
 const SIDEBAR_ITEMS: SidebarItem[] = [
+  { id: 'dashboard', labelHe: 'האירוע', labelEn: 'Dashboard', icon: faCalendar, route: '/dashboard' },
   { id: 'tasks', labelHe: 'משימות', labelEn: 'Tasks', icon: faListCheck, route: '/tasks' },
   { id: 'providers', labelHe: 'ספקים', labelEn: 'Providers', icon: faHandshake, route: '/providers' },
   { id: 'calendar', labelHe: 'לוח שנה', labelEn: 'Calendar', icon: faCalendarDays, route: '/calendar' },
