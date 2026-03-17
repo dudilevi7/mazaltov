@@ -133,7 +133,12 @@ const Dashboard = () => {
         {upcomingTask && (
           <div className="mt-2 w-full bg-blue-800 rounded-lg px-3 py-2 text-center transition-all ">
             <span className="text-xs text-white  font-medium">{isHeb ? 'משימה קרובה' : 'Upcoming task'}:</span>
-            <p className="text-sm text-white font-semibold truncate">{upcomingTask.name}</p>
+            <div className="flex flex-col items-center gap-0.5">
+              <p className="text-sm text-white font-semibold truncate">{upcomingTask.name}</p>
+              <span className="text-xs text-white font-medium">
+                {moment(upcomingTask.reminderTimestamp).format('DD.MM.YYYY, HH:mm')}
+              </span>
+            </div>
           </div>
         )}
       </div>
