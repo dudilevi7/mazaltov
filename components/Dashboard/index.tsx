@@ -146,7 +146,7 @@ const Dashboard = () => {
       <div
         onClick={() => router.push('/budget')}
         className="md:col-span-3 bg-linear-to-r from-white to-gray-50 rounded-lg p-6 flex flex-col gap-4 
-        cursor-pointer transition-shadow border border-gray-200 hover:border-blue-400 group">
+        cursor-pointer transition-shadow border border-gray-200 hover:border-gray-300 group">
         <div className="flex items-center gap-3">
           <FontAwesomeIcon icon={faCoins} className="text-blue-500 text-xl" />
           <span className="text-lg font-bold text-gray-800">{isHeb ? 'תקציב' : 'Budget'}</span>

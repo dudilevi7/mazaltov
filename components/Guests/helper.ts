@@ -101,6 +101,37 @@ const exportGuestsToExcel = (
   URL.revokeObjectURL(url)
 }
 
+const exportGuestsCustomExcel = (
+  guests: Guest[],
+  fieldMap: { key: keyof Guest; customLabel: string }[],
+  sideLabels?: Record<string, string>
+): void => {
+  const rows = guests.map((g) => {
+    const obj: Record<string, string | number | boolean | undefined> = {}
+    fieldMap.forEach((f) => {
+      let val = g[f.key]
+      if (f.key === 'side' && sideLabels && typeof val === 'string') {
+        val = sideLabels[val] ?? val
+      }
+      obj[f.customLabel] = val === undefined || val === null ? '' : val
+    })
+    return obj
+  })
+  const sheet = XLSX.utils.json_to_sheet(rows)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, sheet, 'אורחים')
+  const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
+  const blob = new Blob([arrayBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `guests-custom-${moment().format('DD-MM-YYYY')}.xlsx`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 const importGuestsFromExcel = async (): Promise<Guest[]> => {
   const [file] = await (window as any).showOpenFilePicker()
   const fileHandle = await file.getFile()
@@ -194,6 +225,7 @@ export {
   STATUS_OPTIONS,
   STATUS_LABELS,
   exportGuestsToExcel,
+  exportGuestsCustomExcel,
   importGuestsFromExcel,
   exportToIplanTemplate,
 }

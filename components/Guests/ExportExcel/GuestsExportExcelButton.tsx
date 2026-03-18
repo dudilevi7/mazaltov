@@ -1,0 +1,127 @@
+'use client'
+
+import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faFileExcel,
+  faXmark,
+  faCircleInfo,
+  faTableColumns,
+  faArrowRight,
+} from '@fortawesome/free-solid-svg-icons'
+import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import Logo from '@/components/AppHeader/Logo'
+import Tooltip from '@/components/Tooltip'
+import CustomGuestsFields from './CustomGuestsFields'
+import { exportGuestsToExcel } from '../helper'
+import type { Guest } from '@/types/Guest'
+
+type ModalView = 'select' | 'custom'
+
+interface GuestsExportExcelButtonProps {
+  guests: Guest[]
+  columns: { key: keyof Guest; label: string }[]
+  sideLabels: Record<string, string>
+}
+
+const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportExcelButtonProps) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [view, setView] = useState<ModalView>('select')
+
+  const handleClose = () => {
+    setIsOpen(false)
+    setView('select')
+  }
+
+  const handleMazalTovExport = () => {
+    exportGuestsToExcel(guests, columns, sideLabels)
+    handleClose()
+  }
+
+  return (
+    <>
+      <CustomButton
+        size={ButtonSize.SM}
+        variant="white"
+        onClick={() => setIsOpen(true)}
+        icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
+        ייצוא לאקסל
+      </CustomButton>
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in-0.5"
+          onClick={handleClose}>
+          <div
+            className="relative bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4"
+            onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={handleClose}
+              className="absolute top-3 left-3 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+              <FontAwesomeIcon icon={faXmark} className="text-lg" />
+            </button>
+
+            {view === 'select' ? (
+              <>
+                <h2 className="text-lg font-bold text-gray-800 mb-5 text-center">ייצוא אורחים לאקסל</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div
+                    onClick={handleMazalTovExport}
+                    className="bg-linear-to-r from-white to-gray-50 rounded-lg p-6 flex flex-col items-center
+                      justify-center gap-3 min-h-[160px] cursor-pointer border border-gray-200
+                      hover:border-blue-400 hover:from-blue-600 hover:to-blue-700 group transition-all">
+                    <Logo className="group-hover:*:text-white transition-colors" />
+                    <span className="text-sm font-medium text-gray-600 group-hover:text-white transition-colors">
+                      פורמט MazalTov
+                    </span>
+                  </div>
+
+                  <div
+                    onClick={() => setView('custom')}
+                    className="bg-linear-to-r from-white to-gray-50 rounded-lg p-6 flex flex-col items-center
+                      justify-center gap-3 min-h-[160px] cursor-pointer border border-gray-200
+                      hover:border-blue-400 hover:from-blue-600 hover:to-blue-700 group transition-all">
+                    <FontAwesomeIcon
+                      icon={faTableColumns}
+                      className="text-blue-500 text-2xl group-hover:text-white transition-colors"
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-medium text-gray-600 group-hover:text-white transition-colors">
+                        מיפוי מותאם אישית
+                      </span>
+                      <Tooltip content="מיפוי לאקסל לפי שדות">
+                        <FontAwesomeIcon
+                          icon={faCircleInfo}
+                          className="text-gray-400 text-xs group-hover:text-white/80 transition-colors"
+                        />
+                      </Tooltip>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-5">
+                  <button
+                    onClick={() => setView('select')}
+                    className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </button>
+                  <h2 className="text-lg font-bold text-gray-800">מיפוי שדות מותאם אישית</h2>
+                </div>
+                <CustomGuestsFields
+                  columns={columns}
+                  guests={guests}
+                  sideLabels={sideLabels}
+                  onClose={handleClose}
+                />
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+export default GuestsExportExcelButton

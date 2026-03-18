@@ -4,11 +4,11 @@ import { useGuestsContext } from '@/context/GuestsContext'
 import { useAppContext } from '@/context/AppContext'
 import { GuestStatus } from '@/types/Guest'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUsers, faUser, faCheck, faTimes, faFileExcel, faUserGroup } from '@fortawesome/free-solid-svg-icons'
-import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import { faUsers, faUser, faCheck, faTimes, faUserGroup } from '@fortawesome/free-solid-svg-icons'
 import { useMemo } from 'react'
-import { exportGuestsToExcel, getSideOptions, getSideLabels } from './helper'
+import { getSideOptions, getSideLabels } from './helper'
 import type { Guest } from '@/types/Guest'
+import GuestsExportExcelButton from './ExportExcel/GuestsExportExcelButton'
 
 const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
   { key: 'name', label: 'שם' },
@@ -43,10 +43,6 @@ const GuestsSummaryBar = () => {
       .reduce((s, guest) => s + guest.quantity, 0)
     return { total, bySide, accepted, declined }
   }, [guests, sideOptions, sideLabels])
-
-  const handleDownloadExcel = () => {
-    exportGuestsToExcel(guests, DISPLAY_COLUMNS, sideLabels)
-  }
 
   return (
     <div className="mb-4 flex flex-wrap flex-col gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
@@ -90,13 +86,7 @@ const GuestsSummaryBar = () => {
           <span>דחו הגעה - {stats.declined}</span>
         </button>
         <div className="ms-auto" />
-        <CustomButton
-          size={ButtonSize.SM}
-          variant="white"
-          onClick={handleDownloadExcel}
-          icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
-          ייצוא לאקסל
-        </CustomButton>
+        <GuestsExportExcelButton guests={guests} columns={DISPLAY_COLUMNS} sideLabels={sideLabels} />
       </div>
     </div>
   )
