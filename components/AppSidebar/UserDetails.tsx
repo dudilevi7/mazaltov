@@ -24,7 +24,7 @@ const UserDetails = () => {
   return (
     <Tooltip htmlContent={tooltipHtml} place={tooltipPlace} className="cursor-default">
       <div
-        className={`w-7 h-7 rounded-full bg-linear-to-r from-blue-200 to-blue-300
+        className={`w-7 h-7 rounded-full bg-linear-to-r from-blue-500 to-blue-600 text-white
        flex items-center justify-center text-white text-sm font-bold 
        select-none shrink-0 transition-transform hover:scale-110`}>
         {picture ? (
