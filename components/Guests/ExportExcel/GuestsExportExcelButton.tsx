@@ -2,16 +2,11 @@
 
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faFileExcel,
-  faXmark,
-  faCircleInfo,
-  faTableColumns,
-  faArrowRight,
-} from '@fortawesome/free-solid-svg-icons'
+import { faFileExcel, faXmark, faCircleInfo, faTableColumns, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Logo from '@/components/AppHeader/Logo'
 import Tooltip from '@/components/Tooltip'
+import Card, { CardVariant } from '@/components/Shared/Card'
 import CustomGuestsFields from './CustomGuestsFields'
 import { exportGuestsToExcel } from '../helper'
 import type { Guest } from '@/types/Guest'
@@ -65,22 +60,20 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
               <>
                 <h2 className="text-lg font-bold text-gray-800 mb-5 text-center">ייצוא אורחים לאקסל</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <div
+                  <Card
+                    variant={CardVariant.GRADIENT}
                     onClick={handleMazalTovExport}
-                    className="bg-linear-to-r from-white to-gray-50 rounded-lg p-6 flex flex-col items-center
-                      justify-center gap-3 min-h-[160px] cursor-pointer border border-gray-200
-                      hover:border-blue-400 hover:from-blue-600 hover:to-blue-700 group transition-all">
+                    className="flex flex-col items-center justify-center gap-3 min-h-[160px]">
                     <Logo className="group-hover:*:text-white transition-colors" />
                     <span className="text-sm font-medium text-gray-600 group-hover:text-white transition-colors">
                       פורמט MazalTov
                     </span>
-                  </div>
+                  </Card>
 
-                  <div
+                  <Card
+                    variant={CardVariant.GRADIENT}
                     onClick={() => setView('custom')}
-                    className="bg-linear-to-r from-white to-gray-50 rounded-lg p-6 flex flex-col items-center
-                      justify-center gap-3 min-h-[160px] cursor-pointer border border-gray-200
-                      hover:border-blue-400 hover:from-blue-600 hover:to-blue-700 group transition-all">
+                    className="flex flex-col items-center justify-center gap-3 min-h-[160px]">
                     <FontAwesomeIcon
                       icon={faTableColumns}
                       className="text-blue-500 text-2xl group-hover:text-white transition-colors"
@@ -96,7 +89,7 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
                         />
                       </Tooltip>
                     </div>
-                  </div>
+                  </Card>
                 </div>
               </>
             ) : (
@@ -109,12 +102,7 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
                   </button>
                   <h2 className="text-lg font-bold text-gray-800">מיפוי שדות מותאם אישית</h2>
                 </div>
-                <CustomGuestsFields
-                  columns={columns}
-                  guests={guests}
-                  sideLabels={sideLabels}
-                  onClose={handleClose}
-                />
+                <CustomGuestsFields columns={columns} guests={guests} sideLabels={sideLabels} onClose={handleClose} />
               </>
             )}
           </div>
