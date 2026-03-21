@@ -82,7 +82,19 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
                       <span className="text-sm font-medium text-gray-600 group-hover:text-white transition-colors">
                         מיפוי מותאם אישית
                       </span>
-                      <Tooltip content="מיפוי לאקסל לפי שדות">
+                      <Tooltip
+                        place="top"
+                        contentClassName="whitespace-normal w-max max-w-[min(17rem,calc(100vw-2rem))] px-3.5 py-3"
+                        content={
+                          <div className="flex flex-col gap-2.5 text-right" dir="rtl">
+                            <span className="text-sm font-semibold text-white leading-snug">
+                              מיפוי לאקסל לפי שדות
+                            </span>
+                            <span className="block rounded-md bg-white/10 px-2.5 py-2 text-xs font-bold leading-relaxed text-sky-200 ring-1 ring-white/15">
+                              *ממולץ למערכות אחרות כמו מערכות הושבה/אישורי הגעה.
+                            </span>
+                          </div>
+                        }>
                         <FontAwesomeIcon
                           icon={faCircleInfo}
                           className="text-gray-400 text-xs group-hover:text-white/80 transition-colors"

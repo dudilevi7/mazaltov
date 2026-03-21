@@ -90,6 +90,7 @@ const GuestsSummaryBar = () => {
         {duplicatePhones.length > 0 && (
           <Tooltip
             place="bottom"
+            contentClassName="whitespace-normal w-max max-w-80"
             content={
               <div className="flex flex-col gap-1 whitespace-normal max-w-80 text-right" dir="rtl">
                 <span className="font-semibold text-red-300">מספרי טלפון כפולים:</span>
