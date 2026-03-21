@@ -131,14 +131,14 @@ const GuestsTable = ({
             size={ButtonSize.SM}
             variant="white"
             onClick={() => onEdit(row)}
-            className="hover:bg-blue-500! hover:text-white transition-colors duration-300"
+            className="hover:bg-blue-500! hover:text-white transition-colors duration-300 cursor-pointer"
             icon={<FontAwesomeIcon icon={faPen} />}>
             ערוך
           </CustomButton>
           <CustomButton
             size={ButtonSize.SM}
             variant="white"
-            className="hover:bg-red-500 hover:text-white transition-colors duration-300"
+            className="hover:bg-red-500 hover:text-white transition-colors duration-300 cursor-pointer"
             onClick={() => onDeleteClick(row)}
             icon={<FontAwesomeIcon icon={faTrash} />}>
             מחק

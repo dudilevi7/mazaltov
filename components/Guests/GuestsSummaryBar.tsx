@@ -6,9 +6,11 @@ import { GuestStatus } from '@/types/Guest'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUsers, faUser, faCheck, faTimes, faUserGroup } from '@fortawesome/free-solid-svg-icons'
 import { useMemo } from 'react'
-import { getSideOptions, getSideLabels } from './helper'
+import { getSideOptions, getSideLabels, getDuplicatePhoneGuests } from './helper'
 import type { Guest } from '@/types/Guest'
 import GuestsExportExcelButton from './ExportExcel/GuestsExportExcelButton'
+import Tooltip from '@/components/Tooltip'
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
   { key: 'name', label: 'שם' },
@@ -44,6 +46,8 @@ const GuestsSummaryBar = () => {
     return { total, bySide, accepted, declined }
   }, [guests, sideOptions, sideLabels])
 
+  const duplicatePhones = useMemo(() => getDuplicatePhoneGuests(guests), [guests])
+
   return (
     <div className="mb-4 flex flex-wrap flex-col gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
       <div className="flex flex-row items-center gap-2 text-gray-700 border-b border-gray-200 pb-2">
@@ -70,9 +74,7 @@ const GuestsSummaryBar = () => {
         <button
           onClick={() => setStatusFilter(statusFilter === GuestStatus.ACCEPTED ? 'all' : GuestStatus.ACCEPTED)}
           className={`flex items-center gap-1 px-2 py-1 rounded-md text-white text-sm transition-all cursor-pointer hover:shadow-md ${
-            statusFilter === GuestStatus.ACCEPTED
-              ? 'bg-green-700 ring-1 ring-green-800'
-              : 'bg-green-600 hover:bg-green-700'
+            statusFilter === GuestStatus.ACCEPTED ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'
           }`}>
           <FontAwesomeIcon icon={faCheck} />
           <span>אישרו הגעה - {stats.accepted}</span>
@@ -80,11 +82,31 @@ const GuestsSummaryBar = () => {
         <button
           onClick={() => setStatusFilter(statusFilter === GuestStatus.DECLINED ? 'all' : GuestStatus.DECLINED)}
           className={`flex items-center gap-1 px-2 py-1 rounded-md text-white text-sm transition-all cursor-pointer hover:shadow-md ${
-            statusFilter === GuestStatus.DECLINED ? 'bg-red-700 ring-1 ring-red-800' : 'bg-red-600 hover:bg-red-700'
+            statusFilter === GuestStatus.DECLINED ? 'bg-red-700' : 'bg-red-600 hover:bg-red-700'
           }`}>
           <FontAwesomeIcon icon={faTimes} />
           <span>דחו הגעה - {stats.declined}</span>
         </button>
+        {duplicatePhones.length > 0 && (
+          <Tooltip
+            place="bottom"
+            content={
+              <div className="flex flex-col gap-1 whitespace-normal max-w-80 text-right" dir="rtl">
+                <span className="font-semibold text-red-300">מספרי טלפון כפולים:</span>
+                {duplicatePhones.map((dup) => (
+                  <div key={dup.phone} className="text-xs">
+                    <span className="text-gray-300">{dup.guests.map((g) => g.name).join(', ')}</span>
+                    <span className="text-gray-400 ms-1">({dup.guests[0].phoneNumber})</span>
+                  </div>
+                ))}
+              </div>
+            }>
+            <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-100 text-amber-700 text-sm cursor-pointer hover:bg-amber-200 transition-colors">
+              <FontAwesomeIcon icon={faExclamationTriangle} />
+              <span>{duplicatePhones.length} טלפונים כפולים</span>
+            </div>
+          </Tooltip>
+        )}
         <div className="ms-auto" />
         <GuestsExportExcelButton guests={guests} columns={DISPLAY_COLUMNS} sideLabels={sideLabels} />
       </div>

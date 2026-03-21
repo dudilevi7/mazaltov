@@ -1,30 +1,40 @@
 'use client'
-import { useId } from 'react'
-import { Tooltip as ReactTooltip } from 'react-tooltip'
+import { useState } from 'react'
 
 interface TooltipProps {
   children: React.ReactNode
-  content?: string
-  htmlContent?: string
+  content?: React.ReactNode
   className?: string
   place?: 'top' | 'right' | 'bottom' | 'left'
 }
 
-const Tooltip = ({ children, content, htmlContent, className = '', place = 'top' }: TooltipProps) => {
-  const id = useId().replace(/:/g, '-')
-  const hasContent = !!content || !!htmlContent
+const PLACEMENT_CLASSES: Record<string, string> = {
+  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
+  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+  left: 'right-full top-1/2 -translate-y-1/2 me-2',
+  right: 'left-full top-1/2 -translate-y-1/2 ms-2',
+}
+
+const Tooltip = ({ children, content, className = '', place = 'top' }: TooltipProps) => {
+  const [visible, setVisible] = useState(false)
+
+  if (!content) {
+    return <>{children}</>
+  }
 
   return (
-    <>
-      <div
-        data-tooltip-id={id}
-        {...(htmlContent ? { 'data-tooltip-html': htmlContent } : { 'data-tooltip-content': content })}
-        data-tooltip-place={place}
-        className={`inline-flex items-center cursor-help ${className}`}>
-        {children}
-      </div>
-      {hasContent && <ReactTooltip id={id} className="z-50" />}
-    </>
+    <div
+      className={`relative inline-flex items-center ${className}`}
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}>
+      {children}
+      {visible && (
+        <div
+          className={`absolute z-80 whitespace-nowrap rounded-md bg-linear-to-r from-gray-800 to-gray-900 px-3 py-2 text-sm text-white shadow-lg animate-fade-in ${PLACEMENT_CLASSES[place]} w-max`}>
+          {content}
+        </div>
+      )}
+    </div>
   )
 }
 

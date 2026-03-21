@@ -229,6 +229,27 @@ const exportToIplanTemplate = async (
   URL.revokeObjectURL(url)
 }
 
+export type DuplicatePhoneGroup = { phone: string; guests: Guest[] }
+
+const getDuplicatePhoneGuests = (guests: Guest[]): DuplicatePhoneGroup[] => {
+  const normalize = (p: string) => p.replace(/\D/g, '').replace(/^0/, '972')
+  const map = new Map<string, Guest[]>()
+
+  guests.forEach((g) => {
+    const raw = g.phoneNumber?.trim()
+    if (!raw) return
+    const key = normalize(raw)
+    if (!key) return
+    const arr = map.get(key) || []
+    arr.push(g)
+    map.set(key, arr)
+  })
+
+  return Array.from(map.entries())
+    .filter(([, list]) => list.length > 1)
+    .map(([phone, list]) => ({ phone, guests: list }))
+}
+
 export {
   validatePhoneNumber,
   validateRealName,
@@ -239,4 +260,5 @@ export {
   exportGuestsCustomExcel,
   importGuestsFromExcel,
   exportToIplanTemplate,
+  getDuplicatePhoneGuests,
 }
