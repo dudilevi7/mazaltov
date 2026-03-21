@@ -3,8 +3,14 @@ import { GuestStatus, GuestSide } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import type { EventSettings } from '@/types/Settings'
 import { EventType } from '@/types/Settings'
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
 import moment from 'moment'
+
+const HEADER_STYLE = {
+  fill: { fgColor: { rgb: 'FF2563B5' }, patternType: 'solid' as const },
+  font: { color: { rgb: 'FFFFFFFF' }, bold: true, sz: 12 },
+}
+const COLS_WIDTH = 18
 
 const isWedding = (s: EventSettings) => s.eventType === EventType.WEDDING
 
@@ -70,6 +76,27 @@ const STATUS_LABELS: Record<GuestStatus, string> = {
   [GuestStatus.DECLINED]: 'דחה',
 }
 
+const applyGuestsSheetStyles = (sheet: XLSX.WorkSheet, colCount: number) => {
+  sheet['!cols'] = Array.from({ length: colCount }, () => ({ wch: COLS_WIDTH }))
+  for (let c = 0; c < colCount; c++) {
+    const ref = XLSX.utils.encode_cell({ r: 0, c })
+    if (sheet[ref]) sheet[ref].s = HEADER_STYLE
+  }
+}
+
+const downloadGuestsWorkbook = (workbook: XLSX.WorkBook, fileName: string) => {
+  const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx', cellStyles: true })
+  const blob = new Blob([arrayBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 const exportGuestsToExcel = (
   guests: Guest[],
   columns: { key: keyof Guest; label: string }[],
@@ -87,18 +114,33 @@ const exportGuestsToExcel = (
     return obj
   })
   const sheet = XLSX.utils.json_to_sheet(rows)
+  applyGuestsSheetStyles(sheet, columns.length)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, sheet, 'אורחים')
-  const arrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
-  const blob = new Blob([arrayBuffer], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  downloadGuestsWorkbook(workbook, `guests-${moment().format('DD-MM-YYYY')}.xlsx`)
+}
+
+const exportGuestsCustomExcel = (
+  guests: Guest[],
+  fieldMap: { key: keyof Guest; customLabel: string }[],
+  sideLabels?: Record<string, string>
+): void => {
+  const rows = guests.map((g) => {
+    const obj: Record<string, string | number | boolean | undefined> = {}
+    fieldMap.forEach((f) => {
+      let val = g[f.key]
+      if (f.key === 'side' && sideLabels && typeof val === 'string') {
+        val = sideLabels[val] ?? val
+      }
+      obj[f.customLabel] = val === undefined || val === null ? '' : val
+    })
+    return obj
   })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `guests-${moment().format('DD-MM-YYYY')}.xlsx`
-  a.click()
-  URL.revokeObjectURL(url)
+  const sheet = XLSX.utils.json_to_sheet(rows)
+  applyGuestsSheetStyles(sheet, fieldMap.length)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, sheet, 'אורחים')
+  downloadGuestsWorkbook(workbook, `guests-custom-${moment().format('DD-MM-YYYY')}.xlsx`)
 }
 
 const importGuestsFromExcel = async (): Promise<Guest[]> => {
@@ -187,6 +229,27 @@ const exportToIplanTemplate = async (
   URL.revokeObjectURL(url)
 }
 
+export type DuplicatePhoneGroup = { phone: string; guests: Guest[] }
+
+const getDuplicatePhoneGuests = (guests: Guest[]): DuplicatePhoneGroup[] => {
+  const normalize = (p: string) => p.replace(/\D/g, '').replace(/^0/, '972')
+  const map = new Map<string, Guest[]>()
+
+  guests.forEach((g) => {
+    const raw = g.phoneNumber?.trim()
+    if (!raw) return
+    const key = normalize(raw)
+    if (!key) return
+    const arr = map.get(key) || []
+    arr.push(g)
+    map.set(key, arr)
+  })
+
+  return Array.from(map.entries())
+    .filter(([, list]) => list.length > 1)
+    .map(([phone, list]) => ({ phone, guests: list }))
+}
+
 export {
   validatePhoneNumber,
   validateRealName,
@@ -194,6 +257,8 @@ export {
   STATUS_OPTIONS,
   STATUS_LABELS,
   exportGuestsToExcel,
+  exportGuestsCustomExcel,
   importGuestsFromExcel,
   exportToIplanTemplate,
+  getDuplicatePhoneGuests,
 }

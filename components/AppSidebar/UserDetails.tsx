@@ -17,14 +17,19 @@ const UserDetails = () => {
     user.user_metadata?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || ''
   const initials = getInitials(displayName, email)
   const tooltipLabel = displayName || email.split('@')[0]
-  const tooltipHtml = `<div class="text-center"><div class="font-semibold">${tooltipLabel}</div><div class="text-xs opacity-80">${email}</div></div>`
+  const tooltipContent = (
+    <div className="text-center">
+      <div className="font-semibold">{tooltipLabel}</div>
+      <div className="text-xs opacity-80">{email}</div>
+    </div>
+  )
   const tooltipPlace = isRtl ? 'left' : 'right'
 
   const picture = user.user_metadata?.picture || ''
   return (
-    <Tooltip htmlContent={tooltipHtml} place={tooltipPlace} className="cursor-default">
+    <Tooltip content={tooltipContent} place={tooltipPlace} className="cursor-default">
       <div
-        className={`w-7 h-7 rounded-full bg-linear-to-r from-blue-200 to-blue-300
+        className={`w-7 h-7 rounded-full bg-linear-to-r from-blue-500 to-blue-600 text-white
        flex items-center justify-center text-white text-sm font-bold 
        select-none shrink-0 transition-transform hover:scale-110`}>
         {picture ? (

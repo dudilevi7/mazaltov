@@ -16,7 +16,7 @@ const EventDetails = () => {
   if (!isSidebarOpen || !eventDisplayName) return null
   return (
     <div
-      className={`absolute bottom-8 ${placementOfDetails} flex flex-col bg-linear-to-r from-blue-200 to-blue-300
+      className={`absolute bottom-8 ${placementOfDetails} flex flex-col bg-linear-to-r from-blue-500 to-blue-600 text-white
          text-gray-700 px-3 py-1.5 rounded-e-md z-50 animate-fade-in-0.5 shadow-lg shadow-blue-500/20 max-w-[150px]`}
       dir={languageDirection}>
       <div className="flex flex-row gap-0.5 font-bold">
