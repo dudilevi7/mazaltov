@@ -114,7 +114,7 @@ const AppSidebar = () => {
 
       <button
         onClick={() => setSidebarOpen(!isSidebarOpen)}
-        className={`absolute w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 transition-colors shadow-sm z-10 
+        className={`absolute w-8 h-8 flex items-center justify-center rounded-full bg-linear-to-r to-gray-50 from-gray-100 text-gray-600 transition-colors shadow-sm z-10 
           top-[70%] ${isRight ? `left-0 transform translate-[-50%]` : `right-0 transform translate-x-[50%] translate-y-[-50%]`} cursor-pointer`}>
         <FontAwesomeIcon icon={ChevronIcon} className="text-sm " />
       </button>
