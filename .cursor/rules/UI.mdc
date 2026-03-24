@@ -1,48 +1,55 @@
 ---
-alwaysApply: true
+description: React/UI conventions — arrows, styles, types, reuse, context, colocated helpers
+globs: app/**/*.{tsx,ts},components/**/*.{tsx,ts}
+alwaysApply: false
 ---
 
----
-description: Guidelines for creating and maintaining Cursor rules to ensure consistency and effectiveness.
-globs: .cursor/rules/*.mdc
-alwaysApply: true
----
+# UI & React
 
-- **Required Rule Structure:**
-  ```markdown
-  ---
-  description: Clear, one-line description of what the rule enforces
-  globs: path/to/files/*.ext, other/path/**/*
-  alwaysApply: boolean
-  ---
+High-level: keep UI code consistent with existing patterns—arrow components, shared styling tokens, typed props, reuse before inventing, context for cross-tree state, and pure logic in a sibling helper file in the same folder.
 
-  - **Use Best Practices**
-    - Don't use function, use arrow functions const getSomething = () =>
-    - Use typescript as you can in functions, variables. put types in relevent type (in folder types)
-    example: const items: TODO[] = [], const getTodosById = (id: string): TODO[] => {...}
-    - In each Compoenet export default should be in the bottom. 
-    declartion of component const Item ... 
-    export default Item
-    - trying use Tailwind in className always and not use style={} even you need conditions inside.
-    - Always try to minimze the files, keep on structure for example, header of page, content/list (sub compoennt of item), footer if needed, 
-    - use custom components to be effienct as well. once I asking from you new custom compoenet think on relevant props to add for flexbility
-    - add icons when needed, in buttons for example.
-    - use helpers, dedicated helpers if functions is complex => create helper.tsx file in each dedicated compoenet folder
-    - use dictionary where needed (Record<string,T>) mostly with dropdown options
-  ```
+- **Prefer arrow function components**
+  - Use `const Name = (props: Props) => { ... }` and `export default Name` (or named exports if the folder already uses that).
+  - Avoid `function Name()` for new components unless matching a file that already uses that style.
 
-- **Contexts**
- - Always create a dedicated hook for that.
- - Context could contain relevant states, functions, data, flags for the page
- - Notify if context be bigger, try to avoid useEffects from the context.
+- **Prefer the same styles as nearby code**
+  - Reuse class patterns (e.g. Tailwind strings), variant maps, and `Record<..., string>` for size/variant maps like [custom-button.tsx](mdc:components/Button/custom-button.tsx).
+  - Do not introduce a new styling approach in one file when siblings use another.
 
-- **Code Examples:**
-  - Use default values as you can const url = todoUrl || ""
-  - 
+- **Prefer constants, enums, and explicit types**
+  - Extract repeated literals to `const` or `enum` at module scope; use `interface`/`type` for props and public shapes.
+  - Co-locate small maps (`variantStyles`, `sizeStyles`) next to the component that uses them.
 
-- **Tailwind**
-  - try to keep the colors schema of the project.
-  - add hover states.
-  - add animate-fade-in where needed
-  - add animations/tranistions where needed to be interactive
-  - support mobile display as you can use tailwind for that.
+- **Prefer existing components or a small reusable wrapper**
+  - Before adding markup, check `components/` for buttons, layout, tooltips, etc.
+  - If the same JSX appears twice, extract a component in the same feature folder or under `components/`.
+
+- **Prefer global state via React context**
+  - For data shared across branches of the tree (theme, user, feature flags, wizard steps), use or add a context provider rather than prop-drilling many levels.
+  - Keep providers near the route or layout that owns the subtree.
+
+- **Extract non-UI logic to a helper in the same folder**
+  - Pure functions (formatting, sorting, API payload shaping) go in e.g. `helpers.ts`, `utils.ts`, or `feature-name.helpers.ts` next to the component—not inline as large blocks.
+
+```typescript
+// ✅ DO: arrow component, types, local style maps, default export
+interface RowProps {
+  label: string
+}
+
+const LABEL_CLASS = 'text-sm font-medium text-gray-700'
+
+const Row = ({ label }: RowProps) => (
+  <div className={LABEL_CLASS}>{label}</div>
+)
+
+export default Row
+```
+
+```typescript
+// ❌ DON'T: untyped props, magic strings repeated, huge logic in the component
+function Row(props) {
+  const processed = /* many lines */
+  return <div className="text-sm font-medium text-gray-700">{props.label}</div>
+}
+```

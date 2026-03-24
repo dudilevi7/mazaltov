@@ -1,12 +1,18 @@
 'use client'
 import { useState } from 'react'
 
+export enum TooltipPlace {
+  TOP = 'top',
+  RIGHT = 'right',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+}
 interface TooltipProps {
   children: React.ReactNode
   content?: React.ReactNode
   className?: string
   contentClassName?: string
-  place?: 'top' | 'right' | 'bottom' | 'left'
+  place?: TooltipPlace
 }
 
 const PLACEMENT_CLASSES: Record<string, string> = {
@@ -16,7 +22,13 @@ const PLACEMENT_CLASSES: Record<string, string> = {
   right: 'left-full top-1/2 -translate-y-1/2 me-1',
 }
 
-const Tooltip = ({ children, content, className = '', contentClassName = '', place = 'top' }: TooltipProps) => {
+const Tooltip = ({
+  children,
+  content,
+  className = '',
+  contentClassName = '',
+  place = TooltipPlace.TOP,
+}: TooltipProps) => {
   const [visible, setVisible] = useState(false)
 
   if (!content) {

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileExcel, faXmark, faCircleInfo, faTableColumns, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Logo from '@/components/AppHeader/Logo'
-import Tooltip from '@/components/Tooltip'
+import Tooltip, { TooltipPlace } from '@/components/Tooltip'
 import Card, { CardVariant } from '@/components/Shared/Card'
 import CustomGuestsFields from './CustomGuestsFields'
 import { exportGuestsToExcel } from '../helper'
@@ -83,13 +83,11 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
                         מיפוי מותאם אישית
                       </span>
                       <Tooltip
-                        place="top"
+                        place={TooltipPlace.TOP}
                         contentClassName="whitespace-normal w-max max-w-[min(17rem,calc(100vw-2rem))] px-3.5 py-3"
                         content={
                           <div className="flex flex-col gap-2.5 text-right" dir="rtl">
-                            <span className="text-sm font-semibold text-white leading-snug">
-                              מיפוי לאקסל לפי שדות
-                            </span>
+                            <span className="text-sm font-semibold text-white leading-snug">מיפוי לאקסל לפי שדות</span>
                             <span className="block rounded-md bg-white/10 px-2.5 py-2 text-xs font-bold leading-relaxed text-sky-200 ring-1 ring-white/15">
                               *ממולץ למערכות אחרות כמו מערכות הושבה/אישורי הגעה.
                             </span>

@@ -2,7 +2,7 @@
 
 import type { Provider } from '@/types/Provider'
 import { formatCurrency } from '@/lib/utils'
-import Tooltip from '../Tooltip'
+import Tooltip, { TooltipPlace } from '../Tooltip'
 
 interface ProviderPaymentChipProps {
   provider: Provider
@@ -13,7 +13,7 @@ const ProviderPaymentChip = ({ provider }: ProviderPaymentChipProps) => {
   const isFullyPaid = toBePaid <= 0
 
   return (
-    <Tooltip place="top" content={toBePaid > 0 ? `נותר לתשלום: ${formatCurrency(toBePaid)}` : ''}>
+    <Tooltip place={TooltipPlace.TOP} content={toBePaid > 0 ? `נותר לתשלום: ${formatCurrency(toBePaid)}` : ''}>
       <div
         className={`rounded-md px-3 py-2 text-sm font-medium ${
           isFullyPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'

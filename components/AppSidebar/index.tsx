@@ -18,7 +18,7 @@ import {
   faCalendar,
 } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import Tooltip from '../Tooltip'
+import Tooltip, { TooltipPlace } from '../Tooltip'
 import useSupabase from '@/hooks/useSupabase'
 import UserDetails from './UserDetails'
 
@@ -78,7 +78,7 @@ const AppSidebar = () => {
             return (
               <Tooltip
                 content={!isSidebarOpen ? (isRtl ? item.labelHe : item.labelEn) : ''}
-                place={!isSidebarOpen ? (isRtl ? 'right' : 'left') : 'top'}
+                place={!isSidebarOpen ? (isRtl ? TooltipPlace.RIGHT : TooltipPlace.LEFT) : TooltipPlace.TOP}
                 key={item.id}>
                 <button
                   onClick={() => handleItemClick(item)}
@@ -100,7 +100,7 @@ const AppSidebar = () => {
           <UserDetails />
           <Tooltip
             content={!isSidebarOpen ? (isRtl ? 'יציאה' : 'Logout') : ''}
-            place={!isSidebarOpen ? (isRtl ? 'right' : 'left') : 'top'}>
+            place={!isSidebarOpen ? (isRtl ? TooltipPlace.RIGHT : TooltipPlace.LEFT) : TooltipPlace.TOP}>
             <button
               type="button"
               onClick={() => signOut()}
