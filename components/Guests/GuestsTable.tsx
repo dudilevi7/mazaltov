@@ -10,7 +10,7 @@ import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { useMemo, useState } from 'react'
 import DeleteModal from '../DeleteModal'
-import Tooltip from '@/components/Tooltip'
+import Tooltip, { TooltipPlace } from '@/components/Tooltip'
 import { useGiftsContext } from '@/context/GiftsContext'
 import GuestGiftCell from './GuestGiftCell'
 import WhatsAppInvitationModal from './WhatsAppInvitation'
@@ -114,7 +114,7 @@ const GuestsTable = ({
       label: '',
       render: (row: Guest) => (
         <div className="flex items-center gap-2">
-          <Tooltip content="שלח הודעה בוואטסאפ" place="top">
+          <Tooltip content="שלח הודעה בוואטסאפ" place={TooltipPlace.TOP}>
             <button
               type="button"
               onClick={() => setGuestForWhatsApp(row)}

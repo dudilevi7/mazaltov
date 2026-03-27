@@ -9,7 +9,7 @@ import { useMemo } from 'react'
 import { getSideOptions, getSideLabels, getDuplicatePhoneGuests } from './helper'
 import type { Guest } from '@/types/Guest'
 import GuestsExportExcelButton from './ExportExcel/GuestsExportExcelButton'
-import Tooltip from '@/components/Tooltip'
+import Tooltip, { TooltipPlace } from '@/components/Tooltip'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
@@ -89,7 +89,7 @@ const GuestsSummaryBar = () => {
         </button>
         {duplicatePhones.length > 0 && (
           <Tooltip
-            place="bottom"
+            place={TooltipPlace.BOTTOM}
             contentClassName="whitespace-normal w-max max-w-80"
             content={
               <div className="flex flex-col gap-1 whitespace-normal max-w-80 text-right" dir="rtl">

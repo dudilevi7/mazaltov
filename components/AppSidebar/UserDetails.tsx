@@ -3,7 +3,7 @@
 import { LanguageDirection } from '@/types/General'
 import { useAppContext } from '@/context/AppContext'
 import useSupabase from '@/hooks/useSupabase'
-import Tooltip from '../Tooltip'
+import Tooltip, { TooltipPlace } from '../Tooltip'
 import { getInitials } from './helper'
 
 const UserDetails = () => {
@@ -23,11 +23,10 @@ const UserDetails = () => {
       <div className="text-xs opacity-80">{email}</div>
     </div>
   )
-  const tooltipPlace = isRtl ? 'left' : 'right'
 
   const picture = user.user_metadata?.picture || ''
   return (
-    <Tooltip content={tooltipContent} place={tooltipPlace} className="cursor-default">
+    <Tooltip content={tooltipContent} place={isRtl ? TooltipPlace.LEFT : TooltipPlace.RIGHT} className="cursor-default">
       <div
         className={`w-7 h-7 rounded-full bg-linear-to-r from-blue-500 to-blue-600 text-white
        flex items-center justify-center text-white text-sm font-bold 

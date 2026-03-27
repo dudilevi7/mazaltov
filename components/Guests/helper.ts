@@ -97,6 +97,133 @@ const downloadGuestsWorkbook = (workbook: XLSX.WorkBook, fileName: string) => {
   URL.revokeObjectURL(url)
 }
 
+const normalizeExcelHeader = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase()
+
+type FieldMapLike = Record<string, { customLabel: string; ignored: boolean }>
+
+const resolveGuestTemplateColumns = (
+  sheet: XLSX.WorkSheet,
+  columns: { key: keyof Guest; label: string }[],
+  fieldMap: FieldMapLike
+): { resolutions: { key: keyof Guest; col: number }[]; headerRow: number } => {
+  const ref = sheet['!ref']
+  if (!ref) throw new Error('EMPTY_SHEET')
+  const range = XLSX.utils.decode_range(ref)
+  const headerRow = range.s.r
+  const resolutions: { key: keyof Guest; col: number }[] = []
+  const usedCols = new Set<number>()
+
+  for (const col of columns) {
+    const fm = fieldMap[String(col.key)]
+    if (!fm || fm.ignored) continue
+    const want = normalizeExcelHeader(fm.customLabel.trim() || col.label)
+    if (!want) continue
+    for (let c = range.s.c; c <= range.e.c; c++) {
+      if (usedCols.has(c)) continue
+      const addr = XLSX.utils.encode_cell({ r: headerRow, c })
+      const cell = sheet[addr]
+      const h = cell ? String(cell.v ?? '').trim() : ''
+      if (h && normalizeExcelHeader(h) === want) {
+        resolutions.push({ key: col.key, col: c })
+        usedCols.add(c)
+        break
+      }
+    }
+  }
+  if (resolutions.length === 0) throw new Error('NO_MATCHES')
+  return { resolutions, headerRow }
+}
+
+const guestValueForExport = (
+  g: Guest,
+  key: keyof Guest,
+  sideLabels?: Record<string, string>
+): string | number | boolean => {
+  let val = g[key] as string | number | boolean | undefined
+  if (key === 'side' && sideLabels && typeof val === 'string') {
+    val = sideLabels[val] ?? val
+  }
+  return val === undefined || val === null ? '' : val
+}
+
+const writeCellPreservingStyle = (
+  sheet: XLSX.WorkSheet,
+  row: number,
+  col: number,
+  value: string | number | boolean
+) => {
+  const ref = XLSX.utils.encode_cell({ r: row, c: col })
+  const prev = sheet[ref]
+  const t: XLSX.ExcelDataType =
+    typeof value === 'number' ? 'n' : typeof value === 'boolean' ? 'b' : 's'
+  sheet[ref] = { ...prev, v: value, t }
+}
+
+export const validateGuestTemplateUpload = (
+  arrayBuffer: ArrayBuffer,
+  columns: { key: keyof Guest; label: string }[],
+  fieldMap: FieldMapLike
+): { matchCount: number } => {
+  const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+  const sheet = workbook.Sheets[workbook.SheetNames[0]]
+  const { resolutions } = resolveGuestTemplateColumns(sheet, columns, fieldMap)
+  return { matchCount: resolutions.length }
+}
+
+export const exportGuestsFilledUploadedTemplate = (
+  arrayBuffer: ArrayBuffer,
+  guests: Guest[],
+  columns: { key: keyof Guest; label: string }[],
+  fieldMap: FieldMapLike,
+  sideLabels: Record<string, string>,
+  originalFileName?: string | null
+): void => {
+  const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true })
+  const sheetName = workbook.SheetNames[0]
+  const sheet = workbook.Sheets[sheetName]
+  const { resolutions, headerRow } = resolveGuestTemplateColumns(sheet, columns, fieldMap)
+  const dataStartRow = headerRow + 1
+
+  const range = XLSX.utils.decode_range(sheet['!ref']!)
+  const maxCol = Math.max(range.e.c, ...resolutions.map((r) => r.col))
+  if (maxCol > range.e.c) range.e.c = maxCol
+  if (guests.length > 0) {
+    const lastDataRow = dataStartRow + guests.length - 1
+    if (lastDataRow > range.e.r) range.e.r = lastDataRow
+  }
+  sheet['!ref'] = XLSX.utils.encode_range(range)
+
+  for (let i = 0; i < guests.length; i++) {
+    const row = dataStartRow + i
+    const guest = guests[i]
+    for (const { key, col } of resolutions) {
+      const val = guestValueForExport(guest, key, sideLabels)
+      writeCellPreservingStyle(sheet, row, col, val)
+    }
+  }
+
+  const out = XLSX.write(workbook, { type: 'array', bookType: 'xlsx', cellStyles: true })
+  const blob = new Blob([out], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  const downloadName = originalFileName?.replace(/(\.xlsx?)$/i, '-filled$1') ?? `guests-filled-${moment().format('DD-MM-YYYY')}.xlsx`
+  a.download = downloadName
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export const downloadGuestsExcelTemplate = (columns: { key: keyof Guest; label: string }[]): void => {
+  const headerRow = columns.map((c) => c.label)
+  const sheet = XLSX.utils.aoa_to_sheet([headerRow])
+  applyGuestsSheetStyles(sheet, headerRow.length)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, sheet, 'אורחים')
+  downloadGuestsWorkbook(workbook, `guests-template-${moment().format('DD-MM-YYYY')}.xlsx`)
+}
+
 const exportGuestsToExcel = (
   guests: Guest[],
   columns: { key: keyof Guest; label: string }[],
