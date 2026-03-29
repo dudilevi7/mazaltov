@@ -74,6 +74,7 @@ const GuestsFilters = ({
         enabled={showNonPhoneNumbersFilter}
         onChange={setShowNonPhoneNumbersFilter}
         label="הצג רשומות ללא טלפון"
+        infoTooltip="הצג את האורחים שחסר להם מספר טלפון"
       />
     </div>
   )
