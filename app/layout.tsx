@@ -7,6 +7,7 @@ import { BudgetProvider } from '@/context/BudgetContext'
 import { GuestsProvider } from '@/context/GuestsContext'
 import { ShoppingProvider } from '@/context/ShoppingContext'
 import { GiftsProvider } from '@/context/GiftsContext'
+import { PublicNotesProvider } from '@/context/PublicNotesContext'
 import AppLayout from '@/components/AppLayout'
 
 const geistSans = Geist({
@@ -38,7 +39,9 @@ export default function RootLayout({
               <GiftsProvider>
                 <ShoppingProvider>
                   <BudgetProvider>
-                    <AppLayout>{children}</AppLayout>
+                    <PublicNotesProvider>
+                      <AppLayout>{children}</AppLayout>
+                    </PublicNotesProvider>
                   </BudgetProvider>
                 </ShoppingProvider>
               </GiftsProvider>

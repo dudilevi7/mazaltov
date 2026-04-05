@@ -14,6 +14,7 @@ interface AppLayoutProps {
 }
 
 const AUTH_PATHS = ['/login', '/signup']
+const PUBLIC_PATHS = ['/publicnote']
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const { languageDirection } = useAppContext()
@@ -22,9 +23,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const isAuthPage = AUTH_PATHS.includes(pathname)
+  const isPublicPage = PUBLIC_PATHS.includes(pathname)
 
   useEffect(() => {
     if (isLoading) return
+    if (isPublicPage) return
     if (!isAuthenticated && !isAuthPage) {
       redirect('/login')
       return
@@ -36,7 +39,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     if (pathname === '/') {
       router.push('/dashboard')
     }
-  }, [isLoading, isAuthenticated, pathname, router, isAuthPage])
+  }, [isLoading, isAuthenticated, pathname, router, isAuthPage, isPublicPage])
+
+  if (isPublicPage) {
+    return <>{children}</>
+  }
 
   if (isLoading) {
     return (

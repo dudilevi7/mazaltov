@@ -6,4 +6,5 @@ export const API_ROUTES = {
   SHOPPING: '/api/shopping',
   GIFTS: '/api/gifts',
   INVITATION: '/api/invitation',
+  PUBLIC_NOTES: '/api/public-notes',
 }
