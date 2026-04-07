@@ -13,6 +13,9 @@ import { getSuggestedServiceByLabel } from '@/constants/providers'
 import PublicNoteEditorToolbar from '@/components/PublicNotes/PublicNoteEditorToolbar'
 import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import type { PublicNote } from '@/types/PublicNote'
+import fetchData, { METHODS } from '@/lib/fetchData'
+import Logo from '@/components/AppHeader/Logo'
+import { formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 
 const PublicNotePage = () => {
   const searchParams = useSearchParams()
@@ -31,7 +34,7 @@ const PublicNotePage = () => {
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[120px] px-3 py-2 text-gray-900',
+        class: 'tiptap focus:outline-none min-h-[200px] px-4 py-3 text-sm text-gray-900',
         dir: 'rtl',
       },
     },
@@ -51,7 +54,10 @@ const PublicNotePage = () => {
           setError(res.status === 404 ? 'הערה לא נמצאה' : 'שגיאה בטעינת ההערה')
           return
         }
-        const data: PublicNote = await res.json()
+        const data = await fetchData<unknown, PublicNote>({
+          url: `${baseUrl}${API_ROUTES.PUBLIC_NOTES}/${noteId}`,
+          method: METHODS.GET,
+        })
         setNote(data)
         setUpdatedBy(data.updatedBy ?? '')
       } catch {
@@ -73,22 +79,22 @@ const PublicNotePage = () => {
     if (!noteId || !editor) return
     setSaving(true)
     setSaved(false)
+    const body: Partial<PublicNote> = {
+      ...note,
+      content: editor.getJSON(),
+      updatedBy: updatedBy.trim(),
+    }
     try {
       const baseUrl = API_URL ?? window.location.origin
-      const res = await fetch(`${baseUrl}${API_ROUTES.PUBLIC_NOTES}/${noteId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: editor.getJSON(),
-          updatedBy: updatedBy.trim(),
-        }),
+      const res = await fetchData<Partial<PublicNote>, PublicNote>({
+        url: `${baseUrl}${API_ROUTES.PUBLIC_NOTES}/${noteId}`,
+        method: METHODS.PUT,
+        body,
       })
-      if (res.ok) {
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2000)
-      }
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
     } catch {
-      // silent fail on public page
+      setError('שגיאה בשמירת ההערה')
     } finally {
       setSaving(false)
     }
@@ -116,10 +122,11 @@ const PublicNotePage = () => {
   const suggestedService = getSuggestedServiceByLabel(note.service)
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
-      <div className="max-w-2xl mx-auto px-4 py- h-full">
+    <div className="flex flex-col gap-4 items-center justify-center h-full" dir="rtl">
+      <Logo className="mt-4" />
+      <div className="max-w-2xl mx-auto px-4 h-full">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 p-4">
+          <div className="border-b border-gray-200 p-4 relative">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FontAwesomeIcon icon={faNoteSticky} className="text-blue-500" />
@@ -131,6 +138,10 @@ const PublicNotePage = () => {
                   {note.service}
                 </span>
               )}
+            </div>
+            <div className="flex flex-row gap-1 absolute bottom-1 left-2">
+              <span className="text-xs text-gray-500">עודכן לאחרונה</span>
+              <span className="text-xs text-gray-500">{formatDateDDMMYYHHMM(note.updatedAt ?? note.createdAt)}</span>
             </div>
           </div>
 
@@ -146,13 +157,13 @@ const PublicNotePage = () => {
               value={updatedBy}
               onChange={(e) => setUpdatedBy(e.target.value)}
               placeholder="השם שלך"
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 w-48"
+              className="rounded-md bg-linear-to-r from-gray-50 to-gray-100 border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 w-48"
               dir="rtl"
             />
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-md bg-blue-500 px-4 py-1.5 text-sm text-white hover:bg-blue-600 disabled:opacity-50 cursor-pointer transition-colors">
+              className={`inline-flex items-center gap-2 rounded-md ${saved ? 'bg-green-500' : 'bg-blue-500'} px-4 py-1.5 text-sm text-white hover:bg-blue-600 disabled:opacity-50 cursor-pointer transition-colors ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}>
               <FontAwesomeIcon icon={faFloppyDisk} />
               {saving ? 'שומר...' : saved ? 'נשמר!' : 'שמור'}
             </button>

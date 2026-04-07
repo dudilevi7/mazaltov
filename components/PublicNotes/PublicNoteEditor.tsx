@@ -44,7 +44,7 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[120px] px-3 py-2 text-gray-900',
+        class: 'tiptap focus:outline-none min-h-[120px] px-3 py-2 text-sm text-gray-900',
         dir: languageDirection,
       },
     },

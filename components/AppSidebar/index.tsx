@@ -96,7 +96,7 @@ const AppSidebar = () => {
             )
           })}
         </nav>
-        <div className="absolute bottom-28 left-[50%] transform -translate-x-1/2 z-50 flex flex-col items-center gap-4">
+        <div className="absolute bottom-28 left-[50%] transform -translate-x-1/2 z-40 flex flex-col items-center gap-4">
           <UserDetails />
           <Tooltip
             content={!isSidebarOpen ? (isRtl ? 'יציאה' : 'Logout') : ''}

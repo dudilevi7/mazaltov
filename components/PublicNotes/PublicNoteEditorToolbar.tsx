@@ -11,7 +11,9 @@ import {
   faHeading,
   faUndo,
   faRedo,
+  faUnderline,
 } from '@fortawesome/free-solid-svg-icons'
+import Tooltip from '@/components/Tooltip'
 
 interface ToolbarProps {
   editor: Editor | null
@@ -22,21 +24,25 @@ const ToolbarButton = ({
   isActive,
   icon,
   title,
+  tooltip,
 }: {
   onClick: () => void
   isActive: boolean
   icon: typeof faBold
   title: string
+  tooltip?: string
 }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    title={title}
-    className={`p-1.5 rounded transition-colors cursor-pointer ${
-      isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-    }`}>
-    <FontAwesomeIcon icon={icon} className="w-3.5 h-3.5" />
-  </button>
+  <Tooltip content={tooltip}>
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`p-1.5 rounded transition-colors cursor-pointer ${
+        isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+      }`}>
+      <FontAwesomeIcon icon={icon} className="w-3.5 h-3.5" />
+    </button>
+  </Tooltip>
 )
 
 const PublicNoteEditorToolbar = ({ editor }: ToolbarProps) => {
@@ -49,6 +55,13 @@ const PublicNoteEditorToolbar = ({ editor }: ToolbarProps) => {
         isActive={editor.isActive('bold')}
         icon={faBold}
         title="Bold"
+      />
+      <ToolbarButton
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        isActive={editor.isActive('underline')}
+        icon={faUnderline}
+        title="Underline"
+        tooltip="Underline"
       />
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -87,12 +100,14 @@ const PublicNoteEditorToolbar = ({ editor }: ToolbarProps) => {
         isActive={false}
         icon={faUndo}
         title="Undo"
+        tooltip="Undo"
       />
       <ToolbarButton
         onClick={() => editor.chain().focus().redo().run()}
         isActive={false}
         icon={faRedo}
         title="Redo"
+        tooltip="Redo"
       />
     </div>
   )

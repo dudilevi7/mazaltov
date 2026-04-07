@@ -54,9 +54,7 @@ const PublicNoteItem = ({ note, onEdit, onDelete }: PublicNoteItemProps) => {
               {note.service}
             </span>
           )}
-          {!suggestedService && note.service && (
-            <span className="text-xs text-gray-500">{note.service}</span>
-          )}
+          {!suggestedService && note.service && <span className="text-xs text-gray-500">{note.service}</span>}
         </div>
         <div className="flex items-center gap-3 text-xs text-gray-500">
           {note.updatedBy && <span>{note.updatedBy}</span>}
@@ -66,17 +64,23 @@ const PublicNoteItem = ({ note, onEdit, onDelete }: PublicNoteItemProps) => {
 
       <div className="flex items-center gap-1.5 shrink-0">
         <Tooltip content={labels.share}>
-          <button onClick={handleShare} className="p-1.5 rounded text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+          <button
+            onClick={handleShare}
+            className="p-1.5 rounded text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
             <FontAwesomeIcon icon={faShareNodes} className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
         <Tooltip content={labels.editNote}>
-          <button onClick={() => onEdit(note)} className="p-1.5 rounded text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+          <button
+            onClick={() => onEdit(note)}
+            className="p-1.5 rounded text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
             <FontAwesomeIcon icon={faPen} className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
         <Tooltip content={labels.delete}>
-          <button onClick={() => onDelete(note)} className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
+          <button
+            onClick={() => onDelete(note)}
+            className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
             <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
