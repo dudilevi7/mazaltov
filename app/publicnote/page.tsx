@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -17,7 +17,7 @@ import fetchData, { METHODS } from '@/lib/fetchData'
 import Logo from '@/components/AppHeader/Logo'
 import { formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 
-const PublicNotePage = () => {
+const PublicNotePageContent = () => {
   const searchParams = useSearchParams()
   const noteId = searchParams.get('id')
 
@@ -173,5 +173,11 @@ const PublicNotePage = () => {
     </div>
   )
 }
+
+const PublicNotePage = () => (
+  <Suspense>
+    <PublicNotePageContent />
+  </Suspense>
+)
 
 export default PublicNotePage
