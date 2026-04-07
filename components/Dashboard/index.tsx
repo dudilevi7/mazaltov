@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -13,20 +13,26 @@ import {
   faCoins,
   faLocationDot,
   faGear,
+  faNoteSticky,
+  faCircleInfo,
 } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import moment from 'moment'
 import { useAppContext } from '@/context/AppContext'
 import { useGuestsContext } from '@/context/GuestsContext'
 import { useBudgetContext } from '@/context/BudgetContext'
+import { usePublicNotesContext } from '@/context/PublicNotesContext'
 import { getEventDisplayName } from '@/components/AppHeader/helper'
 import { getEventTypeDisplayName, hasEventData } from '@/components/Settings/helper'
 import { EventType } from '@/types/Settings'
 import { TodoStatus } from '@/types/Todo'
 import { LanguageDirection } from '@/types/General'
 import { formatCurrency } from '@/lib/utils'
+import { PUBLIC_NOTE_TOOLTIP_HEB, PUBLIC_NOTE_TOOLTIP_ENG, PUBLIC_NOTE_LABELS } from '@/constants/publicNotes'
 import ProgressBar from '@/components/Shared/ProgressBar'
 import Card, { CardVariant } from '@/components/Shared/Card'
+import Tooltip from '@/components/Tooltip'
+import PublicNotesModal from '@/components/PublicNotes/PublicNotesModal'
 
 const EVENT_TYPE_ICON: Record<EventType, IconDefinition> = {
   [EventType.WEDDING]: faRing,
@@ -40,6 +46,8 @@ const Dashboard = () => {
   const { eventSettings, todos, languageDirection } = useAppContext()
   const { guests } = useGuestsContext()
   const { totalPrice, totalPaid, totalToBePaid, guestsIncome, estimatedTotal, balance } = useBudgetContext()
+  const { publicNotes } = usePublicNotesContext()
+  const [notesModalOpen, setNotesModalOpen] = useState(false)
 
   const isHeb = languageDirection === LanguageDirection.HEB
 
@@ -144,6 +152,30 @@ const Dashboard = () => {
       </Card>
 
       <Card
+        variant={CardVariant.GRADIENT}
+        onClick={() => setNotesModalOpen(true)}
+        className="flex flex-col items-center h-full justify-start gap-3 min-h-[180px] relative">
+        <div className="absolute top-3 end-3">
+          <Tooltip
+            content={
+              <span className="whitespace-pre-line text-xs max-w-[260px] block">
+                {isHeb ? PUBLIC_NOTE_TOOLTIP_HEB : PUBLIC_NOTE_TOOLTIP_ENG}
+              </span>
+            }
+            contentClassName="whitespace-pre-line w-[280px]">
+            <FontAwesomeIcon icon={faCircleInfo} className="text-gray-400 group-hover:text-white/80 transition-colors w-4 h-4" />
+          </Tooltip>
+        </div>
+        <FontAwesomeIcon icon={faNoteSticky} className="text-blue-500 text-2xl group-hover:text-white transition-colors" />
+        <span className="text-4xl font-bold text-gray-800 group-hover:text-white transition-all">
+          {publicNotes.length}
+        </span>
+        <span className="text-sm text-gray-500 group-hover:text-white transition-all">
+          {isHeb ? PUBLIC_NOTE_LABELS.HEB.notes : PUBLIC_NOTE_LABELS.ENG.notes}
+        </span>
+      </Card>
+
+      <Card
         variant={CardVariant.SUBTLE}
         onClick={() => router.push('/budget')}
         className="md:col-span-3 flex flex-col gap-4">
@@ -175,6 +207,8 @@ const Dashboard = () => {
           </div>
         </div>
       </Card>
+
+      <PublicNotesModal isOpen={notesModalOpen} onClose={() => setNotesModalOpen(false)} />
     </div>
   )
 }
