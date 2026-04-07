@@ -175,7 +175,7 @@ const PublicNotePageContent = () => {
 }
 
 const PublicNotePage = () => (
-  <Suspense>
+  <Suspense fallback={<SpinnerLoader size="lg" />}>
     <PublicNotePageContent />
   </Suspense>
 )
