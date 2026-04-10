@@ -13,15 +13,14 @@ import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faPlus,
-  faSpinner,
-  faUpload,
   faFilterCircleXmark,
   faFileDownload,
   faChartPie,
 } from '@fortawesome/free-solid-svg-icons'
 import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
-import { getSideOptions, getSideLabels, importGuestsFromExcel, exportToIplanTemplate } from './helper'
+import { getSideOptions, getSideLabels, exportToIplanTemplate } from './helper'
+import ImportGuestsExcelButton from './ImportExcel/ImportGuestsExcelButton'
 import { EventType } from '@/types/Settings'
 import { API_URL } from '@/constants'
 import { API_ROUTES } from '@/constants/apiRoutes'
@@ -54,7 +53,6 @@ const Guests = () => {
   const { languageDirection, eventSettings } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
-  const [isImportingExcel, setIsImportingExcel] = useState(false)
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false)
   const [invitationUrl, setInvitationUrl] = useState<string | null>(null)
 
@@ -132,17 +130,6 @@ const Guests = () => {
     })
   }
 
-  const handleImportGuestsFromExcel = async () => {
-    try {
-      setIsImportingExcel(true)
-      const guests = await importGuestsFromExcel()
-      setGuests(guests)
-      setIsImportingExcel(false)
-    } catch {
-      setIsImportingExcel(false)
-    }
-  }
-
   if (isLoadingGuests) {
     return <SpinnerLoader size="lg" isLoadingPage />
   }
@@ -156,18 +143,7 @@ const Guests = () => {
           <CustomButton size={ButtonSize.SM} onClick={openAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
             הוסף אורח
           </CustomButton>
-          <CustomButton
-            size={ButtonSize.SM}
-            onClick={handleImportGuestsFromExcel}
-            className="bg-green-600 hover:bg-green-700 text-white"
-            icon={
-              <FontAwesomeIcon
-                icon={isImportingExcel ? faSpinner : faUpload}
-                className={isImportingExcel ? 'animate-spin' : ''}
-              />
-            }>
-            ייבא מאקסל{' '}
-          </CustomButton>
+          <ImportGuestsExcelButton />
           <CustomButton
             size={ButtonSize.SM}
             className="bg-gray-700 hover:bg-gray-800 text-white"
