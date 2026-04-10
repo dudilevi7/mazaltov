@@ -10,7 +10,7 @@ interface TodoHeaderProps {
 
 export default function TodoHeader({ onAddClick, searchValue, onSearchChange }: TodoHeaderProps) {
   return (
-    <div className="flex flex-row items-center gap-3 ">
+    <div className="flex flex-row items-center gap-3 flex-wrap">
       <CustomButton onClick={onAddClick}>לחץ להוספת משימה</CustomButton>
       <SearchBar value={searchValue} onChange={onSearchChange} />
     </div>

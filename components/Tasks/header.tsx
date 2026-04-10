@@ -9,7 +9,7 @@ interface TasksHeaderProps {
 }
 
 const TasksHeader = ({ onAddClick, searchValue, onSearchChange }: TasksHeaderProps) => (
-  <div className="mb-6 flex shrink-0 flex-row items-center justify-end">
+  <div className="mb-4 flex shrink-0 flex-row items-center justify-end flex-wrap gap-2">
     <TodoHeader onAddClick={onAddClick} searchValue={searchValue} onSearchChange={onSearchChange} />
   </div>
 )

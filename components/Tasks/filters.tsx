@@ -14,7 +14,7 @@ interface TasksFiltersProps {
 }
 
 const TasksFilters = ({ sortByDate, onSortByDate, selectedStatus, onStatusChange }: TasksFiltersProps) => (
-  <div className="flex flex-row items-center justify-end gap-2">
+  <div className="flex flex-row items-center justify-end gap-2 flex-wrap mb-2">
     <div
       className="flex shrink-0 flex-row items-center justify-end gap-1 text-gray-500 hover:text-gray-700 cursor-pointer"
       onClick={onSortByDate}>

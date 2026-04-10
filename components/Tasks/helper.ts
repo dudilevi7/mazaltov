@@ -1,5 +1,3 @@
-import { Todo } from '@/types/Todo'
-
 export const buildGoogleCalendarUrl = (name: string, description: string, reminderTimestamp: number): string => {
   const baseUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
   const title = encodeURIComponent(name)
@@ -19,3 +17,6 @@ export const buildGoogleCalendarUrl = (name: string, description: string, remind
 
   return `${baseUrl}&text=${title}${dateParam}${details}`
 }
+
+export const getProviderName = (providers: { id: number; name: string }[], providerId?: number): string | undefined =>
+  providerId ? providers.find((p) => p.id === providerId)?.name : undefined

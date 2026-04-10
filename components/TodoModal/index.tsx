@@ -9,7 +9,8 @@ import SelectDropdown from '@/components/Shared/SelectDropdown'
 import { getEventOwnerOptions } from './helper'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { buildGoogleCalendarUrl } from '../TodoItem/helper'
+import { buildGoogleCalendarUrl } from '@/components/Tasks/helper'
+import { STATUS_OPTIONS } from '@/constants/todoStatus'
 
 interface TodoModalProps {
   isOpen: boolean
@@ -29,40 +30,29 @@ export interface TodoFormData {
   comments?: string
 }
 
-const STATUS_OPTIONS: { value: TodoStatus; label: string }[] = [
-  { value: TodoStatus.PENDING, label: 'ממתין' },
-  { value: TodoStatus.IN_PROGRESS, label: 'בתהליך' },
-  { value: TodoStatus.COMPLETED, label: 'הושלם' },
-]
+const toReminderDate = (todo?: Todo | null, initial?: Partial<TodoFormData>): Date | null => {
+  const ts = todo?.reminderTimestamp || initial?.reminderTimestamp
+  return ts ? new Date(ts) : null
+}
 
 export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }: TodoModalProps) {
-  const [name, setName] = useState(todo?.name || initialData?.name || '')
-  const [description, setDescription] = useState(todo?.description || initialData?.description || '')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [status, setStatus] = useState<TodoStatus>(TodoStatus.PENDING)
-  const [reminderDate, setReminderDate] = useState<Date | null>(
-    todo?.reminderTimestamp ? new Date(todo.reminderTimestamp) : null
-  )
-  const [updatedBy, setUpdatedBy] = useState(todo?.updatedBy || '')
+  const [reminderDate, setReminderDate] = useState<Date | null>(null)
+  const [updatedBy, setUpdatedBy] = useState('')
   const { eventSettings } = useAppContext()
   const ownerOptions = useMemo(() => getEventOwnerOptions(eventSettings), [eventSettings])
-
   const isEdit = !!todo
 
   useEffect(() => {
-    if (isOpen) {
-      setName(todo?.name || initialData?.name || '')
-      setDescription(todo?.description || initialData?.description || '')
-      setStatus(todo?.status ?? initialData?.status ?? TodoStatus.PENDING)
-      setReminderDate(
-        todo?.reminderTimestamp
-          ? new Date(todo.reminderTimestamp)
-          : initialData?.reminderTimestamp
-            ? new Date(initialData.reminderTimestamp)
-            : null
-      )
-      const nextUpdatedBy = todo?.updatedBy || initialData?.updatedBy || ''
-      setUpdatedBy(nextUpdatedBy || (ownerOptions[0]?.value ?? ''))
-    }
+    if (!isOpen) return
+    setName(todo?.name || initialData?.name || '')
+    setDescription(todo?.description || initialData?.description || '')
+    setStatus(todo?.status ?? initialData?.status ?? TodoStatus.PENDING)
+    setReminderDate(toReminderDate(todo, initialData))
+    const who = todo?.updatedBy || initialData?.updatedBy || ''
+    setUpdatedBy(who || (ownerOptions[0]?.value ?? ''))
   }, [isOpen, todo, initialData, ownerOptions])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -77,16 +67,15 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
       comments: todo?.comments,
     })
   }
-  const handleAddTaskToGoogleCalendar = () => {
-    if (!name) return
-    const reminderTimestamp = reminderDate ? reminderDate.getTime() : 0
-    window.open(buildGoogleCalendarUrl(name, description, reminderTimestamp), '_blank')
-  }
+
   if (!isOpen) return null
 
+  const inputClass =
+    'w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right px-4">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <h2 className="mb-4 text-xl font-semibold text-gray-900">{isEdit ? 'עריכת משימה' : 'הוספת משימה חדשה'}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
@@ -96,7 +85,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full text-right rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className={`${inputClass} text-right`}
               required
             />
           </div>
@@ -107,7 +96,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               dir="rtl"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className={inputClass}
             />
           </div>
           <div>
@@ -115,7 +104,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as TodoStatus)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-right">
+              className={`${inputClass} text-right`}>
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -131,7 +120,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
               showTimeSelect
               dateFormat="dd/MM/yyyy HH:mm"
               placeholderText="בחר תאריך ושעה"
-              className="rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className={inputClass}
               isClearable
             />
           </div>
@@ -139,10 +128,15 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
             <CustomButton
               type="button"
               disabled={!name}
-              className="bg-linear-to-r from-blue-200 to-blue-300 !text-white inline-flex justify-end items-center gap-2
-             hover:!text-gray-700 transition-colors duration-300"
+              className="bg-linear-to-r from-blue-200 to-blue-300 text-white! hover:text-gray-700! transition-colors duration-300"
               icon={<FontAwesomeIcon icon={faGoogle} className="h-4 w-4" />}
-              onClick={handleAddTaskToGoogleCalendar}>
+              onClick={() => {
+                if (!name) return
+                window.open(
+                  buildGoogleCalendarUrl(name, description, reminderDate ? reminderDate.getTime() : 0),
+                  '_blank'
+                )
+              }}>
               הוסף לגוגל קלנדר
             </CustomButton>
           </div>
@@ -156,7 +150,6 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
               className="w-full"
             />
           </div>
-
           <div className="flex gap-2 justify-end pt-2">
             <CustomButton size={ButtonSize.SM} type="button" onClick={onClose}>
               ביטול
