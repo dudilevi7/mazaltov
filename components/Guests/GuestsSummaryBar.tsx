@@ -4,13 +4,14 @@ import { useGuestsContext } from '@/context/GuestsContext'
 import { useAppContext } from '@/context/AppContext'
 import { GuestStatus } from '@/types/Guest'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUsers, faUser, faCheck, faTimes, faUserGroup } from '@fortawesome/free-solid-svg-icons'
-import { useMemo } from 'react'
+import { faUsers, faUser, faCheck, faTimes, faUserGroup, faTrash, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { useMemo, useState } from 'react'
 import { getSideOptions, getSideLabels, getDuplicatePhoneGuests } from './helper'
 import type { Guest } from '@/types/Guest'
 import GuestsExportExcelButton from './ExportExcel/GuestsExportExcelButton'
 import Tooltip, { TooltipPlace } from '@/components/Tooltip'
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import DeleteModal from '@/components/DeleteModal'
 
 const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
   { key: 'name', label: 'שם' },
@@ -26,8 +27,14 @@ const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
 ]
 
 const GuestsSummaryBar = () => {
-  const { guests, statusFilter, setStatusFilter } = useGuestsContext()
+  const { guests, statusFilter, setStatusFilter, clearGuests } = useGuestsContext()
   const { eventSettings } = useAppContext()
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
+
+  const handleConfirmDeleteAll = async () => {
+    await clearGuests()
+    setShowDeleteAllModal(false)
+  }
 
   const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
   const sideLabels = useMemo(() => getSideLabels(eventSettings), [eventSettings])
@@ -111,7 +118,20 @@ const GuestsSummaryBar = () => {
         )}
         <div className="ms-auto" />
         <GuestsExportExcelButton guests={guests} columns={DISPLAY_COLUMNS} sideLabels={sideLabels} />
+        <CustomButton
+          size={ButtonSize.SM}
+          variant="red"
+          onClick={() => setShowDeleteAllModal(true)}
+          icon={<FontAwesomeIcon icon={faTrash} />}>
+          מחק הכל
+        </CustomButton>
       </div>
+      <DeleteModal
+        isOpen={showDeleteAllModal}
+        onClose={() => setShowDeleteAllModal(false)}
+        onConfirm={handleConfirmDeleteAll}
+        title="כל האורחים"
+      />
     </div>
   )
 }

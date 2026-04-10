@@ -7,7 +7,6 @@ import GuestsSummaryBar from './GuestsSummaryBar'
 import GuestModal, { GuestFormData } from './GuestModal'
 import GuestsFilters from './filters'
 import GuestsTable from './GuestsTable'
-import DeleteModal from '@/components/DeleteModal'
 import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
@@ -15,7 +14,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faPlus,
   faSpinner,
-  faTrash,
   faUpload,
   faFilterCircleXmark,
   faFileDownload,
@@ -36,7 +34,6 @@ const Guests = () => {
     guests,
     addGuest,
     updateGuest,
-    clearGuests,
     deleteGuest,
     setGuests,
     searchQuery,
@@ -57,7 +54,6 @@ const Guests = () => {
   const { languageDirection, eventSettings } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
-  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [isImportingExcel, setIsImportingExcel] = useState(false)
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false)
   const [invitationUrl, setInvitationUrl] = useState<string | null>(null)
@@ -124,11 +120,6 @@ const Guests = () => {
     closeModal()
   }
 
-  const handleConfirmDeleteAll = () => {
-    clearGuests()
-    setShowDeleteAllModal(false)
-  }
-
   const handleDeleteGuest = (guest: Guest) => {
     deleteGuest(guest.id)
   }
@@ -179,13 +170,6 @@ const Guests = () => {
             onClick={() => exportToIplanTemplate(guests, guestSideByName, eventSettings)}
             icon={<FontAwesomeIcon icon={faFileDownload} />}>
             ייצא ל IPlan
-          </CustomButton>
-          <CustomButton
-            size={ButtonSize.SM}
-            variant="red"
-            onClick={() => setShowDeleteAllModal(true)}
-            icon={<FontAwesomeIcon icon={faTrash} />}>
-            מחק הכל
           </CustomButton>
           <CustomButton
             size={ButtonSize.SM}
@@ -250,13 +234,6 @@ const Guests = () => {
         guest={editingGuest}
         existingGuests={guests}
         sideOptions={sideOptions}
-      />
-
-      <DeleteModal
-        isOpen={showDeleteAllModal}
-        onClose={() => setShowDeleteAllModal(false)}
-        onConfirm={handleConfirmDeleteAll}
-        title="כל האורחים"
       />
 
       <CustomSlideover isOpen={isStatisticsOpen} onClose={() => setIsStatisticsOpen(false)} title="סטטיסטיקות אורחים">

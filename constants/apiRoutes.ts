@@ -3,6 +3,7 @@ export const API_ROUTES = {
   TASKS: '/api/tasks',
   PROVIDERS: '/api/providers',
   GUESTS: '/api/guests',
+  GUESTS_DELETE_ALL: '/api/guests/delete-all',
   SHOPPING: '/api/shopping',
   GIFTS: '/api/gifts',
   INVITATION: '/api/invitation',

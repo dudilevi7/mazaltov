@@ -17,7 +17,7 @@ interface GuestsContextType {
   addGuest: (guest: Omit<Guest, 'id' | 'createdAt' | 'updatedAt'>) => void
   updateGuest: (id: number, guest: Partial<Omit<Guest, 'id' | 'createdAt'>>) => void
   removeGuest: (id: number) => void
-  clearGuests: () => void
+  clearGuests: () => Promise<void>
   deleteGuest: (id: number) => void
   searchQuery: string
   setSearchQuery: (query: string) => void
@@ -143,8 +143,25 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const deleteGuest = removeGuest
 
-  const clearGuests = () => {
-    setGuests([])
+  const clearGuests = async () => {
+    try {
+      await fetchData<unknown, unknown>({
+        url: `${API_URL}${API_ROUTES.GUESTS_DELETE_ALL}`,
+        method: METHODS.DELETE,
+      })
+      setGuests([])
+      showToast({
+        type: ToastType.SUCCESS,
+        title: languageDirection === LanguageDirection.HEB ? 'הצלחה' : 'Success',
+        message: languageDirection === LanguageDirection.HEB ? 'כל האורחים נמחקו בהצלחה' : 'All guests deleted successfully',
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: languageDirection === LanguageDirection.HEB ? 'שגיאה' : 'Error',
+        message: languageDirection === LanguageDirection.HEB ? 'שגיאה במחיקת האורחים' : 'Failed to delete guests',
+      })
+    }
   }
 
   const filteredGuests = useMemo(() => {
