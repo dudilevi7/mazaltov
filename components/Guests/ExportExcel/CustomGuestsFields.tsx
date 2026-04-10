@@ -30,6 +30,8 @@ const CustomGuestsFields = ({ columns, guests, sideLabels, onClose }: CustomGues
   const [templateBuffer, setTemplateBuffer] = useState<ArrayBuffer | null>(null)
   const [templateFileName, setTemplateFileName] = useState<string | null>(null)
   const [templateMatchCount, setTemplateMatchCount] = useState(0)
+  const [templateMatched, setTemplateMatched] = useState<string[]>([])
+  const [templateUnmatched, setTemplateUnmatched] = useState<string[]>([])
   const [templateError, setTemplateError] = useState<string | null>(null)
 
   const [fieldMap, setFieldMap] = useState<Record<string, FieldMapping>>(() => {
@@ -45,6 +47,8 @@ const CustomGuestsFields = ({ columns, guests, sideLabels, onClose }: CustomGues
     setTemplateBuffer(null)
     setTemplateFileName(null)
     setTemplateMatchCount(0)
+    setTemplateMatched([])
+    setTemplateUnmatched([])
     setTemplateError(null)
   }
 
@@ -63,9 +67,11 @@ const CustomGuestsFields = ({ columns, guests, sideLabels, onClose }: CustomGues
     setTemplateBuffer(null)
     try {
       const buf = await file.arrayBuffer()
-      const { matchCount } = validateGuestTemplateUpload(buf, columns, fieldMap)
+      const { matchCount, matched, unmatched } = validateGuestTemplateUpload(buf, columns, fieldMap)
       setTemplateBuffer(buf)
       setTemplateMatchCount(matchCount)
+      setTemplateMatched(matched)
+      setTemplateUnmatched(unmatched)
       setTemplateFileName(file.name)
       setTemplateReady(true)
     } catch (err) {
@@ -88,8 +94,10 @@ const CustomGuestsFields = ({ columns, guests, sideLabels, onClose }: CustomGues
   useEffect(() => {
     if (!mapByTemplate || !templateBuffer) return
     try {
-      const { matchCount } = validateGuestTemplateUpload(templateBuffer, columns, fieldMap)
+      const { matchCount, matched, unmatched } = validateGuestTemplateUpload(templateBuffer, columns, fieldMap)
       setTemplateMatchCount(matchCount)
+      setTemplateMatched(matched)
+      setTemplateUnmatched(unmatched)
       setTemplateError(null)
       setTemplateReady(true)
     } catch {
@@ -126,7 +134,7 @@ const CustomGuestsFields = ({ columns, guests, sideLabels, onClose }: CustomGues
   }))
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 overflow-y-auto">
       <CustomGuestsExcelTemplateSection
         mapByTemplate={mapByTemplate}
         onMapByTemplateChange={handleMapByTemplateChange}
@@ -137,6 +145,8 @@ const CustomGuestsFields = ({ columns, guests, sideLabels, onClose }: CustomGues
         templateError={templateError}
         templateFileName={templateFileName}
         templateMatchCount={templateMatchCount}
+        templateMatched={templateMatched}
+        templateUnmatched={templateUnmatched}
         onTemplateFileChange={handleTemplateFile}
         onDownloadBlankTemplate={() => downloadGuestsExcelTemplate(effectiveColumnsForBlankTemplate)}
         onExportFilledTemplate={handleExportFilledTemplate}

@@ -2,7 +2,7 @@
 
 import type { RefObject } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleInfo, faUpload, faSpinner, faDownload, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faCircleInfo, faUpload, faSpinner, faDownload, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Tooltip, { TooltipPlace } from '@/components/Tooltip'
 import { useAppContext } from '@/context/AppContext'
@@ -18,6 +18,8 @@ interface CustomGuestsExcelTemplateSectionProps {
   templateError: string | null
   templateFileName: string | null
   templateMatchCount: number
+  templateMatched: string[]
+  templateUnmatched: string[]
   onTemplateFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onDownloadBlankTemplate: () => void
   onExportFilledTemplate: () => void
@@ -33,6 +35,8 @@ const CustomGuestsExcelTemplateSection = ({
   templateError,
   templateFileName,
   templateMatchCount,
+  templateMatched,
+  templateUnmatched,
   onTemplateFileChange,
   onDownloadBlankTemplate,
   onExportFilledTemplate,
@@ -128,11 +132,30 @@ const CustomGuestsExcelTemplateSection = ({
           </div>
           {templateError && <p className="text-xs text-red-600">{templateError}</p>}
           {templateReady && templateFileName && !templateError && (
-            <div className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faCheck} className="text-emerald-700" />
-              <p className="text-xs text-emerald-700">
-                הותאם &quot;{templateFileName}&quot; — נמצאו {templateMatchCount} עמודות לפי המיפוי
-              </p>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex flex-row gap-1.5">
+                <span className="text-xs font-bold text-gray-600">&quot;{templateFileName}&quot; -</span>
+                <span className="text-xs font-bold text-gray-600">עמודות שהותאמו:</span>
+                <span className="text-xs font-medium text-emerald-700">{templateMatchCount}</span>
+              </div>
+              <ul className="flex flex-col gap-0.5">
+                {templateMatched.map((label, index) => (
+                  <li key={`${label}-${index}`} className="flex items-center gap-1.5 text-xs text-emerald-700">
+                    <FontAwesomeIcon icon={faCheck} className="shrink-0" />
+                    {label}
+                  </li>
+                ))}
+                <div className="flex flex-row gap-1.5">
+                  <span className="text-xs font-bold text-gray-600">עמודות שלא הותאמו:</span>
+                  <span className="text-xs font-medium text-red-500">{templateUnmatched.length}</span>
+                </div>
+                {templateUnmatched.map((label, index) => (
+                  <li key={`${label}-${index}`} className="flex items-center gap-1.5 text-xs text-red-500">
+                    <FontAwesomeIcon icon={faXmark} className="shrink-0" />
+                    {label}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>

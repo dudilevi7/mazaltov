@@ -105,33 +105,38 @@ const resolveGuestTemplateColumns = (
   sheet: XLSX.WorkSheet,
   columns: { key: keyof Guest; label: string }[],
   fieldMap: FieldMapLike
-): { resolutions: { key: keyof Guest; col: number }[]; headerRow: number } => {
+): { resolutions: { key: keyof Guest; col: number }[]; headerRow: number; unmatchedColsFromTemplate: string[] } => {
   const ref = sheet['!ref']
   if (!ref) throw new Error('EMPTY_SHEET')
   const range = XLSX.utils.decode_range(ref)
   const headerRow = range.s.r
   const resolutions: { key: keyof Guest; col: number }[] = []
+  let unmatchedColsFromTemplate: string[] = []
   const usedCols = new Set<number>()
 
   for (const col of columns) {
     const fm = fieldMap[String(col.key)]
     if (!fm || fm.ignored) continue
-    const want = normalizeExcelHeader(fm.customLabel.trim() || col.label)
-    if (!want) continue
+    const normalizedLabel = normalizeExcelHeader(fm.customLabel.trim() || col.label)
+    if (!normalizedLabel) continue
     for (let c = range.s.c; c <= range.e.c; c++) {
       if (usedCols.has(c)) continue
       const addr = XLSX.utils.encode_cell({ r: headerRow, c })
       const cell = sheet[addr]
       const h = cell ? String(cell.v ?? '').trim() : ''
-      if (h && normalizeExcelHeader(h) === want) {
+      if (h && normalizeExcelHeader(h) === normalizedLabel) {
         resolutions.push({ key: col.key, col: c })
         usedCols.add(c)
         break
+      } else {
+        if (h?.length > 0 && h.length < 30) {
+          unmatchedColsFromTemplate.push(h)
+        }
       }
     }
   }
-  if (resolutions.length === 0) throw new Error('NO_MATCHES')
-  return { resolutions, headerRow }
+  unmatchedColsFromTemplate = Array.from(new Set(unmatchedColsFromTemplate))
+  return { resolutions, headerRow, unmatchedColsFromTemplate }
 }
 
 const guestValueForExport = (
@@ -154,8 +159,7 @@ const writeCellPreservingStyle = (
 ) => {
   const ref = XLSX.utils.encode_cell({ r: row, c: col })
   const prev = sheet[ref]
-  const t: XLSX.ExcelDataType =
-    typeof value === 'number' ? 'n' : typeof value === 'boolean' ? 'b' : 's'
+  const t: XLSX.ExcelDataType = typeof value === 'number' ? 'n' : typeof value === 'boolean' ? 'b' : 's'
   sheet[ref] = { ...prev, v: value, t }
 }
 
@@ -163,11 +167,22 @@ export const validateGuestTemplateUpload = (
   arrayBuffer: ArrayBuffer,
   columns: { key: keyof Guest; label: string }[],
   fieldMap: FieldMapLike
-): { matchCount: number } => {
+): { matchCount: number; matched: string[]; unmatched: string[] } => {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' })
   const sheet = workbook.Sheets[workbook.SheetNames[0]]
-  const { resolutions } = resolveGuestTemplateColumns(sheet, columns, fieldMap)
-  return { matchCount: resolutions.length }
+  const { resolutions, unmatchedColsFromTemplate } = resolveGuestTemplateColumns(sheet, columns, fieldMap)
+  const matchedKeys = new Set(resolutions.map((r) => r.key))
+  const matched: string[] = []
+  for (const col of columns) {
+    const fm = fieldMap[String(col.key)]
+    if (!fm || fm.ignored) continue
+    const label = fm.customLabel.trim() || col.label
+    if (matchedKeys.has(col.key)) {
+      matched.push(label)
+    } else {
+    }
+  }
+  return { matchCount: resolutions.length, matched, unmatched: unmatchedColsFromTemplate }
 }
 
 export const exportGuestsFilledUploadedTemplate = (
@@ -209,7 +224,8 @@ export const exportGuestsFilledUploadedTemplate = (
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  const downloadName = originalFileName?.replace(/(\.xlsx?)$/i, '-filled$1') ?? `guests-filled-${moment().format('DD-MM-YYYY')}.xlsx`
+  const downloadName =
+    originalFileName?.replace(/(\.xlsx?)$/i, '-filled$1') ?? `guests-filled-${moment().format('DD-MM-YYYY')}.xlsx`
   a.download = downloadName
   a.click()
   URL.revokeObjectURL(url)

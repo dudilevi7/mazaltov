@@ -45,10 +45,10 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in-0.5"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in-0.5 overflow-y-auto"
           onClick={handleClose}>
           <div
-            className="relative bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4"
+            className="relative bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4 max-h-[95vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}>
             <button
               onClick={handleClose}
@@ -104,7 +104,7 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
               </>
             ) : (
               <>
-                <div className="flex items-center gap-2 mb-5">
+                <div className="flex items-center gap-2 mb-5  overflow-y-auto">
                   <button
                     onClick={() => setView('select')}
                     className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">

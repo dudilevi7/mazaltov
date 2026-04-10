@@ -21,6 +21,7 @@ const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
   { key: 'phoneNumber', label: 'טלפון' },
   { key: 'category', label: 'קירבה' },
   { key: 'gift', label: 'מתנה' },
+  { key: 'notes', label: 'הערות' },
   { key: 'manualApproval', label: 'אישור ידני' },
 ]
 
