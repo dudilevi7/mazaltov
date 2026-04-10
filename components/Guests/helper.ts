@@ -301,6 +301,7 @@ const importGuestsFromExcel = async (): Promise<Guest[]> => {
     category: guest['קבוצה'] || guest['קירבה'],
     gift: guest['מתנה'],
     status: guest['סטטוס'] || GuestStatus.PENDING,
+    notes: guest['הערות'],
     manualApproval: guest['אישור ידני'] || false,
     id: index + 1,
     createdAt: new Date().getTime(),

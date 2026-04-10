@@ -133,10 +133,14 @@ const Guests = () => {
   }
 
   const handleImportGuestsFromExcel = async () => {
-    setIsImportingExcel(true)
-    const guests = await importGuestsFromExcel()
-    setGuests(guests)
-    setIsImportingExcel(false)
+    try {
+      setIsImportingExcel(true)
+      const guests = await importGuestsFromExcel()
+      setGuests(guests)
+      setIsImportingExcel(false)
+    } catch {
+      setIsImportingExcel(false)
+    }
   }
 
   if (isLoadingGuests) {
