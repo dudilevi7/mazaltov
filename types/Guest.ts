@@ -15,6 +15,7 @@ interface Guest {
   category: string
   gift: number
   manualApproval: boolean
+  notes?: string
   createdAt: number
   updatedAt: number
 }

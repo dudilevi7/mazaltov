@@ -6,7 +6,7 @@ import { STATUS_LABELS } from './helper'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Toggle from '@/components/Shared/Toggle'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faTrash, faComment } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { useMemo, useState } from 'react'
 import DeleteModal from '../DeleteModal'
@@ -101,6 +101,20 @@ const GuestsTable = ({
           giftId={giftsIdAndAmountByGuestId[row.id]?.giftId}
         />
       ),
+    },
+    {
+      key: 'notes',
+      label: 'הערות',
+      render: (row: Guest) =>
+        row.notes ? (
+          <Tooltip content={row.notes} place={TooltipPlace.TOP}>
+            <span className="flex items-center gap-1 cursor-default text-blue-500">
+              <FontAwesomeIcon icon={faComment} className="h-4 w-4" />
+            </span>
+          </Tooltip>
+        ) : (
+          <span className="text-gray-300">–</span>
+        ),
     },
     {
       key: 'manualApproval',

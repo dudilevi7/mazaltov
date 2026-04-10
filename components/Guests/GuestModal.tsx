@@ -23,6 +23,7 @@ export interface GuestFormData {
   category: string
   gift: number
   manualApproval: boolean
+  notes?: string
 }
 
 interface GuestModalProps {
@@ -43,6 +44,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   const [phoneNumber, setPhoneNumber] = useState('')
   const [category, setCategory] = useState('')
   const [manualApproval, setManualApproval] = useState(false)
+  const [notes, setNotes] = useState('')
 
   const isEdit = !!guest
   const isPhoneValid = useMemo(() => validatePhoneNumber(phoneNumber || ''), [phoneNumber])
@@ -88,6 +90,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       setPhoneNumber(guest?.phoneNumber || '')
       setCategory(guest?.category || '')
       setManualApproval(guest?.manualApproval ?? false)
+      setNotes(guest?.notes || '')
     }
   }, [isOpen, guest, sideOptions])
 
@@ -107,6 +110,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       category: category.trim(),
       gift: 0,
       manualApproval,
+      notes: notes.trim() || undefined,
     })
     onClose()
   }
@@ -196,6 +200,17 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
             </div>
             <div className="md:col-span-2">
               <Toggle enabled={manualApproval} onChange={setManualApproval} label="אישור ידני" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-gray-700">הערות</label>
+              <textarea
+                dir="rtl"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                placeholder="הערות נוספות על האורח..."
+              />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">

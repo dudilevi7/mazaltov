@@ -12,6 +12,7 @@ export type GuestRow = {
   category: string
   gift: number
   manual_approval: boolean
+  notes: string | null
   created_at: string
   updated_at: string
 }
@@ -30,6 +31,7 @@ export const mapGuestRowToGuest = (row: GuestRow): Guest => ({
   category: row.category ?? '',
   gift: toNum(row.gift),
   manualApproval: row.manual_approval ?? false,
+  notes: row.notes ?? undefined,
   createdAt: row.created_at ? new Date(row.created_at).getTime() : 0,
   updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : 0,
 })
@@ -46,4 +48,5 @@ export const mapGuestToGuestRow = (
   category: guest.category ?? '',
   gift: guest.gift ?? 0,
   manual_approval: guest.manualApproval ?? false,
+  notes: guest.notes ?? null,
 })
