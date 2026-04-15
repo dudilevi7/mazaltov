@@ -9,6 +9,7 @@ import { LanguageDirection } from '@/types/General'
 import { PUBLIC_NOTE_LABELS } from '@/constants/publicNotes'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import DeleteModal from '@/components/DeleteModal'
+import Modal from '@/components/Shared/Modal'
 import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import PublicNoteItem from './PublicNoteItem'
 import PublicNoteEditor from './PublicNoteEditor'
@@ -29,8 +30,6 @@ const PublicNotesModal = ({ isOpen, onClose }: PublicNotesModalProps) => {
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<PublicNote | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<PublicNote | null>(null)
-
-  if (!isOpen) return null
 
   const handleAdd = () => {
     setEditingNote(null)
@@ -58,23 +57,19 @@ const PublicNotesModal = ({ isOpen, onClose }: PublicNotesModalProps) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
-        <div
-          className="w-full max-w-2xl rounded-lg bg-white shadow-xl animate-fade-in max-h-[85vh] flex flex-col"
-          dir={languageDirection}>
-          <div className="flex items-center justify-between border-b border-gray-200 p-4">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        className="max-w-2xl max-h-[85vh] flex flex-col"
+        header={
+          <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">{labels.title}</h2>
-            <div className="flex items-center gap-2">
-              <CustomButton size={ButtonSize.SM} onClick={handleAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
-                {labels.addNote}
-              </CustomButton>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer text-xl ms-2">
-                &times;
-              </button>
-            </div>
+            <CustomButton size={ButtonSize.SM} onClick={handleAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
+              {labels.addNote}
+            </CustomButton>
           </div>
-
-          <div className="flex-1 overflow-y-auto p-4">
+        }>
+        <div className="flex-1 overflow-y-auto p-4" dir={languageDirection}>
             {isLoadingPublicNotes ? (
               <div className="flex justify-center py-8">
                 <SpinnerLoader size="md" />
@@ -90,9 +85,8 @@ const PublicNotesModal = ({ isOpen, onClose }: PublicNotesModalProps) => {
                 ))}
               </div>
             )}
-          </div>
         </div>
-      </div>
+      </Modal>
 
       {editorOpen && (
         <PublicNoteEditor

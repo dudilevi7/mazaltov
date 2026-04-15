@@ -5,6 +5,7 @@ import type { ShoppingItem } from '@/types/ShoppingItem'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import { useAppContext } from '@/context/AppContext'
+import Modal from '@/components/Shared/Modal'
 import { getEventOwnerOptions } from '@/components/TodoModal/helper'
 
 export interface ShoppingFormData {
@@ -76,15 +77,9 @@ const ShoppingModal = ({ isOpen, onClose, onSave, item }: ShoppingModalProps) =>
     })
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl animate-fade-in">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">
-          {isEdit ? 'עריכת פריט' : 'הוספת פריט חדש'}
-        </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={onClose} className="text-right" header={isEdit ? 'עריכת פריט' : 'הוספת פריט חדש'}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">שם הפריט</label>
             <input
@@ -162,9 +157,8 @@ const ShoppingModal = ({ isOpen, onClose, onSave, item }: ShoppingModalProps) =>
               {isEdit ? 'שמור שינויים' : 'הוסף פריט'}
             </CustomButton>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   )
 }
 

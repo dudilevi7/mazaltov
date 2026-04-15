@@ -11,6 +11,7 @@ import { useAppContext } from '@/context/AppContext'
 import { buildGoogleCalendarUrl } from '@/components/Tasks/helper'
 import { STATUS_BADGE_COLORS, STATUS_LABELS } from '@/constants/todoStatus'
 import Tooltip from '@/components/Tooltip'
+import Modal from '@/components/Shared/Modal'
 import StatusDropdown from './StatusDropdown'
 
 interface TodoDetailModalProps {
@@ -27,33 +28,42 @@ const TodoDetailModal = ({ todo, providerName, onClose, onSaveComments, onStatus
   const isDirty = comments !== (todo.comments || '')
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div
-        className="w-full max-w-lg rounded-lg bg-white shadow-xl animate-fade-in max-h-[90vh] overflow-y-auto"
-        dir={languageDirection}>
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+    <Modal
+      isOpen
+      onClose={onClose}
+      className="max-w-lg max-h-[90vh] overflow-y-auto"
+      overlayClassName="px-4"
+      header={
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">פרטי משימה</h2>
-          <div className="flex items-center gap-2">
-            <Tooltip content="הוסף לגוגל קלנדר">
-              <button
-                type="button"
-                onClick={() =>
-                  window.open(buildGoogleCalendarUrl(todo.name, todo.description, todo.reminderTimestamp), '_blank')
-                }
-                className="cursor-pointer rounded-md text-gray-400 hover:text-blue-500 transition-colors p-1">
-                <FontAwesomeIcon icon={faGoogle} className="h-4 w-4" />
-              </button>
-            </Tooltip>
+          <Tooltip content="הוסף לגוגל קלנדר">
             <button
               type="button"
-              className="cursor-pointer rounded-md text-gray-400 hover:text-gray-600 transition-colors p-1"
-              onClick={onClose}>
-              <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
+              onClick={() =>
+                window.open(buildGoogleCalendarUrl(todo.name, todo.description, todo.reminderTimestamp), '_blank')
+              }
+              className="cursor-pointer rounded-md text-gray-400 hover:text-blue-500 transition-colors p-1">
+              <FontAwesomeIcon icon={faGoogle} className="h-4 w-4" />
             </button>
-          </div>
+          </Tooltip>
         </div>
-
-        <div className="flex flex-col gap-4 px-6 py-5">
+      }
+      actions={
+        <>
+          <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
+            סגור
+          </CustomButton>
+          {isDirty && (
+            <CustomButton
+              size={ButtonSize.SM}
+              onClick={() => onSaveComments(todo, comments)}
+              icon={<FontAwesomeIcon icon={faSave} className="h-3 w-3" />}>
+              שמור הערות
+            </CustomButton>
+          )}
+        </>
+      }>
+      <div className="flex flex-col gap-4 px-6 py-5" dir={languageDirection}>
           <div>
             <span className="text-xs font-medium text-gray-400">שם</span>
             <p className="text-gray-900 font-semibold">{todo.name}</p>
@@ -118,23 +128,8 @@ const TodoDetailModal = ({ todo, providerName, onClose, onSaveComments, onStatus
               className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-2 border-t border-gray-200 px-6 py-4">
-          <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
-            סגור
-          </CustomButton>
-          {isDirty && (
-            <CustomButton
-              size={ButtonSize.SM}
-              onClick={() => onSaveComments(todo, comments)}
-              icon={<FontAwesomeIcon icon={faSave} className="h-3 w-3" />}>
-              שמור הערות
-            </CustomButton>
-          )}
-        </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 

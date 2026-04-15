@@ -7,6 +7,7 @@ import { GiftType } from '@/types/Gift'
 import type { Guest } from '@/types/Guest'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
+import Modal from '@/components/Shared/Modal'
 import { GIFT_TYPE_LABELS } from './helper'
 
 export interface GiftFormData {
@@ -61,8 +62,6 @@ const GiftModal = ({ isOpen, onClose, onSave, gift, guests }: GiftModalProps) =>
     }
   }, [isOpen, gift])
 
-  if (!isOpen) return null
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit) return
@@ -79,10 +78,8 @@ const GiftModal = ({ isOpen, onClose, onSave, gift, guests }: GiftModalProps) =>
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
-      <div className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isEdit ? 'עריכת מתנה' : 'הוספת מתנה'}</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-xl text-right max-h-[90vh] overflow-y-auto" header={isEdit ? 'עריכת מתנה' : 'הוספת מתנה'}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <label className="mb-1 block text-sm font-medium text-gray-700">אורח *</label>
@@ -144,9 +141,8 @@ const GiftModal = ({ isOpen, onClose, onSave, gift, guests }: GiftModalProps) =>
               {isEdit ? 'שמור שינויים' : 'הוסף מתנה'}
             </CustomButton>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   )
 }
 

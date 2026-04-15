@@ -9,6 +9,7 @@ import { parseNumber } from '@/lib/utils'
 import { validatePhoneNumber } from './helper'
 import { SUGGESTED_SERVICES_OPTIONS, getSuggestedServiceByLabel } from '@/constants/providers'
 import SelectDropdown from '../Shared/SelectDropdown'
+import Modal from '@/components/Shared/Modal'
 
 interface ProvidersModalProps {
   isOpen: boolean
@@ -73,8 +74,6 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
     }
   }, [isOpen, provider])
 
-  if (!isOpen) return null
-
   const resolvedService = service === '__custom__' ? customService : service
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -95,10 +94,8 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
-      <div className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isEdit ? 'עריכת ספק' : 'הוספת ספק חדש'}</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-xl text-right" header={isEdit ? 'עריכת ספק' : 'הוספת ספק חדש'}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">שם ספק</label>
@@ -192,9 +189,8 @@ const ProvidersModal = ({ isOpen, onClose, onSave, provider }: ProvidersModalPro
               {isEdit ? 'שמור שינויים' : 'הוסף ספק'}
             </CustomButton>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   )
 }
 

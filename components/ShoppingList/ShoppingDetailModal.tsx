@@ -2,8 +2,7 @@
 
 import type { ShoppingItem } from '@/types/ShoppingItem'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import Modal from '@/components/Shared/Modal'
 import { formatDateDDMMYY } from '@/lib/dateUtils'
 import { formatCurrency } from '@/lib/utils'
 import { CATEGORY_LABELS } from './ShoppingModal'
@@ -15,19 +14,17 @@ interface ShoppingDetailModalProps {
 
 const ShoppingDetailModal = ({ item, onClose }: ShoppingDetailModalProps) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-lg bg-white shadow-xl animate-fade-in" dir="rtl">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">פרטי פריט</h2>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md text-gray-400 hover:text-gray-600 transition-colors"
-            onClick={onClose}>
-            <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-4 px-6 py-5">
+    <Modal
+      isOpen
+      onClose={onClose}
+      className="max-w-lg"
+      header="פרטי פריט"
+      actions={
+        <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
+          סגור
+        </CustomButton>
+      }>
+      <div className="flex flex-col gap-4 px-6 py-5" dir="rtl">
           <div>
             <span className="text-xs font-medium text-gray-500">שם הפריט</span>
             <p className="text-gray-900 font-medium">{item.name}</p>
@@ -89,15 +86,8 @@ const ShoppingDetailModal = ({ item, onClose }: ShoppingDetailModalProps) => {
               </span>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center justify-end border-t border-gray-200 px-6 py-4">
-          <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
-            סגור
-          </CustomButton>
-        </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 

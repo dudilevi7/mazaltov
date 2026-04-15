@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import Modal from '@/components/Shared/Modal'
 import type { EstimatedIncome } from '@/types/Income'
 import { parseNumber } from '@/lib/utils'
 
@@ -23,8 +24,6 @@ const IncomesModal = ({ isOpen, onClose, onSave, estimatedIncome }: IncomesModal
     }
   }, [isOpen, estimatedIncome])
 
-  if (!isOpen) return null
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSave({
@@ -35,10 +34,8 @@ const IncomesModal = ({ isOpen, onClose, onSave, estimatedIncome }: IncomesModal
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">הכנסות משוערות</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={onClose} className="text-right" header="הכנסות משוערות">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">אורחים</label>
             <input
@@ -71,9 +68,8 @@ const IncomesModal = ({ isOpen, onClose, onSave, estimatedIncome }: IncomesModal
               שמור
             </CustomButton>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   )
 }
 

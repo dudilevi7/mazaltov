@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUpload, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faUpload } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import Modal from '@/components/Shared/Modal'
 import ImportFormatSelection from './ImportFormatSelection'
 import MazalTovImportFlow from './MazalTovImportFlow'
 
@@ -32,20 +33,13 @@ const ImportGuestsExcelButton = () => {
         ייבא מאקסל
       </CustomButton>
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in-0.5 overflow-y-auto"
-          onClick={handleClose}>
-          <div
-            className="relative bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4 max-h-[95vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={handleClose}
-              className="absolute top-3 left-3 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
-              <FontAwesomeIcon icon={faXmark} className="text-lg" />
-            </button>
-
-            {view === 'select' && (
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        closeOnBackdropClick
+        overlayClassName="animate-fade-in-0.5 overflow-y-auto"
+        className="rounded-xl p-6 max-w-lg mx-4 max-h-[95vh] overflow-y-auto">
+        {view === 'select' && (
               <ImportFormatSelection
                 onSelectMazalTov={() => setView(ImportView.MAZALTOV)}
                 onSelectCustom={() => setView(ImportView.CUSTOM)}
@@ -64,9 +58,7 @@ const ImportGuestsExcelButton = () => {
                 </CustomButton>
               </div>
             )}
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   )
 }

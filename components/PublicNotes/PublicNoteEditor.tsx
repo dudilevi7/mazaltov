@@ -10,6 +10,7 @@ import { SUGGESTED_SERVICES_OPTIONS } from '@/constants/providers'
 import { PUBLIC_NOTE_LABELS } from '@/constants/publicNotes'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import Modal from '@/components/Shared/Modal'
 import PublicNoteEditorToolbar from './PublicNoteEditorToolbar'
 import type { PublicNote } from '@/types/PublicNote'
 
@@ -59,8 +60,6 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
     }
   }, [editor, note, isEditMode])
 
-  if (!isOpen) return null
-
   const handleSave = () => {
     if (!title.trim()) return
     onSave({
@@ -73,18 +72,22 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div
-        className="w-full max-w-lg rounded-lg bg-white shadow-xl animate-fade-in max-h-[90vh] overflow-y-auto"
-        dir={languageDirection}>
-        <div className="flex items-center justify-between border-b border-gray-200 p-4">
-          <h2 className="text-lg font-semibold text-gray-900">{isEditMode ? labels.editNote : labels.addNote}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer text-xl">
-            &times;
-          </button>
-        </div>
-
-        <div className="p-4 flex flex-col gap-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="max-w-lg max-h-[90vh] overflow-y-auto"
+      header={isEditMode ? labels.editNote : labels.addNote}
+      actions={
+        <>
+          <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
+            {labels.cancel}
+          </CustomButton>
+          <CustomButton size={ButtonSize.SM} onClick={handleSave} disabled={!title.trim()}>
+            {labels.save}
+          </CustomButton>
+        </>
+      }>
+      <div className="p-4 flex flex-col gap-4" dir={languageDirection}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{labels.noteTitle}</label>
             <input
@@ -126,18 +129,8 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
               <EditorContent editor={editor} />
             </div>
           </div>
-        </div>
-
-        <div className="flex gap-2 justify-end border-t border-gray-200 p-4">
-          <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
-            {labels.cancel}
-          </CustomButton>
-          <CustomButton size={ButtonSize.SM} onClick={handleSave} disabled={!title.trim()}>
-            {labels.save}
-          </CustomButton>
-        </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 

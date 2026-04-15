@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
+import Modal from '@/components/Shared/Modal'
 import { getDefaultEventManualMessage } from './helper'
 
 export interface WhatsAppInvitationModalProps {
@@ -30,8 +31,6 @@ const WhatsAppInvitationModal = ({ isOpen, onClose, guest, invitationUrl }: What
     }
   }, [isOpen, guest?.name, invitationUrl, isRtl])
 
-  if (!isOpen) return null
-
   const canSend = !!guest?.phoneNumber?.trim()
   const finalMessage = [message.trim(), attachInvitation && invitationUrl ? invitationUrl : '']
     .filter(Boolean)
@@ -45,20 +44,13 @@ const WhatsAppInvitationModal = ({ isOpen, onClose, guest, invitationUrl }: What
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      role="dialog"
-      aria-modal
-      aria-labelledby="whatsapp-modal-title"
-      onClick={onClose}>
-      <meta property="og:image" content={invitationUrl ?? ''} />
-      <div
-        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl animate-fade-in"
-        dir={languageDirection}
-        onClick={(e) => e.stopPropagation()}>
-        <h2 id="whatsapp-modal-title" className="mb-4 text-xl font-semibold text-gray-900">
-          {isRtl ? 'שליחת הודעה בוואטסאפ' : 'Send WhatsApp message'}
-        </h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="p-6"
+      overlayClassName="p-4"
+      closeOnBackdropClick
+      header={isRtl ? 'שליחת הודעה בוואטסאפ' : 'Send WhatsApp message'}>
         {guest && (
           <p className="mb-3 text-sm text-gray-600">
             {isRtl ? 'אל' : 'To'}: <span className="font-medium">{guest.name}</span>
@@ -107,8 +99,7 @@ const WhatsAppInvitationModal = ({ isOpen, onClose, guest, invitationUrl }: What
             {isRtl ? 'פתח בוואטסאפ' : 'Open in WhatsApp'}
           </CustomButton>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }
 

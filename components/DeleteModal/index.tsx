@@ -1,5 +1,6 @@
 "use client";
 import CustomButton, { ButtonSize } from "@/components/Button/custom-button";
+import Modal from "@/components/Shared/Modal";
 import { useAppContext } from "@/context/AppContext";
 
 interface DeleteModalProps {
@@ -15,23 +16,28 @@ export default function DeleteModal({
   onConfirm,
   title=""
 }: DeleteModalProps) {
-  if (!isOpen) return null;
   const { languageDirection } = useAppContext();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <h2 className="mb-1 text-xl font-semibold text-gray-900" dir={languageDirection}>
-האם אתה רוצה למחוק את {title}? השינויים לא יישמרו.
-        </h2>
-        <div className="flex gap-2 justify-end pt-2">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="text-right"
+      showCloseButton={false}
+      actions={
+        <>
           <CustomButton size={ButtonSize.SM} variant="white" onClick={onClose}>
             ביטול
           </CustomButton>
           <CustomButton size={ButtonSize.SM} variant="red" onClick={onConfirm}>
             מחק
           </CustomButton>
-        </div>
+        </>
+      }>
+      <div className="p-6">
+        <h2 className="mb-1 text-xl font-semibold text-gray-900" dir={languageDirection}>
+האם אתה רוצה למחוק את {title}? השינויים לא יישמרו.
+        </h2>
       </div>
-    </div>
+    </Modal>
   );
 }

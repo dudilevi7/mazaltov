@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileExcel, faXmark, faCircleInfo, faTableColumns, faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { faFileExcel, faCircleInfo, faTableColumns, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import Modal from '@/components/Shared/Modal'
 import Logo from '@/components/AppHeader/Logo'
 import Tooltip, { TooltipPlace } from '@/components/Tooltip'
 import Card, { CardVariant } from '@/components/Shared/Card'
@@ -43,20 +44,13 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
         ייצוא לאקסל
       </CustomButton>
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in-0.5 overflow-y-auto"
-          onClick={handleClose}>
-          <div
-            className="relative bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4 max-h-[95vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={handleClose}
-              className="absolute top-3 left-3 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
-              <FontAwesomeIcon icon={faXmark} className="text-lg" />
-            </button>
-
-            {view === 'select' ? (
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        closeOnBackdropClick
+        overlayClassName="animate-fade-in-0.5 overflow-y-auto"
+        className="rounded-xl p-6 max-w-lg mx-4 max-h-[95vh] overflow-y-auto">
+        {view === 'select' ? (
               <>
                 <h2 className="text-lg font-bold text-gray-800 mb-5 text-center">ייצוא אורחים לאקסל</h2>
                 <div className="grid grid-cols-2 gap-4">
@@ -115,9 +109,7 @@ const GuestsExportExcelButton = ({ guests, columns, sideLabels }: GuestsExportEx
                 <CustomGuestsFields columns={columns} guests={guests} sideLabels={sideLabels} onClose={handleClose} />
               </>
             )}
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   )
 }

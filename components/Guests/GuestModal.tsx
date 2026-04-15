@@ -9,6 +9,7 @@ import SelectDropdown from '@/components/Shared/SelectDropdown'
 import SelectDropdownWithCustomOption from '@/components/Shared/SelectDropdownWithCustomOption'
 import Toggle from '@/components/Shared/Toggle'
 import { validatePhoneNumber, validateRealName, isNameInGuests, STATUS_OPTIONS } from './helper'
+import Modal from '@/components/Shared/Modal'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 
 const CUSTOM_CATEGORY_VALUE = '__custom__'
@@ -94,8 +95,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
     }
   }, [isOpen, guest, sideOptions])
 
-  if (!isOpen) return null
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit) return
@@ -116,10 +115,8 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right">
-      <div className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isEdit ? 'עריכת אורח' : 'הוספת אורח'}</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-xl text-right max-h-[90vh] overflow-y-auto" header={isEdit ? 'עריכת אורח' : 'הוספת אורח'}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">שם *</label>
@@ -221,9 +218,8 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
               {isEdit ? 'שמור שינויים' : 'הוסף אורח'}
             </CustomButton>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   )
 }
 

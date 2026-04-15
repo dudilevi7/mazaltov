@@ -10,6 +10,7 @@ import { getEventOwnerOptions } from './helper'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { buildGoogleCalendarUrl } from '@/components/Tasks/helper'
+import Modal from '@/components/Shared/Modal'
 import { STATUS_OPTIONS } from '@/constants/todoStatus'
 
 interface TodoModalProps {
@@ -68,16 +69,12 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
     })
   }
 
-  if (!isOpen) return null
-
   const inputClass =
     'w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-right px-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isEdit ? 'עריכת משימה' : 'הוספת משימה חדשה'}</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={onClose} className="text-right max-h-[90vh] overflow-y-auto" overlayClassName="px-4" header={isEdit ? 'עריכת משימה' : 'הוספת משימה חדשה'}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">שם</label>
             <input
@@ -158,8 +155,7 @@ export default function TodoModal({ isOpen, onClose, onSave, todo, initialData }
               {isEdit ? 'שמור שינויים' : 'הוסף משימה'}
             </CustomButton>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   )
 }
