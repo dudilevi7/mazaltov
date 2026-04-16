@@ -53,6 +53,21 @@ export const GIFT_TYPE_COLORS: Record<string, string> = {
 export const formatCurrency = (amount: number): string =>
   amount.toLocaleString('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 })
 
+export const buildAmountSummaryForGifts = (
+  gifts: Gift[]
+): { totalAmount: number; amountByType: Record<string, number> } => {
+  const amountByType: Record<string, number> = {}
+  Object.values(GiftType).forEach((t) => {
+    amountByType[t] = 0
+  })
+  let totalAmount = 0
+  for (const g of gifts) {
+    totalAmount += g.amount
+    amountByType[g.type] = (amountByType[g.type] || 0) + g.amount
+  }
+  return { totalAmount, amountByType }
+}
+
 export const exportGiftsToExcel = (gifts: Gift[], totalAmount: number, amountByType: Record<string, number>): void => {
   const rows = gifts.map((gift) => ({
     'שם אורח': gift.guestName,
