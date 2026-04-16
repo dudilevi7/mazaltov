@@ -106,7 +106,6 @@ export const parseMazalTovExcel = (buffer: ArrayBuffer): ParseResult => {
       notes: String(row['הערות'] ?? '').trim() || undefined,
       status: GuestStatus.PENDING,
       gift: 0,
-      manualApproval: false,
     })
   })
 

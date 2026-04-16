@@ -14,7 +14,7 @@ interface Guest {
   phoneNumber?: string
   category: string
   gift: number
-  manualApproval: boolean
+  manualApproval?: boolean
   notes?: string
   createdAt: number
   updatedAt: number

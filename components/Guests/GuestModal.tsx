@@ -7,7 +7,6 @@ import { GuestStatus } from '@/types/Guest'
 import { parseNumber } from '@/lib/utils'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import SelectDropdownWithCustomOption from '@/components/Shared/SelectDropdownWithCustomOption'
-import Toggle from '@/components/Shared/Toggle'
 import { validatePhoneNumber, validateRealName, isNameInGuests, STATUS_OPTIONS } from './helper'
 import Modal from '@/components/Shared/Modal'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
@@ -23,7 +22,6 @@ export interface GuestFormData {
   phoneNumber?: string
   category: string
   gift: number
-  manualApproval: boolean
   notes?: string
 }
 
@@ -44,7 +42,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   const [table, setTable] = useState<string>('0')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [category, setCategory] = useState('')
-  const [manualApproval, setManualApproval] = useState(false)
   const [notes, setNotes] = useState('')
 
   const isEdit = !!guest
@@ -90,7 +87,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       setTable(guest?.table !== undefined ? String(guest.table) : '0')
       setPhoneNumber(guest?.phoneNumber || '')
       setCategory(guest?.category || '')
-      setManualApproval(guest?.manualApproval ?? false)
       setNotes(guest?.notes || '')
     }
   }, [isOpen, guest, sideOptions])
@@ -108,7 +104,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       phoneNumber: phoneNumber.trim() || undefined,
       category: category.trim(),
       gift: 0,
-      manualApproval,
       notes: notes.trim() || undefined,
     })
     onClose()
@@ -194,9 +189,6 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
                 customPlaceholder="צור קירבה"
                 className="w-full"
               />
-            </div>
-            <div className="md:col-span-2">
-              <Toggle enabled={manualApproval} onChange={setManualApproval} label="אישור ידני" />
             </div>
             <div className="md:col-span-2">
               <label className="mb-1 block text-sm font-medium text-gray-700">הערות</label>

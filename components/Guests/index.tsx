@@ -125,9 +125,16 @@ const Guests = () => {
   const handleToggleManualApproval = (guest: Guest, value: boolean) => {
     updateGuest(guest.id, {
       ...guest,
-      manualApproval: value,
       status: value ? GuestStatus.ACCEPTED : GuestStatus.PENDING,
     })
+  }
+
+  const handleStatusChange = (guest: Guest, status: GuestStatus) => {
+    updateGuest(guest.id, { ...guest, status })
+  }
+
+  const handleNotesChange = (guest: Guest, notes: string) => {
+    updateGuest(guest.id, { ...guest, notes: notes || undefined })
   }
 
   if (isLoadingGuests) {
@@ -203,6 +210,8 @@ const Guests = () => {
             onEdit={openEdit}
             onDeleteGuest={handleDeleteGuest}
             onToggleManualApproval={handleToggleManualApproval}
+            onStatusChange={handleStatusChange}
+            onNotesChange={handleNotesChange}
           />
         </div>
       </div>

@@ -23,7 +23,6 @@ const DISPLAY_COLUMNS: { key: keyof Guest; label: string }[] = [
   { key: 'category', label: 'קירבה' },
   { key: 'gift', label: 'מתנה' },
   { key: 'notes', label: 'הערות' },
-  { key: 'manualApproval', label: 'אישור ידני' },
 ]
 
 const GuestsSummaryBar = () => {

@@ -18,6 +18,7 @@ interface SelectDropdownProps {
   placeholder?: string
   className?: string
   searchable?: boolean
+  buttonClassName?: string
 }
 
 const SelectDropdown = ({
@@ -27,6 +28,7 @@ const SelectDropdown = ({
   placeholder = '',
   className = '',
   searchable = false,
+  buttonClassName = '',
 }: SelectDropdownProps) => {
   const [searchQuery, setSearchQuery] = useState('')
   const selectedOption = options.find((opt) => opt.value === value) || null
@@ -43,8 +45,8 @@ const SelectDropdown = ({
       <div className={`relative ${className}`} dir={languageDirection}>
         <Listbox.Button
           dir={languageDirection}
-          className="w-full cursor-pointer rounded-md bg-linear-to-b from-gray-50 to-gray-100 py-1.5 px-3 text-left text-sm text-gray-900 shadow-sm focus:outline-none 
-        focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-100 flex flex-row gap-2 items-center hover:bg-gray-200 transition-colors">
+          className={`w-full cursor-pointer rounded-md bg-linear-to-b from-gray-50 to-gray-100 py-1.5 px-3 text-left text-sm text-gray-900 shadow-sm focus:outline-none 
+        focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-100 flex flex-row gap-2 items-center hover:bg-gray-200 transition-colors ${buttonClassName}`}>
           <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3 text-gray-400" aria-hidden="true" />
           <span className="block truncate">{selectedOption ? selectedOption.label : placeholder || 'בחר'}</span>
         </Listbox.Button>
