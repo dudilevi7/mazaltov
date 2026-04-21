@@ -123,14 +123,16 @@ const Guests = () => {
   }
 
   const handleToggleManualApproval = (guest: Guest, value: boolean) => {
-    updateGuest(guest.id, {
-      ...guest,
-      status: value ? GuestStatus.ACCEPTED : GuestStatus.PENDING,
-    })
+    const status = value ? GuestStatus.ACCEPTED : GuestStatus.PENDING
+    const approved =
+      value && (guest.approved ?? 0) === 0 ? guest.quantity : guest.approved
+    updateGuest(guest.id, { ...guest, status, approved })
   }
 
   const handleStatusChange = (guest: Guest, status: GuestStatus) => {
-    updateGuest(guest.id, { ...guest, status })
+    const approved =
+      status === GuestStatus.ACCEPTED && (guest.approved ?? 0) === 0 ? guest.quantity : guest.approved
+    updateGuest(guest.id, { ...guest, status, approved })
   }
 
   const handleNotesChange = (guest: Guest, notes: string) => {

@@ -111,16 +111,20 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
     e.preventDefault()
     if (!canSubmit) return
     const tableNum = parseNumber(table)
+    const quantityNum = Math.max(1, parseInt(quantity, 10) || 1)
+    const approvedNum = Math.max(0, parseInt(approved, 10) || 0)
+    const resolvedApproved =
+      status === GuestStatus.ACCEPTED && approvedNum === 0 ? quantityNum : approvedNum
     onSave({
       name: name.trim(),
-      quantity: Math.max(1, parseInt(quantity, 10) || 1),
+      quantity: quantityNum,
       status,
       side: side?.label ?? '',
       table: tableNum > 0 ? tableNum : undefined,
       phoneNumber: phoneNumber.trim() || undefined,
       category: category.trim(),
       gift: 0,
-      approved: Math.max(0, parseInt(approved, 10) || 0),
+      approved: resolvedApproved,
       notes: notes.trim() || undefined,
       vegan,
       vegetarian,
