@@ -10,9 +10,11 @@ import { SUGGESTED_SERVICES_OPTIONS } from '@/constants/providers'
 import { PUBLIC_NOTE_LABELS } from '@/constants/publicNotes'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import CustomCheckbox from '@/components/Shared/CustomCheckbox'
 import Modal from '@/components/Shared/Modal'
 import PublicNoteEditorToolbar from './PublicNoteEditorToolbar'
 import type { PublicNote } from '@/types/PublicNote'
+import type { EventSettings } from '@/types/Settings'
 
 interface PublicNoteEditorProps {
   isOpen: boolean
@@ -21,7 +23,7 @@ interface PublicNoteEditorProps {
     title: string
     content: object
     service: string
-    eventDetails: string
+    eventDetails: EventSettings | undefined
     updatedBy: string
   }) => void
   note?: PublicNote | null
@@ -29,25 +31,25 @@ interface PublicNoteEditorProps {
 }
 
 const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicNoteEditorProps) => {
-  const { languageDirection } = useAppContext()
+  const { languageDirection, eventSettings } = useAppContext()
   const isHeb = languageDirection === LanguageDirection.HEB
   const labels = isHeb ? PUBLIC_NOTE_LABELS.HEB : PUBLIC_NOTE_LABELS.ENG
 
   const [title, setTitle] = useState('')
   const [service, setService] = useState('')
-  const [eventDetails, setEventDetails] = useState('')
+  const [saveEventDetails, setSaveEventDetails] = useState(false)
   const [updatedBy, setUpdatedBy] = useState('')
 
   useEffect(() => {
     if (isEditMode) {
       setTitle(note?.title ?? '')
       setService(note?.service ?? '')
-      setEventDetails(note?.eventDetails ?? '')
+      setSaveEventDetails(!!note?.eventDetails)
       setUpdatedBy(note?.updatedBy ?? '')
     } else {
       setTitle('')
       setService('')
-      setEventDetails('')
+      setSaveEventDetails(false)
       setUpdatedBy('')
     }
   }, [isEditMode, note])
@@ -79,7 +81,7 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
       title: title.trim(),
       content: editor?.getJSON() ?? {},
       service,
-      eventDetails: eventDetails.trim(),
+      eventDetails: saveEventDetails ? eventSettings : undefined,
       updatedBy: updatedBy.trim(),
     })
     onClose()
@@ -124,17 +126,11 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{labels.eventDetails}</label>
-            <textarea
-              value={eventDetails}
-              onChange={(e) => setEventDetails(e.target.value)}
-              placeholder={labels.eventDetailsPlaceholder}
-              rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y min-h-[4.5rem]"
-              dir={languageDirection}
-            />
-          </div>
+          <CustomCheckbox
+            checked={saveEventDetails}
+            onChange={setSaveEventDetails}
+            label={labels.saveEventDetails}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{labels.updatedBy}</label>

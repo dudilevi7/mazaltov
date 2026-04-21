@@ -13,10 +13,34 @@ import { getSuggestedServiceByLabel } from '@/constants/providers'
 import PublicNoteEditorToolbar from '@/components/PublicNotes/PublicNoteEditorToolbar'
 import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import type { PublicNote } from '@/types/PublicNote'
+import type { EventSettings } from '@/types/Settings'
+import { EventType } from '@/types/Settings'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import Logo from '@/components/AppHeader/Logo'
-import { formatDateDDMMYYHHMM } from '@/lib/dateUtils'
+import { formatDateDDMMYY, formatDateDDMMYYHHMM } from '@/lib/dateUtils'
 import { PUBLIC_NOTE_LABELS } from '@/constants/publicNotes'
+
+const EVENT_TYPE_LABEL: Record<EventType, string> = {
+  [EventType.WEDDING]: 'חתונה',
+  [EventType.BAR_MITZVA]: 'בר מצווה',
+  [EventType.BRIT]: 'ברית',
+  [EventType.CUSTOM]: '',
+}
+
+const getEventDetailsRows = (e: EventSettings): { label: string; value: string }[] => {
+  const rows: { label: string; value: string }[] = []
+  const typeName = e.eventType === EventType.CUSTOM ? (e.customEventType ?? '') : EVENT_TYPE_LABEL[e.eventType]
+  if (typeName) rows.push({ label: 'סוג אירוע', value: typeName })
+  if (e.eventType === EventType.WEDDING) {
+    if (e.groomName?.trim()) rows.push({ label: 'חתן', value: e.groomName.trim() })
+    if (e.brideName?.trim()) rows.push({ label: 'כלה', value: e.brideName.trim() })
+  } else {
+    if (e.ownerName?.trim()) rows.push({ label: 'שם', value: e.ownerName.trim() })
+  }
+  if (e.eventDate?.trim()) rows.push({ label: 'תאריך', value: formatDateDDMMYY(new Date(e.eventDate).getTime() ?? 0) })
+  if (e.eventHall?.trim()) rows.push({ label: 'אולם', value: e.eventHall.trim() })
+  return rows
+}
 
 const PublicNotePageContent = () => {
   const searchParams = useSearchParams()
@@ -122,6 +146,7 @@ const PublicNotePageContent = () => {
 
   const suggestedService = getSuggestedServiceByLabel(note.service)
 
+  const eventDetailsRows = note.eventDetails ? getEventDetailsRows(note.eventDetails) : []
   return (
     <div className="flex flex-col gap-4 items-center justify-center h-full" dir="rtl">
       <Logo className="mt-4" />
@@ -146,10 +171,19 @@ const PublicNotePageContent = () => {
             </div>
           </div>
 
-          {note.eventDetails?.trim() && (
-            <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+          {note.eventDetails && (
+            <div className="px-4 py-3 bg-linear-to-b from-blue-50 to-gray-100 border-b border-gray-200">
               <p className="text-xs font-medium text-gray-500 mb-1">{PUBLIC_NOTE_LABELS.HEB.eventDetails}</p>
-              <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{note.eventDetails.trim()}</p>
+              <div className="flex flex-row flex-wrap gap-2">
+                {eventDetailsRows.map(({ label, value }, index) => (
+                  <div
+                    key={label}
+                    className={`flex gap-1 text-sm ${index < eventDetailsRows.length - 1 ? 'border-l border-gray-300 pl-2' : ''}`}>
+                    <span className="text-gray-500 shrink-0">{label}:</span>
+                    <span className="bg-gray-100 text-gray-800 rounded-md">{value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

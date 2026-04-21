@@ -14,6 +14,7 @@ import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import PublicNoteItem from './PublicNoteItem'
 import PublicNoteEditor from './PublicNoteEditor'
 import type { PublicNote } from '@/types/PublicNote'
+import type { EventSettings } from '@/types/Settings'
 
 interface PublicNotesModalProps {
   isOpen: boolean
@@ -45,7 +46,7 @@ const PublicNotesModal = ({ isOpen, onClose }: PublicNotesModalProps) => {
     title: string
     content: object
     service: string
-    eventDetails: string
+    eventDetails: EventSettings | undefined
     updatedBy: string
   }) => {
     if (editingNote) {

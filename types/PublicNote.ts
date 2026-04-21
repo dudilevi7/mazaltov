@@ -1,9 +1,11 @@
+import type { EventSettings } from '@/types/Settings'
+
 interface PublicNote {
   id: string
   title: string
   content: object
   service: string
-  eventDetails: string
+  eventDetails?: EventSettings
   updatedBy: string
   createdAt: number
   updatedAt: number
