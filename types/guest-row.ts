@@ -12,6 +12,10 @@ export type GuestRow = {
   category: string
   gift: number
   notes: string | null
+  vegan: boolean
+  vegetarian: boolean
+  glat_kosher: boolean
+  transportation: boolean
   created_at: string
   updated_at: string
 }
@@ -31,6 +35,10 @@ export const mapGuestRowToGuest = (row: GuestRow): Guest => ({
   gift: toNum(row.gift),
   manualApproval: (row.status ?? 'pending') === 'accepted',
   notes: row.notes ?? undefined,
+  vegan: row.vegan ?? false,
+  vegetarian: row.vegetarian ?? false,
+  glatKosher: row.glat_kosher ?? false,
+  transportation: row.transportation ?? false,
   createdAt: row.created_at ? new Date(row.created_at).getTime() : 0,
   updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : 0,
 })
@@ -47,4 +55,8 @@ export const mapGuestToGuestRow = (
   category: guest.category ?? '',
   gift: guest.gift ?? 0,
   notes: guest.notes ?? null,
+  vegan: guest.vegan ?? false,
+  vegetarian: guest.vegetarian ?? false,
+  glat_kosher: guest.glatKosher ?? false,
+  transportation: guest.transportation ?? false,
 })

@@ -10,6 +10,7 @@ import SelectDropdownWithCustomOption from '@/components/Shared/SelectDropdownWi
 import { validatePhoneNumber, validateRealName, isNameInGuests, STATUS_OPTIONS } from './helper'
 import Modal from '@/components/Shared/Modal'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
+import CustomCheckbox from '@/components/Shared/CustomCheckbox'
 
 const CUSTOM_CATEGORY_VALUE = '__custom__'
 
@@ -23,6 +24,10 @@ export interface GuestFormData {
   category: string
   gift: number
   notes?: string
+  vegan: boolean
+  vegetarian: boolean
+  glatKosher: boolean
+  transportation: boolean
 }
 
 interface GuestModalProps {
@@ -43,6 +48,10 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   const [phoneNumber, setPhoneNumber] = useState('')
   const [category, setCategory] = useState('')
   const [notes, setNotes] = useState('')
+  const [vegan, setVegan] = useState(false)
+  const [vegetarian, setVegetarian] = useState(false)
+  const [glatKosher, setGlatKosher] = useState(false)
+  const [transportation, setTransportation] = useState(false)
 
   const isEdit = !!guest
   const isPhoneValid = useMemo(() => validatePhoneNumber(phoneNumber || ''), [phoneNumber])
@@ -88,6 +97,10 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       setPhoneNumber(guest?.phoneNumber || '')
       setCategory(guest?.category || '')
       setNotes(guest?.notes || '')
+      setVegan(guest?.vegan ?? false)
+      setVegetarian(guest?.vegetarian ?? false)
+      setGlatKosher(guest?.glatKosher ?? false)
+      setTransportation(guest?.transportation ?? false)
     }
   }, [isOpen, guest, sideOptions])
 
@@ -105,6 +118,10 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       category: category.trim(),
       gift: 0,
       notes: notes.trim() || undefined,
+      vegan,
+      vegetarian,
+      glatKosher,
+      transportation,
     })
     onClose()
   }
@@ -200,6 +217,15 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
                 placeholder="הערות נוספות על האורח..."
               />
+            </div>
+            <div className="md:col-span-2">
+              <p className="mb-2 text-sm font-medium text-gray-700">פרטים נוספים</p>
+              <div className="flex flex-wrap gap-x-6 gap-y-3">
+                <CustomCheckbox checked={vegan} onChange={setVegan} label="טבעוני" />
+                <CustomCheckbox checked={vegetarian} onChange={setVegetarian} label="צמחוני" />
+                <CustomCheckbox checked={glatKosher} onChange={setGlatKosher} label="גלאט כשר" />
+                <CustomCheckbox checked={transportation} onChange={setTransportation} label="הסעות" />
+              </div>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">

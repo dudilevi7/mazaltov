@@ -17,7 +17,13 @@ import type { PublicNote } from '@/types/PublicNote'
 interface PublicNoteEditorProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (note: { title: string; content: object; service: string; updatedBy: string }) => void
+  onSave: (note: {
+    title: string
+    content: object
+    service: string
+    eventDetails: string
+    updatedBy: string
+  }) => void
   note?: PublicNote | null
   isEditMode: boolean
 }
@@ -29,13 +35,20 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
 
   const [title, setTitle] = useState('')
   const [service, setService] = useState('')
+  const [eventDetails, setEventDetails] = useState('')
   const [updatedBy, setUpdatedBy] = useState('')
 
   useEffect(() => {
     if (isEditMode) {
       setTitle(note?.title ?? '')
       setService(note?.service ?? '')
+      setEventDetails(note?.eventDetails ?? '')
       setUpdatedBy(note?.updatedBy ?? '')
+    } else {
+      setTitle('')
+      setService('')
+      setEventDetails('')
+      setUpdatedBy('')
     }
   }, [isEditMode, note])
 
@@ -66,6 +79,7 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
       title: title.trim(),
       content: editor?.getJSON() ?? {},
       service,
+      eventDetails: eventDetails.trim(),
       updatedBy: updatedBy.trim(),
     })
     onClose()
@@ -107,6 +121,18 @@ const PublicNoteEditor = ({ isOpen, onClose, onSave, note, isEditMode }: PublicN
               options={SUGGESTED_SERVICES_OPTIONS}
               placeholder={isHeb ? 'בחר שירות' : 'Select service'}
               searchable
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{labels.eventDetails}</label>
+            <textarea
+              value={eventDetails}
+              onChange={(e) => setEventDetails(e.target.value)}
+              placeholder={labels.eventDetailsPlaceholder}
+              rows={3}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y min-h-[4.5rem]"
+              dir={languageDirection}
             />
           </div>
 

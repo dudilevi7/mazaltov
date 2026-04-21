@@ -137,6 +137,14 @@ const Guests = () => {
     updateGuest(guest.id, { ...guest, notes: notes || undefined })
   }
 
+  const handleBooleanFieldChange = (
+    guest: Guest,
+    field: 'vegan' | 'vegetarian' | 'glatKosher' | 'transportation',
+    value: boolean
+  ) => {
+    updateGuest(guest.id, { ...guest, [field]: value })
+  }
+
   if (isLoadingGuests) {
     return <SpinnerLoader size="lg" isLoadingPage />
   }
@@ -212,6 +220,7 @@ const Guests = () => {
             onToggleManualApproval={handleToggleManualApproval}
             onStatusChange={handleStatusChange}
             onNotesChange={handleNotesChange}
+            onBooleanFieldChange={handleBooleanFieldChange}
           />
         </div>
       </div>

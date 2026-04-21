@@ -41,7 +41,13 @@ const PublicNotesModal = ({ isOpen, onClose }: PublicNotesModalProps) => {
     setEditorOpen(true)
   }
 
-  const handleSave = async (data: { title: string; content: object; service: string; updatedBy: string }) => {
+  const handleSave = async (data: {
+    title: string
+    content: object
+    service: string
+    eventDetails: string
+    updatedBy: string
+  }) => {
     if (editingNote) {
       await updatePublicNote(editingNote.id, data)
     } else {

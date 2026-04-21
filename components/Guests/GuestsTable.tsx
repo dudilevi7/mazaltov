@@ -5,7 +5,7 @@ import type { Guest } from '@/types/Guest'
 import { GuestStatus } from '@/types/Guest'
 import { STATUS_OPTIONS } from './helper'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
-import Toggle from '@/components/Shared/Toggle'
+import CustomCheckbox from '@/components/Shared/CustomCheckbox'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
@@ -27,6 +27,7 @@ interface GuestsTableProps {
   onToggleManualApproval?: (guest: Guest, value: boolean) => void
   onStatusChange?: (guest: Guest, status: GuestStatus) => void
   onNotesChange?: (guest: Guest, notes: string) => void
+  onBooleanFieldChange?: (guest: Guest, field: 'vegan' | 'vegetarian' | 'glatKosher' | 'transportation', value: boolean) => void
 }
 
 const InlineNotesCell = ({
@@ -98,6 +99,7 @@ const GuestsTable = ({
   onToggleManualApproval = () => {},
   onStatusChange = () => {},
   onNotesChange = () => {},
+  onBooleanFieldChange = () => {},
 }: GuestsTableProps) => {
   const { gifts } = useGiftsContext()
   const [showDeleteSpecificGuestModal, setShowDeleteSpecificGuestModal] = useState(false)
@@ -182,10 +184,68 @@ const GuestsTable = ({
       render: (row: Guest) => <InlineNotesCell guest={row} onNotesChange={onNotesChange} />,
     },
     {
+      key: 'vegan',
+      label: 'טבעוני',
+      render: (row: Guest) => (
+        <div className="flex justify-center">
+          <CustomCheckbox
+            checked={row.vegan ?? false}
+            onChange={(value) => onBooleanFieldChange(row, 'vegan', value)}
+            ariaLabel={`טבעוני, ${row.name}`}
+          />
+        </div>
+      ),
+    },
+    {
+      key: 'vegetarian',
+      label: 'צמחוני',
+      render: (row: Guest) => (
+        <div className="flex justify-center">
+          <CustomCheckbox
+            checked={row.vegetarian ?? false}
+            onChange={(value) => onBooleanFieldChange(row, 'vegetarian', value)}
+            ariaLabel={`צמחוני, ${row.name}`}
+          />
+        </div>
+      ),
+    },
+    {
+      key: 'glatKosher',
+      label: 'גלאט כשר',
+      render: (row: Guest) => (
+        <div className="flex justify-center">
+          <CustomCheckbox
+            checked={row.glatKosher ?? false}
+            onChange={(value) => onBooleanFieldChange(row, 'glatKosher', value)}
+            ariaLabel={`גלאט כשר, ${row.name}`}
+          />
+        </div>
+      ),
+    },
+    {
+      key: 'transportation',
+      label: 'הסעות',
+      render: (row: Guest) => (
+        <div className="flex justify-center">
+          <CustomCheckbox
+            checked={row.transportation ?? false}
+            onChange={(value) => onBooleanFieldChange(row, 'transportation', value)}
+            ariaLabel={`הסעות, ${row.name}`}
+          />
+        </div>
+      ),
+    },
+    {
       key: 'manualApproval',
       label: 'אישור ידני',
       render: (row: Guest) => (
-        <Toggle enabled={row.manualApproval ?? false} onChange={(value) => onToggleManualApproval(row, value)} />
+        <div className="flex justify-center">
+          <CustomCheckbox
+            checked={row.manualApproval ?? false}
+            onChange={(value) => onToggleManualApproval(row, value)}
+            ariaLabel={`אישור ידני, ${row.name}`}
+          />
+        </div>
       ),
     },
     {

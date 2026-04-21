@@ -16,6 +16,7 @@ import type { PublicNote } from '@/types/PublicNote'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import Logo from '@/components/AppHeader/Logo'
 import { formatDateDDMMYYHHMM } from '@/lib/dateUtils'
+import { PUBLIC_NOTE_LABELS } from '@/constants/publicNotes'
 
 const PublicNotePageContent = () => {
   const searchParams = useSearchParams()
@@ -144,6 +145,13 @@ const PublicNotePageContent = () => {
               <span className="text-xs text-gray-500">{formatDateDDMMYYHHMM(note.updatedAt ?? note.createdAt)}</span>
             </div>
           </div>
+
+          {note.eventDetails?.trim() && (
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-1">{PUBLIC_NOTE_LABELS.HEB.eventDetails}</p>
+              <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{note.eventDetails.trim()}</p>
+            </div>
+          )}
 
           <div className="px-4 pt-3">
             <PublicNoteEditorToolbar editor={editor} />

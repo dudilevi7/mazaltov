@@ -16,6 +16,10 @@ interface Guest {
   gift: number
   manualApproval?: boolean
   notes?: string
+  vegan?: boolean
+  vegetarian?: boolean
+  glatKosher?: boolean
+  transportation?: boolean
   createdAt: number
   updatedAt: number
 }

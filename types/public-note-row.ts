@@ -6,6 +6,7 @@ export type PublicNoteRow = {
   title: string
   content: object
   service: string
+  event_details?: string
   updated_by: string
   created_at: string
   updated_at: string
@@ -16,6 +17,7 @@ export const mapPublicNoteRowToPublicNote = (row: PublicNoteRow): PublicNote => 
   title: row.title ?? '',
   content: row.content ?? {},
   service: row.service ?? '',
+  eventDetails: row.event_details ?? '',
   updatedBy: row.updated_by ?? '',
   createdAt: row.created_at ? new Date(row.created_at).getTime() : 0,
   updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : 0,
@@ -27,5 +29,6 @@ export const mapPublicNoteToPublicNoteRow = (
   title: note.title ?? '',
   content: note.content ?? {},
   service: note.service ?? '',
+  event_details: note.eventDetails ?? '',
   updated_by: note.updatedBy ?? '',
 })

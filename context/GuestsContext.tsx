@@ -28,6 +28,14 @@ interface GuestsContextType {
   categoryFilter: string
   setCategoryFilter: (category: string) => void
   setShowNonPhoneNumbersFilter: (show: boolean) => void
+  veganFilter: boolean
+  setVeganFilter: (v: boolean) => void
+  vegetarianFilter: boolean
+  setVegetarianFilter: (v: boolean) => void
+  glatKosherFilter: boolean
+  setGlatKosherFilter: (v: boolean) => void
+  transportationFilter: boolean
+  setTransportationFilter: (v: boolean) => void
   filteredGuests: Guest[]
   filteredGuestsByQuantityCount: number
   filteredPhoneNumbersCount: number
@@ -53,6 +61,10 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
   })
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [veganFilter, setVeganFilter] = useState(false)
+  const [vegetarianFilter, setVegetarianFilter] = useState(false)
+  const [glatKosherFilter, setGlatKosherFilter] = useState(false)
+  const [transportationFilter, setTransportationFilter] = useState(false)
 
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated) return
@@ -178,9 +190,23 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
       const matchNonPhoneNumbers = showNonPhoneNumbersFilter
         ? !guest.phoneNumber || guest.phoneNumber.trim() === ''
         : true
-      return matchSearch && matchSide && matchStatus && matchCategory && matchNonPhoneNumbers
+      const matchVegan = !veganFilter || guest.vegan === true
+      const matchVegetarian = !vegetarianFilter || guest.vegetarian === true
+      const matchGlatKosher = !glatKosherFilter || guest.glatKosher === true
+      const matchTransportation = !transportationFilter || guest.transportation === true
+      return (
+        matchSearch &&
+        matchSide &&
+        matchStatus &&
+        matchCategory &&
+        matchNonPhoneNumbers &&
+        matchVegan &&
+        matchVegetarian &&
+        matchGlatKosher &&
+        matchTransportation
+      )
     })
-  }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter, showNonPhoneNumbersFilter])
+  }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter, showNonPhoneNumbersFilter, veganFilter, vegetarianFilter, glatKosherFilter, transportationFilter])
 
   const filteredGuestsByQuantityCount = useMemo(
     () => filteredGuests.reduce((sum, guest) => sum + guest.quantity, 0),
@@ -192,13 +218,24 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
   )
 
   const hasFiltersOrSearch =
-    searchQuery.trim() !== '' || sideFilter.value !== 'all' || statusFilter !== 'all' || categoryFilter !== 'all'
+    searchQuery.trim() !== '' ||
+    sideFilter.value !== 'all' ||
+    statusFilter !== 'all' ||
+    categoryFilter !== 'all' ||
+    veganFilter ||
+    vegetarianFilter ||
+    glatKosherFilter ||
+    transportationFilter
 
   const clearAllFilters = () => {
     setSideFilter({ value: 'all', label: 'הכל' })
     setStatusFilter('all')
     setCategoryFilter('all')
     setSearchQuery('')
+    setVeganFilter(false)
+    setVegetarianFilter(false)
+    setGlatKosherFilter(false)
+    setTransportationFilter(false)
   }
 
   return (
@@ -224,6 +261,14 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
         filteredPhoneNumbersCount,
         showNonPhoneNumbersFilter,
         setShowNonPhoneNumbersFilter,
+        veganFilter,
+        setVeganFilter,
+        vegetarianFilter,
+        setVegetarianFilter,
+        glatKosherFilter,
+        setGlatKosherFilter,
+        transportationFilter,
+        setTransportationFilter,
         clearAllFilters,
         hasFiltersOrSearch,
         isLoadingGuests,
