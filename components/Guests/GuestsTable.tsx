@@ -27,7 +27,12 @@ interface GuestsTableProps {
   onToggleManualApproval?: (guest: Guest, value: boolean) => void
   onStatusChange?: (guest: Guest, status: GuestStatus) => void
   onNotesChange?: (guest: Guest, notes: string) => void
-  onBooleanFieldChange?: (guest: Guest, field: 'vegan' | 'vegetarian' | 'glatKosher' | 'transportation', value: boolean) => void
+  onApprovedChange?: (guest: Guest, approved: number) => void
+  onBooleanFieldChange?: (
+    guest: Guest,
+    field: 'vegan' | 'vegetarian' | 'glatKosher' | 'transportation',
+    value: boolean
+  ) => void
 }
 
 const InlineNotesCell = ({
@@ -89,6 +94,65 @@ const InlineNotesCell = ({
   )
 }
 
+const InlineApprovedCell = ({
+  guest,
+  onApprovedChange,
+}: {
+  guest: Guest
+  onApprovedChange: (guest: Guest, approved: number) => void
+}) => {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(String(guest.approved ?? 0))
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleClick = () => {
+    setValue(String(guest.approved ?? 0))
+    setEditing(true)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
+  const handleBlur = () => {
+    setEditing(false)
+    const num = Math.max(0, parseInt(value, 10) || 0)
+    if (num !== (guest.approved ?? 0)) {
+      onApprovedChange(guest, num)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') inputRef.current?.blur()
+    if (e.key === 'Escape') {
+      setValue(String(guest.approved ?? 0))
+      setEditing(false)
+    }
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        type="number"
+        min="0"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        className="w-16 rounded border border-blue-400 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+      />
+    )
+  }
+
+  return (
+    <Tooltip content="לחץ לעריכה" place={TooltipPlace.TOP}>
+      <span
+        onClick={handleClick}
+        className="block min-w-[40px] cursor-pointer rounded px-1 py-0.5 text-sm hover:bg-gray-100 text-center">
+        {guest.approved ?? 0}
+      </span>
+    </Tooltip>
+  )
+}
+
 const GuestsTable = ({
   guests,
   sideLabels,
@@ -99,6 +163,7 @@ const GuestsTable = ({
   onToggleManualApproval = () => {},
   onStatusChange = () => {},
   onNotesChange = () => {},
+  onApprovedChange = () => {},
   onBooleanFieldChange = () => {},
 }: GuestsTableProps) => {
   const { gifts } = useGiftsContext()
@@ -138,6 +203,11 @@ const GuestsTable = ({
   const columns: CustomTableColumn<Guest>[] = [
     { key: 'name', label: 'שם' },
     { key: 'quantity', label: 'כמות' },
+    {
+      key: 'approved',
+      label: 'מגיעים',
+      render: (row: Guest) => <InlineApprovedCell guest={row} onApprovedChange={onApprovedChange} />,
+    },
     {
       key: 'status',
       label: 'סטטוס',

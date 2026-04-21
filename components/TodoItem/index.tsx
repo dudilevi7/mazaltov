@@ -38,7 +38,7 @@ const TodoItem = ({ todo, providerName, onEdit, onDelete, onStatusChange, onView
               </span>
             )}
           </div>
-          {todo.description && <p className="text-sm text-gray-500">{todo.description}</p>}
+          {todo.description && <p className="text-sm text-gray-500 whitespace-pre-wrap">{todo.description}</p>}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">

@@ -137,6 +137,10 @@ const Guests = () => {
     updateGuest(guest.id, { ...guest, notes: notes || undefined })
   }
 
+  const handleApprovedChange = (guest: Guest, approved: number) => {
+    updateGuest(guest.id, { ...guest, approved })
+  }
+
   const handleBooleanFieldChange = (
     guest: Guest,
     field: 'vegan' | 'vegetarian' | 'glatKosher' | 'transportation',
@@ -220,6 +224,7 @@ const Guests = () => {
             onToggleManualApproval={handleToggleManualApproval}
             onStatusChange={handleStatusChange}
             onNotesChange={handleNotesChange}
+            onApprovedChange={handleApprovedChange}
             onBooleanFieldChange={handleBooleanFieldChange}
           />
         </div>

@@ -14,6 +14,7 @@ interface Guest {
   phoneNumber?: string
   category: string
   gift: number
+  approved?: number
   manualApproval?: boolean
   notes?: string
   vegan?: boolean

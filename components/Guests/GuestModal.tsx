@@ -23,6 +23,7 @@ export interface GuestFormData {
   phoneNumber?: string
   category: string
   gift: number
+  approved: number
   notes?: string
   vegan: boolean
   vegetarian: boolean
@@ -47,6 +48,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
   const [table, setTable] = useState<string>('0')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [category, setCategory] = useState('')
+  const [approved, setApproved] = useState<string>('0')
   const [notes, setNotes] = useState('')
   const [vegan, setVegan] = useState(false)
   const [vegetarian, setVegetarian] = useState(false)
@@ -96,6 +98,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       setTable(guest?.table !== undefined ? String(guest.table) : '0')
       setPhoneNumber(guest?.phoneNumber || '')
       setCategory(guest?.category || '')
+      setApproved(guest ? String(guest.approved ?? 0) : '0')
       setNotes(guest?.notes || '')
       setVegan(guest?.vegan ?? false)
       setVegetarian(guest?.vegetarian ?? false)
@@ -117,6 +120,7 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
       phoneNumber: phoneNumber.trim() || undefined,
       category: category.trim(),
       gift: 0,
+      approved: Math.max(0, parseInt(approved, 10) || 0),
       notes: notes.trim() || undefined,
       vegan,
       vegetarian,
@@ -150,6 +154,16 @@ const GuestModal = ({ isOpen, onClose, onSave, guest, existingGuests, sideOption
                 min="1"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">מגיעים בפועל</label>
+              <input
+                type="number"
+                min="0"
+                value={approved}
+                onChange={(e) => setApproved(e.target.value)}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>

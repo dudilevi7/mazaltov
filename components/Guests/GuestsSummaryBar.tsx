@@ -4,7 +4,15 @@ import { useGuestsContext } from '@/context/GuestsContext'
 import { useAppContext } from '@/context/AppContext'
 import { GuestStatus } from '@/types/Guest'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUsers, faUser, faCheck, faTimes, faUserGroup, faTrash, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import {
+  faUsers,
+  faUser,
+  faCheck,
+  faTimes,
+  faUserGroup,
+  faTrash,
+  faExclamationTriangle,
+} from '@fortawesome/free-solid-svg-icons'
 import { useMemo, useState } from 'react'
 import { getSideOptions, getSideLabels, getDuplicatePhoneGuests } from './helper'
 import type { Guest } from '@/types/Guest'
@@ -50,7 +58,8 @@ const GuestsSummaryBar = () => {
     const declined = guests
       .filter((guest) => guest.status === GuestStatus.DECLINED)
       .reduce((s, guest) => s + guest.quantity, 0)
-    return { total, bySide, accepted, declined }
+    const approved = guests.reduce((s, guest) => s + (guest.approved ?? 0), 0)
+    return { total, bySide, accepted, declined, approved }
   }, [guests, sideOptions, sideLabels])
 
   const duplicatePhones = useMemo(() => getDuplicatePhoneGuests(guests), [guests])
@@ -84,7 +93,7 @@ const GuestsSummaryBar = () => {
             statusFilter === GuestStatus.ACCEPTED ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'
           }`}>
           <FontAwesomeIcon icon={faCheck} />
-          <span>אישרו הגעה - {stats.accepted}</span>
+          <span>אישרו הגעה - {stats.approved > 0 ? ` ${stats.approved}` : ''}</span>
         </button>
         <button
           onClick={() => setStatusFilter(statusFilter === GuestStatus.DECLINED ? 'all' : GuestStatus.DECLINED)}
