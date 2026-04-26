@@ -93,7 +93,9 @@ const GuestsSummaryBar = () => {
             statusFilter === GuestStatus.ACCEPTED ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'
           }`}>
           <FontAwesomeIcon icon={faCheck} />
-          <span>אישרו הגעה - {stats.approved > 0 ? ` ${stats.approved}` : ''}</span>
+          <span>
+            אישרו הגעה - {stats.accepted} (מגיעים: {stats.approved})
+          </span>
         </button>
         <button
           onClick={() => setStatusFilter(statusFilter === GuestStatus.DECLINED ? 'all' : GuestStatus.DECLINED)}

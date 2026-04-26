@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext'
 import { getSideOptions } from './helper'
 import type { Guest } from '@/types/Guest'
 import StatisticsInteractivePie, { type ChartEntry } from './StatisticsInteractivePie'
+import StatisticsCategoryLines from './StatisticsCategoryLines'
 import GuestsStatusStats from './GuestsStatusStats'
 
 const SIDE_COLORS = ['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981']
@@ -60,6 +61,8 @@ const GuestsStatistics = () => {
       <StatisticsInteractivePie data={sideData} colors={SIDE_COLORS} title="אורחים לפי צד" />
       <div className="border-t border-gray-200" />
       <StatisticsInteractivePie data={categoryData} colors={CATEGORY_COLORS} title="אורחים לפי קירבה" />
+      <div className="border-t border-gray-200" />
+      <StatisticsCategoryLines guests={guests} title="קירבה: סה״כ מול אושרו" />
     </div>
   )
 }

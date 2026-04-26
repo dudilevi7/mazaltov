@@ -170,6 +170,36 @@ const GuestsTable = ({
   const [showDeleteSpecificGuestModal, setShowDeleteSpecificGuestModal] = useState(false)
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null)
   const [guestForWhatsApp, setGuestForWhatsApp] = useState<Guest | null>(null)
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null)
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      if (sortDir === 'asc') {
+        setSortDir('desc')
+      } else {
+        setSortKey(null)
+        setSortDir(null)
+      }
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  const sortedGuests = useMemo(() => {
+    if (!sortKey || !sortDir) return guests
+    return [...guests].sort((a, b) => {
+      const aVal = (a as unknown as Record<string, unknown>)[sortKey]
+      const bVal = (b as unknown as Record<string, unknown>)[sortKey]
+      const aNum = typeof aVal === 'boolean' ? (aVal ? 1 : 0) : typeof aVal === 'number' ? aVal : 0
+      const bNum = typeof bVal === 'boolean' ? (bVal ? 1 : 0) : typeof bVal === 'number' ? bVal : 0
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      return sortDir === 'asc' ? aNum - bNum : bNum - aNum
+    })
+  }, [guests, sortKey, sortDir])
   const giftsIdAndAmountByGuestId = useMemo(() => {
     const map: Record<number, { giftId: string; amount: number }> = {}
     gifts.forEach((gift) => {
@@ -201,11 +231,12 @@ const GuestsTable = ({
   }
 
   const columns: CustomTableColumn<Guest>[] = [
-    { key: 'name', label: 'שם' },
-    { key: 'quantity', label: 'כמות' },
+    { key: 'name', label: 'שם', sortable: true },
+    { key: 'quantity', label: 'כמות', sortable: true },
     {
       key: 'approved',
       label: 'מגיעים',
+      sortable: true,
       render: (row: Guest) => <InlineApprovedCell guest={row} onApprovedChange={onApprovedChange} />,
     },
     {
@@ -256,6 +287,7 @@ const GuestsTable = ({
     {
       key: 'vegan',
       label: 'טבעוני',
+      sortable: true,
       render: (row: Guest) => (
         <div className="flex justify-center">
           <CustomCheckbox
@@ -269,6 +301,7 @@ const GuestsTable = ({
     {
       key: 'vegetarian',
       label: 'צמחוני',
+      sortable: true,
       render: (row: Guest) => (
         <div className="flex justify-center">
           <CustomCheckbox
@@ -282,6 +315,7 @@ const GuestsTable = ({
     {
       key: 'glatKosher',
       label: 'גלאט כשר',
+      sortable: true,
       render: (row: Guest) => (
         <div className="flex justify-center">
           <CustomCheckbox
@@ -295,6 +329,7 @@ const GuestsTable = ({
     {
       key: 'transportation',
       label: 'הסעות',
+      sortable: true,
       render: (row: Guest) => (
         <div className="flex justify-center">
           <CustomCheckbox
@@ -308,6 +343,7 @@ const GuestsTable = ({
     {
       key: 'manualApproval',
       label: 'אישור ידני',
+      sortable: true,
       render: (row: Guest) => (
         <div className="flex justify-center">
           <CustomCheckbox
@@ -359,7 +395,15 @@ const GuestsTable = ({
 
   return (
     <>
-      <CustomTable<Guest> columns={columns} data={guests} getRowKey={(g) => g.id} emptyMessage={emptyMessage} />
+      <CustomTable<Guest>
+        columns={columns}
+        data={sortedGuests}
+        getRowKey={(g) => g.id}
+        emptyMessage={emptyMessage}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={handleSort}
+      />
       <DeleteModal
         isOpen={showDeleteSpecificGuestModal}
         onClose={onDeleteCancel}
