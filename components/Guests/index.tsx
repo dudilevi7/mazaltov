@@ -14,14 +14,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faPlus,
   faFilterCircleXmark,
-  faFileDownload,
   faChartPie,
 } from '@fortawesome/free-solid-svg-icons'
 import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
-import { getSideOptions, getSideLabels, exportToIplanTemplate } from './helper'
+import { getSideOptions, getSideLabels } from './helper'
 import ImportGuestsExcelButton from './ImportExcel/ImportGuestsExcelButton'
-import { EventType } from '@/types/Settings'
+import ExportToIplanButton from './ExportToIplanButton'
 import { API_URL } from '@/constants'
 import { API_ROUTES } from '@/constants/apiRoutes'
 import fetchData, { METHODS } from '@/lib/fetchData'
@@ -71,18 +70,6 @@ const Guests = () => {
   useEffect(() => {
     fetchInvitationUrl()
   }, [fetchInvitationUrl])
-
-  const guestSideByName = useMemo(() => {
-    if (eventSettings.eventType === EventType.WEDDING && eventSettings.brideName && eventSettings.groomName) {
-      return {
-        [eventSettings.brideName as string]: 'כלה',
-        [eventSettings.groomName as string]: 'חתן',
-      }
-    }
-    return {
-      [eventSettings.ownerName as string]: 'חתן',
-    }
-  }, [eventSettings])
 
   const sideOptions = useMemo(() => getSideOptions(eventSettings), [eventSettings])
   const sideFilterOptions: SelectOption[] = useMemo(
@@ -165,13 +152,7 @@ const Guests = () => {
             הוסף אורח
           </CustomButton>
           <ImportGuestsExcelButton />
-          <CustomButton
-            size={ButtonSize.SM}
-            className="bg-gray-700 hover:bg-gray-800 text-white"
-            onClick={() => exportToIplanTemplate(guests, guestSideByName, eventSettings)}
-            icon={<FontAwesomeIcon icon={faFileDownload} />}>
-            ייצא ל IPlan
-          </CustomButton>
+          <ExportToIplanButton />
           <CustomButton
             size={ButtonSize.SM}
             className="bg-indigo-500 hover:bg-indigo-600 text-white"
