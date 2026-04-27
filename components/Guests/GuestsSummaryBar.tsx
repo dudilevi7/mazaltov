@@ -9,9 +9,11 @@ import {
   faUser,
   faCheck,
   faTimes,
+  faQuestion,
   faUserGroup,
   faTrash,
   faExclamationTriangle,
+  faPercent,
 } from '@fortawesome/free-solid-svg-icons'
 import { useMemo, useState } from 'react'
 import { getSideOptions, getSideLabels, getDuplicatePhoneGuests } from './helper'
@@ -58,8 +60,13 @@ const GuestsSummaryBar = () => {
     const declined = guests
       .filter((guest) => guest.status === GuestStatus.DECLINED)
       .reduce((s, guest) => s + guest.quantity, 0)
+    const maybe = guests
+      .filter((guest) => guest.status === GuestStatus.MAYBE)
+      .reduce((s, guest) => s + guest.quantity, 0)
     const approved = guests.reduce((s, guest) => s + (guest.approved ?? 0), 0)
-    return { total, bySide, accepted, declined, approved }
+    const denominator = approved + declined + maybe
+    const attendancePct = denominator > 0 ? Math.round((approved / denominator) * 100) : null
+    return { total, bySide, accepted, declined, maybe, approved, attendancePct }
   }, [guests, sideOptions, sideLabels])
 
   const duplicatePhones = useMemo(() => getDuplicatePhoneGuests(guests), [guests])
@@ -105,6 +112,20 @@ const GuestsSummaryBar = () => {
           <FontAwesomeIcon icon={faTimes} />
           <span>דחו הגעה - {stats.declined}</span>
         </button>
+        <button
+          onClick={() => setStatusFilter(statusFilter === GuestStatus.MAYBE ? 'all' : GuestStatus.MAYBE)}
+          className={`flex items-center gap-1 px-2 py-1 rounded-md text-white text-sm transition-all cursor-pointer hover:shadow-md ${
+            statusFilter === GuestStatus.MAYBE ? 'bg-yellow-600' : 'bg-yellow-500 hover:bg-yellow-600'
+          }`}>
+          <FontAwesomeIcon icon={faQuestion} />
+          <span>אולי - {stats.maybe}</span>
+        </button>
+        {stats.attendancePct !== null && (
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-gray-800 text-white text-sm font-medium">
+            <FontAwesomeIcon icon={faPercent} className="text-xs opacity-70" />
+            <span>אחוזי הגעה לייב: {stats.attendancePct}%</span>
+          </div>
+        )}
         {duplicatePhones.length > 0 && (
           <Tooltip
             place={TooltipPlace.BOTTOM}

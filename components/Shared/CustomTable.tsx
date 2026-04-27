@@ -41,7 +41,7 @@ const CustomTable = <T,>({
   onSort,
 }: CustomTableProps<T>) => {
   return (
-    <div className={`overflow-auto rounded-lg border border-gray-200 ${className}`}>
+    <div className={`overflow-auto rounded-lg border border-gray-200 h-full bg-white ${className}`}>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-linear-to-b from-gray-50 to-gray-100">
           <tr>

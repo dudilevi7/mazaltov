@@ -68,12 +68,14 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: GuestStatus.PENDING, label: 'ממתין' },
   { value: GuestStatus.ACCEPTED, label: 'אישר' },
   { value: GuestStatus.DECLINED, label: 'דחה' },
+  { value: GuestStatus.MAYBE, label: 'אולי' },
 ]
 
 const STATUS_LABELS: Record<GuestStatus, string> = {
   [GuestStatus.PENDING]: 'ממתין',
   [GuestStatus.ACCEPTED]: 'אישר',
   [GuestStatus.DECLINED]: 'דחה',
+  [GuestStatus.MAYBE]: 'אולי',
 }
 
 const applyGuestsSheetStyles = (sheet: XLSX.WorkSheet, colCount: number) => {

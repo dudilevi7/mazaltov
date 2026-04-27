@@ -2,6 +2,7 @@ enum GuestStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   DECLINED = 'declined',
+  MAYBE = 'maybe',
 }
 
 interface Guest {
