@@ -11,11 +11,7 @@ import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faPlus,
-  faFilterCircleXmark,
-  faChartPie,
-} from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faFilterCircleXmark, faChartPie } from '@fortawesome/free-solid-svg-icons'
 import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels } from './helper'
@@ -54,6 +50,14 @@ const Guests = () => {
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false)
   const [invitationUrl, setInvitationUrl] = useState<string | null>(null)
+  const filtteredApprovedGuests = useMemo(
+    () =>
+      filteredGuests.reduce(
+        (sum, guest) => sum + (guest.status === GuestStatus.ACCEPTED ? (guest.approved ?? 0) : 0),
+        0
+      ),
+    [guests, filteredGuests]
+  )
 
   const fetchInvitationUrl = useCallback(async () => {
     try {
@@ -111,14 +115,12 @@ const Guests = () => {
 
   const handleToggleManualApproval = (guest: Guest, value: boolean) => {
     const status = value ? GuestStatus.ACCEPTED : GuestStatus.PENDING
-    const approved =
-      value && (guest.approved ?? 0) === 0 ? guest.quantity : guest.approved
+    const approved = value && (guest.approved ?? 0) === 0 ? guest.quantity : guest.approved
     updateGuest(guest.id, { ...guest, status, approved })
   }
 
   const handleStatusChange = (guest: Guest, status: GuestStatus) => {
-    const approved =
-      status === GuestStatus.ACCEPTED && (guest.approved ?? 0) === 0 ? guest.quantity : guest.approved
+    const approved = status === GuestStatus.ACCEPTED && (guest.approved ?? 0) === 0 ? guest.quantity : guest.approved
     updateGuest(guest.id, { ...guest, status, approved })
   }
 
@@ -189,6 +191,12 @@ const Guests = () => {
           <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="חיפוש אורח" />
 
           <span className="text-gray-500 text-sm ms-auto">{filteredGuestsByQuantityCount} אורחים</span>
+          {filtteredApprovedGuests > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-sm ms-auto">|</span>
+              <span className="text-gray-500 text-sm ms-auto">{filtteredApprovedGuests} מגיעים</span>
+            </div>
+          )}
           {filteredPhoneNumbersCount > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-gray-500 text-sm ms-auto">|</span>

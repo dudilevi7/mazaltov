@@ -165,7 +165,8 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
       showToast({
         type: ToastType.SUCCESS,
         title: languageDirection === LanguageDirection.HEB ? 'הצלחה' : 'Success',
-        message: languageDirection === LanguageDirection.HEB ? 'כל האורחים נמחקו בהצלחה' : 'All guests deleted successfully',
+        message:
+          languageDirection === LanguageDirection.HEB ? 'כל האורחים נמחקו בהצלחה' : 'All guests deleted successfully',
       })
     } catch {
       showToast({
@@ -206,7 +207,18 @@ const GuestsProvider = ({ children }: { children: React.ReactNode }) => {
         matchTransportation
       )
     })
-  }, [guests, searchQuery, sideFilter, statusFilter, categoryFilter, showNonPhoneNumbersFilter, veganFilter, vegetarianFilter, glatKosherFilter, transportationFilter])
+  }, [
+    guests,
+    searchQuery,
+    sideFilter,
+    statusFilter,
+    categoryFilter,
+    showNonPhoneNumbersFilter,
+    veganFilter,
+    vegetarianFilter,
+    glatKosherFilter,
+    transportationFilter,
+  ])
 
   const filteredGuestsByQuantityCount = useMemo(
     () => filteredGuests.reduce((sum, guest) => sum + guest.quantity, 0),

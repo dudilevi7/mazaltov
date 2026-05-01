@@ -56,14 +56,16 @@ const GuestsSummaryBar = () => {
     })
     const accepted = guests
       .filter((guest) => guest.status === GuestStatus.ACCEPTED)
-      .reduce((s, guest) => s + guest.quantity, 0)
+      .reduce((sum, guest) => sum + guest.quantity, 0)
     const declined = guests
       .filter((guest) => guest.status === GuestStatus.DECLINED)
-      .reduce((s, guest) => s + guest.quantity, 0)
+      .reduce((sum, guest) => sum + guest.quantity, 0)
     const maybe = guests
       .filter((guest) => guest.status === GuestStatus.MAYBE)
-      .reduce((s, guest) => s + guest.quantity, 0)
-    const approved = guests.reduce((s, guest) => s + (guest.approved ?? 0), 0)
+      .reduce((sum, guest) => sum + guest.quantity, 0)
+    const approved = guests
+      .filter((guest) => guest.status === GuestStatus.ACCEPTED)
+      .reduce((sum, guest) => sum + (guest.approved ?? 0), 0)
     const denominator = approved + declined + maybe
     const attendancePct = denominator > 0 ? Math.round((approved / denominator) * 100) : null
     return { total, bySide, accepted, declined, maybe, approved, attendancePct }

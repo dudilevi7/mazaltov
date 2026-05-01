@@ -312,7 +312,7 @@ const importGuestsFromExcel = async (): Promise<Guest[]> => {
 const iplanColumnsNamesMapToGuest: Record<string, Partial<keyof Guest>> = {
   שיוך: 'side',
   __EMPTY: 'name',
-  __EMPTY_1: 'quantity',
+  __EMPTY_1: 'approved',
   __EMPTY_2: 'category',
   __EMPTY_3: 'phoneNumber',
 }
@@ -362,7 +362,7 @@ const exportToIplanTemplate = async (
   const newWorkbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(newWorkbook, rowsToSheet, workbook.SheetNames[0])
   const newArrayBuffer = XLSX.write(workbook, { type: 'buffer' })
-  const fileName = `guest_list_${eventSettings.eventType.toLowerCase()}_${moment().format('DD-MM-YYYY')}.xlsx`
+  const fileName = `guest_list_iplan_${eventSettings.eventType.toLowerCase()}_${moment().format('DD-MM-YYYY')}.xlsx`
   const newFile = new File([newArrayBuffer], fileName, {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   })
