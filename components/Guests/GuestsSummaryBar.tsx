@@ -54,9 +54,7 @@ const GuestsSummaryBar = () => {
     sideOptions.forEach((opt) => {
       bySide[opt.label] = guests.filter((guest) => guest.side === opt.label).reduce((s, guest) => s + guest.quantity, 0)
     })
-    const accepted = guests
-      .filter((guest) => guest.status === GuestStatus.ACCEPTED)
-      .reduce((sum, guest) => sum + guest.quantity, 0)
+    const accepted = guests.filter((guest) => guest.status === GuestStatus.ACCEPTED).length
     const declined = guests
       .filter((guest) => guest.status === GuestStatus.DECLINED)
       .reduce((sum, guest) => sum + guest.quantity, 0)
@@ -103,7 +101,7 @@ const GuestsSummaryBar = () => {
           }`}>
           <FontAwesomeIcon icon={faCheck} />
           <span>
-            אישרו הגעה - {stats.accepted} (מגיעים: {stats.approved})
+            אישרו הגעה - {stats.accepted} רשומות (מגיעים: {stats.approved})
           </span>
         </button>
         <button
