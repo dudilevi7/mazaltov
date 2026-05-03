@@ -11,7 +11,7 @@ import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SearchBar from '@/components/SearchBar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faFilterCircleXmark, faChartPie } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faFilterCircleXmark, faChartPie, faCopy } from '@fortawesome/free-solid-svg-icons'
 import { GuestStatus, type Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels } from './helper'
@@ -22,6 +22,7 @@ import { API_ROUTES } from '@/constants/apiRoutes'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import CustomSlideover from '@/components/Shared/CustomSlideover'
 import GuestsStatistics from './GuestsStatistics'
+import { ToastType } from '@/types/Toast'
 
 const Guests = () => {
   const {
@@ -45,7 +46,7 @@ const Guests = () => {
     hasFiltersOrSearch,
     isLoadingGuests,
   } = useGuestsContext()
-  const { languageDirection, eventSettings } = useAppContext()
+  const { languageDirection, eventSettings, showToast } = useAppContext()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false)
@@ -140,6 +141,36 @@ const Guests = () => {
     updateGuest(guest.id, { ...guest, [field]: value })
   }
 
+  const handleCopyApprovedGuests = async () => {
+    const lines = filteredGuests
+      .filter((g) => g.status === GuestStatus.ACCEPTED && (g.approved ?? 0) > 0)
+      .map((g) => `${g.name} - ${g.approved ?? 0} מגיעים`)
+
+    if (lines.length === 0) {
+      showToast({
+        type: ToastType.ERROR,
+        title: 'אין נתונים',
+        message: 'אין אורחים שאישרו הגעה להעתקה',
+      })
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'))
+      showToast({
+        type: ToastType.SUCCESS,
+        title: 'הצלחה',
+        message: `${lines.length} אורחים הועתקו ללוח`,
+      })
+    } catch {
+      showToast({
+        type: ToastType.ERROR,
+        title: 'שגיאה',
+        message: 'שגיאה בהעתקה ללוח',
+      })
+    }
+  }
+
   if (isLoadingGuests) {
     return <SpinnerLoader size="lg" isLoadingPage />
   }
@@ -161,6 +192,13 @@ const Guests = () => {
             onClick={() => setIsStatisticsOpen(true)}
             icon={<FontAwesomeIcon icon={faChartPie} />}>
             סטטיסטיקות
+          </CustomButton>
+          <CustomButton
+            size={ButtonSize.SM}
+            className="bg-teal-500 hover:bg-teal-600 text-white"
+            onClick={handleCopyApprovedGuests}
+            icon={<FontAwesomeIcon icon={faCopy} />}>
+            העתק רשימת מגיעים
           </CustomButton>
         </div>
 
