@@ -9,7 +9,6 @@ import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { useMemo, useState } from 'react'
 import DeleteModal from '../DeleteModal'
 import moment from 'moment'
-import { useGuestsContext } from '@/context/GuestsContext'
 
 interface GiftsTableProps {
   gifts: Gift[]
@@ -28,6 +27,36 @@ const GiftsTable = ({
 }: GiftsTableProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [giftToDelete, setGiftToDelete] = useState<Gift | null>(null)
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null)
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      if (sortDir === 'asc') {
+        setSortDir('desc')
+      } else {
+        setSortKey(null)
+        setSortDir(null)
+      }
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  const sortedGifts = useMemo(() => {
+    if (!sortKey || !sortDir) return gifts
+    return [...gifts].sort((a, b) => {
+      const aVal = (a as unknown as Record<string, unknown>)[sortKey]
+      const bVal = (b as unknown as Record<string, unknown>)[sortKey]
+      const aNum = typeof aVal === 'number' ? aVal : 0
+      const bNum = typeof bVal === 'number' ? bVal : 0
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      return sortDir === 'asc' ? aNum - bNum : bNum - aNum
+    })
+  }, [gifts, sortKey, sortDir])
 
   const onDeleteClick = (gift: Gift) => {
     setGiftToDelete(gift)
@@ -56,6 +85,7 @@ const GiftsTable = ({
     {
       key: 'amount',
       label: 'סכום',
+      sortable: true,
       render: (row: Gift) => formatCurrency(row.amount),
     },
     {
@@ -102,7 +132,15 @@ const GiftsTable = ({
 
   return (
     <>
-      <CustomTable<Gift> columns={columns} data={gifts} getRowKey={(g) => g.id} emptyMessage={emptyMessage} />
+      <CustomTable<Gift>
+        columns={columns}
+        data={sortedGifts}
+        getRowKey={(g) => g.id}
+        emptyMessage={emptyMessage}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={handleSort}
+      />
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={onDeleteCancel}

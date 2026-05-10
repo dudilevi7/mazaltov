@@ -8,6 +8,7 @@ import type { Provider } from '@/types/Provider'
 import type { EstimatedIncome } from '@/types/Income'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
 import { MAZAL_TOV_INCOMES_KEY } from '@/constants/localStorage'
+import { Guest } from '@/types/Guest'
 
 interface BudgetContextType {
   totalPrice: number
@@ -51,8 +52,19 @@ const BudgetProvider = ({ children }: { children: React.ReactNode }) => {
     const estimatedTotal = estimatedIncome ? estimatedIncome.numberOfGuests * estimatedIncome.avgGiftPerGuest : 0
 
     const guestsIncome = gifts.reduce((sum, g) => sum + (g.amount || 0), 0)
-    const guestIdsWithGifts = new Set(gifts.filter((g) => g.guestId && g.amount > 0).map((g) => g.guestId))
-    const guestsWithGiftCount = guestIdsWithGifts.size
+    // const guestIdsWithGifts = new Set(gifts.filter((g) => g.guestId && g.amount > 0).map((g) => g.guestId))
+    // const guestsWithGiftCount = guestIdsWithGifts.size
+    const guestsNamesMap = guests.reduce(
+      (map, guest) => {
+        map[guest.name] = guest
+        return map
+      },
+      {} as Record<string, Guest>
+    )
+    const guestsWithGiftCount = guests
+      .filter((g) => g.name in guestsNamesMap)
+      .reduce((count, guest) => count + (guest.approved ?? guest.quantity), 0)
+    // .map((g) => guestsMapById[g.guestId ? ]).length
     const avgGiftPerGuestActual = guestsWithGiftCount > 0 ? guestsIncome / guestsWithGiftCount : 0
 
     const balance = (guestsIncome > 0 ? guestsIncome : estimatedTotal) - totalPrice
