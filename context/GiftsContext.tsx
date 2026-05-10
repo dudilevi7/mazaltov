@@ -2,10 +2,10 @@
 
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
 import type { Gift } from '@/types/Gift'
-import { GiftType } from '@/types/Gift'
-import type { GuestNameDuplicateGroup } from '@/components/Gifts/helper'
-import { buildGuestNameDuplicateInfo } from '@/components/Gifts/helper'
+import type { GuestNameDuplicateGroup, GiftStats } from '@/components/Gifts/helper'
+import { buildGuestNameDuplicateInfo, computeGiftStats } from '@/components/Gifts/helper'
 import { SelectOption } from '@/components/Shared/SelectDropdown'
+import { useGuestsContext } from './GuestsContext'
 import useSupabase from '@/hooks/useSupabase'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import { API_URL } from '@/constants'
@@ -29,8 +29,11 @@ interface GiftsContextType {
   typeFilter: string
   setTypeFilter: (type: string) => void
   filteredGifts: Gift[]
+  filteredStats: GiftStats
   totalAmount: number
   amountByType: Record<string, number>
+  averageGift: number
+  headCount: number
   clearAllFilters: () => void
   hasFiltersOrSearch: boolean
   guestNameDuplicateGroups: GuestNameDuplicateGroup[]
@@ -43,6 +46,7 @@ const GiftsContext = createContext<GiftsContextType | undefined>(undefined)
 const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading: isAuthLoading, isAuthenticated } = useSupabase()
   const { languageDirection, showToast } = useAppContext()
+  const { guests } = useGuestsContext()
   const [gifts, setGifts] = useState<Gift[]>([])
   const [isLoadingGifts, setIsLoadingGifts] = useState<boolean>(false)
 
@@ -151,18 +155,8 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
     })
   }, [gifts, searchQuery, sideFilter, categoryFilter, typeFilter])
 
-  const totalAmount = useMemo(() => gifts.reduce((sum, g) => sum + g.amount, 0), [gifts])
-
-  const amountByType = useMemo(() => {
-    const map: Record<string, number> = {}
-    Object.values(GiftType).forEach((t) => {
-      map[t] = 0
-    })
-    gifts.forEach((g) => {
-      map[g.type] = (map[g.type] || 0) + g.amount
-    })
-    return map
-  }, [gifts])
+  const filteredStats = useMemo(() => computeGiftStats(filteredGifts, guests), [filteredGifts, guests])
+  const { totalAmount, amountByType, averageGift, headCount } = filteredStats
 
   const hasFiltersOrSearch =
     searchQuery.trim() !== '' || sideFilter.value !== 'all' || categoryFilter.length > 0 || typeFilter !== 'all'
@@ -205,8 +199,11 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
         typeFilter,
         setTypeFilter,
         filteredGifts,
+        filteredStats,
         totalAmount,
         amountByType,
+        averageGift,
+        headCount,
         clearAllFilters,
         hasFiltersOrSearch,
         guestNameDuplicateGroups,

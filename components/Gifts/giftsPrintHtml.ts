@@ -1,6 +1,6 @@
 import type { Gift } from '@/types/Gift'
 import moment from 'moment'
-import { GIFT_TYPE_LABELS, formatCurrency } from './helper'
+import { GIFT_TYPE_LABELS, formatCurrency, type GiftStats } from './helper'
 
 const escapeHtml = (value: string): string =>
   value
@@ -20,13 +20,9 @@ const COLUMNS: { label: string; align?: 'right' | 'left' | 'center' }[] = [
   { label: 'עודכן', align: 'center' },
 ]
 
-export const buildGiftsPrintHtml = (
-  gifts: Gift[],
-  totalAmount: number,
-  amountByType: Record<string, number>
-): string => {
+export const buildGiftsPrintHtml = (gifts: Gift[], stats: GiftStats): string => {
   const generatedAt = moment().format('DD/MM/YYYY HH:mm')
-  const averageGift = gifts.length > 0 ? totalAmount / gifts.length : 0
+  const { totalAmount, amountByType, averageGift, headCount } = stats
 
   const rowsHtml = gifts
     .map((gift) => {
@@ -45,8 +41,9 @@ export const buildGiftsPrintHtml = (
 
   const summaryItems = [
     { label: 'סה"כ מתנות', value: formatCurrency(totalAmount), highlight: true },
-    { label: 'מתנה ממוצעת', value: formatCurrency(averageGift) },
+    { label: 'מתנה ממוצעת לאורח', value: formatCurrency(averageGift) },
     { label: 'מספר מתנות', value: String(gifts.length) },
+    { label: 'מספר אורחים', value: String(headCount) },
     ...Object.entries(amountByType)
       .filter(([, amount]) => amount > 0)
       .map(([type, amount]) => ({

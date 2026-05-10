@@ -1,5 +1,6 @@
 import { GiftType } from '@/types/Gift'
 import type { Gift } from '@/types/Gift'
+import type { Guest } from '@/types/Guest'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import * as XLSX from 'xlsx-js-style'
 import moment from 'moment'
@@ -103,22 +104,38 @@ export const buildGiftActiveFilterLines = ({
   return lines
 }
 
-export const buildAmountSummaryForGifts = (
-  gifts: Gift[]
-): { totalAmount: number; amountByType: Record<string, number> } => {
+export type GiftStats = {
+  totalAmount: number
+  amountByType: Record<string, number>
+  averageGift: number
+  headCount: number
+}
+
+const computeGiftHeadCount = (gifts: Gift[], guests: Guest[]): number => {
+  const giftedNames = new Set(
+    gifts.filter((g) => (g.amount || 0) > 0 && g.guestName).map((g) => g.guestName.trim())
+  )
+  return guests
+    .filter((g) => giftedNames.has(g.name.trim()))
+    .reduce((sum, g) => sum + (g.approved ?? g.quantity ?? 0), 0)
+}
+
+export const computeGiftStats = (gifts: Gift[], guests: Guest[]): GiftStats => {
   const amountByType: Record<string, number> = {}
   Object.values(GiftType).forEach((t) => {
     amountByType[t] = 0
   })
   let totalAmount = 0
   for (const g of gifts) {
-    totalAmount += g.amount
-    amountByType[g.type] = (amountByType[g.type] || 0) + g.amount
+    totalAmount += g.amount || 0
+    amountByType[g.type] = (amountByType[g.type] || 0) + (g.amount || 0)
   }
-  return { totalAmount, amountByType }
+  const headCount = computeGiftHeadCount(gifts, guests)
+  const averageGift = headCount > 0 ? totalAmount / headCount : 0
+  return { totalAmount, amountByType, averageGift, headCount }
 }
 
-export const exportGiftsToExcel = (gifts: Gift[], totalAmount: number, amountByType: Record<string, number>): void => {
+export const exportGiftsToExcel = (gifts: Gift[], stats: GiftStats): void => {
   const rows = gifts.map((gift) => ({
     'שם אורח': gift.guestName,
     צד: gift.guestSide,
@@ -136,8 +153,7 @@ export const exportGiftsToExcel = (gifts: Gift[], totalAmount: number, amountByT
   }
 
   const summaryOrigin = 1 + rows.length
-  const averageGift = gifts.length > 0 ? totalAmount / gifts.length : 0
-  setGiftsSummaryToSheet(sheet, totalAmount, averageGift, amountByType, summaryOrigin)
+  setGiftsSummaryToSheet(sheet, stats.totalAmount, stats.averageGift, stats.amountByType, summaryOrigin)
 
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, sheet, 'מתנות')
@@ -153,12 +169,8 @@ export const exportGiftsToExcel = (gifts: Gift[], totalAmount: number, amountByT
   URL.revokeObjectURL(url)
 }
 
-export const exportGiftsToPdf = async (
-  gifts: Gift[],
-  totalAmount: number,
-  amountByType: Record<string, number>
-): Promise<void> => {
-  const html = buildGiftsPrintHtml(gifts, totalAmount, amountByType)
+export const exportGiftsToPdf = async (gifts: Gift[], stats: GiftStats): Promise<void> => {
+  const html = buildGiftsPrintHtml(gifts, stats)
   const printWindow = window.open('', '_blank', 'width=1024,height=768')
   if (!printWindow) {
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' })

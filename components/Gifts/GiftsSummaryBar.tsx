@@ -12,7 +12,6 @@ import {
   formatCurrency,
   exportGiftsToExcel,
   exportGiftsToPdf,
-  buildAmountSummaryForGifts,
   buildGiftActiveFilterLines,
 } from './helper'
 import GiftsGuestNameDuplicatesAlert from './GiftsGuestNameDuplicatesAlert'
@@ -24,7 +23,10 @@ const GiftsSummaryBar = () => {
   const {
     totalAmount,
     amountByType,
+    averageGift,
+    headCount,
     filteredGifts,
+    filteredStats,
     hasFiltersOrSearch,
     searchQuery,
     sideFilter,
@@ -33,8 +35,6 @@ const GiftsSummaryBar = () => {
     guestNameDuplicateGroups,
   } = useGiftsContext()
   const [exportModalOpen, setExportModalOpen] = useState(false)
-
-  const exportSummary = useMemo(() => buildAmountSummaryForGifts(filteredGifts), [filteredGifts])
 
   const activeFilterLines = useMemo(() => {
     return buildGiftActiveFilterLines({
@@ -46,22 +46,31 @@ const GiftsSummaryBar = () => {
   }, [searchQuery, sideFilter, categoryFilter, typeFilter])
 
   const handleExportExcel = () => {
-    exportGiftsToExcel(filteredGifts, exportSummary.totalAmount, exportSummary.amountByType)
+    exportGiftsToExcel(filteredGifts, filteredStats)
     setExportModalOpen(false)
   }
   const handleExportPdf = async () => {
-    await exportGiftsToPdf(filteredGifts, exportSummary.totalAmount, exportSummary.amountByType)
+    await exportGiftsToPdf(filteredGifts, filteredStats)
     setExportModalOpen(false)
   }
 
   return (
     <div className="mb-4 flex flex-wrap flex-col gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
-      <div className="flex flex-row items-center gap-2 text-gray-700 border-b border-gray-200 pb-2">
+      <div className="flex flex-row items-center gap-3 flex-wrap text-gray-700 border-b border-gray-200 pb-2">
         <div className="flex flex-row items-center gap-2">
           <FontAwesomeIcon icon={faGift} className="text-pink-500 text-lg" />
           <span className="font-medium text-base">סה&quot;כ מתנות</span>
         </div>
         <span className="font-bold text-2xl">{formatCurrency(totalAmount)}</span>
+        <span className="text-gray-300">|</span>
+        <span className="text-sm text-gray-600">
+          מתנה ממוצעת לאורח: <span className="font-bold text-gray-800">{formatCurrency(averageGift)}</span>
+          <span className="text-gray-400 mx-1">·</span>
+          <span className="text-gray-500">{headCount} אורחים</span>
+        </span>
+        {hasFiltersOrSearch && (
+          <span className="text-xs text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">לפי מסננים</span>
+        )}
       </div>
       <div className="flex flex-wrap gap-3 items-center">
         {Object.entries(amountByType)
@@ -101,7 +110,8 @@ const GiftsSummaryBar = () => {
         <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">ייצוא מתנות</h2>
 
         <p className="text-sm text-gray-600 text-center mb-4">
-          {filteredGifts.length} מתנות · {formatCurrency(exportSummary.totalAmount)}
+          {filteredGifts.length} מתנות · {formatCurrency(totalAmount)} · ממוצע{' '}
+          {formatCurrency(averageGift)} לאורח
         </p>
 
         {!hasFiltersOrSearch ? (
