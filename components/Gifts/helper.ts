@@ -50,6 +50,35 @@ export const GIFT_TYPE_COLORS: Record<string, string> = {
   [GiftType.OTHER]: 'bg-gray-100 text-gray-800',
 }
 
+export type GuestNameDuplicateGroup = {
+  displayName: string
+  count: number
+}
+
+export const buildGuestNameDuplicateInfo = (
+  gifts: Gift[]
+): { keys: Set<string>; groups: GuestNameDuplicateGroup[] } => {
+  const byKey = new Map<string, string[]>()
+  for (const g of gifts) {
+    const raw = (g.guestName ?? '').trim()
+    if (!raw) continue
+    const key = raw.toLowerCase()
+    const arr = byKey.get(key)
+    if (arr) arr.push(raw)
+    else byKey.set(key, [raw])
+  }
+  const keys = new Set<string>()
+  const groups: GuestNameDuplicateGroup[] = []
+  for (const [key, names] of byKey) {
+    if (names.length >= 2) {
+      keys.add(key)
+      groups.push({ displayName: names[0], count: names.length })
+    }
+  }
+  groups.sort((a, b) => b.count - a.count || a.displayName.localeCompare(b.displayName, 'he'))
+  return { keys, groups }
+}
+
 export const formatCurrency = (amount: number): string =>
   amount.toLocaleString('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 })
 

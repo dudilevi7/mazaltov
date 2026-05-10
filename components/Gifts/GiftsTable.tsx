@@ -2,10 +2,11 @@
 
 import CustomTable, { CustomTableColumn } from '@/components/Shared/CustomTable'
 import type { Gift } from '@/types/Gift'
+import { useGiftsContext } from '@/context/GiftsContext'
 import { GIFT_TYPE_LABELS, GIFT_TYPE_COLORS, formatCurrency } from './helper'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faTrash, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { useMemo, useState } from 'react'
 import DeleteModal from '../DeleteModal'
 import moment from 'moment'
@@ -25,6 +26,7 @@ const GiftsTable = ({
   onEdit = () => {},
   onDeleteGift = () => {},
 }: GiftsTableProps) => {
+  const { isGuestNameDuplicate } = useGiftsContext()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [giftToDelete, setGiftToDelete] = useState<Gift | null>(null)
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -75,7 +77,22 @@ const GiftsTable = ({
   }
 
   const columns: CustomTableColumn<Gift>[] = [
-    { key: 'guestName', label: 'שם אורח' },
+    {
+      key: 'guestName',
+      label: 'שם אורח',
+      render: (row: Gift) => (
+        <span className="inline-flex items-center gap-1.5 min-w-0">
+          <span className="truncate">{row.guestName}</span>
+          {isGuestNameDuplicate(row) && (
+            <FontAwesomeIcon
+              icon={faTriangleExclamation}
+              className="text-amber-600 shrink-0 text-sm"
+              title="שם זה מופיע ביותר ממתנה אחת"
+            />
+          )}
+        </span>
+      ),
+    },
     {
       key: 'guestSide',
       label: 'צד',

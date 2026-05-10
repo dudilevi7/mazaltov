@@ -1,8 +1,10 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useMemo } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
 import type { Gift } from '@/types/Gift'
 import { GiftType } from '@/types/Gift'
+import type { GuestNameDuplicateGroup } from '@/components/Gifts/helper'
+import { buildGuestNameDuplicateInfo } from '@/components/Gifts/helper'
 import { SelectOption } from '@/components/Shared/SelectDropdown'
 import useSupabase from '@/hooks/useSupabase'
 import fetchData, { METHODS } from '@/lib/fetchData'
@@ -31,6 +33,9 @@ interface GiftsContextType {
   amountByType: Record<string, number>
   clearAllFilters: () => void
   hasFiltersOrSearch: boolean
+  guestNameDuplicateGroups: GuestNameDuplicateGroup[]
+  hasGuestNameDuplicates: boolean
+  isGuestNameDuplicate: (gift: Gift) => boolean
 }
 
 const GiftsContext = createContext<GiftsContextType | undefined>(undefined)
@@ -162,6 +167,20 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
   const hasFiltersOrSearch =
     searchQuery.trim() !== '' || sideFilter.value !== 'all' || categoryFilter !== 'all' || typeFilter !== 'all'
 
+  const { keys: duplicateGuestNameKeys, groups: guestNameDuplicateGroups } = useMemo(
+    () => buildGuestNameDuplicateInfo(gifts),
+    [gifts]
+  )
+  const hasGuestNameDuplicates = guestNameDuplicateGroups.length > 0
+  const isGuestNameDuplicate = useCallback(
+    (gift: Gift) => {
+      const raw = (gift.guestName ?? '').trim()
+      if (!raw) return false
+      return duplicateGuestNameKeys.has(raw.toLowerCase())
+    },
+    [duplicateGuestNameKeys]
+  )
+
   const clearAllFilters = () => {
     setSideFilter({ value: 'all', label: 'הכל' })
     setCategoryFilter('all')
@@ -190,6 +209,9 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
         amountByType,
         clearAllFilters,
         hasFiltersOrSearch,
+        guestNameDuplicateGroups,
+        hasGuestNameDuplicates,
+        isGuestNameDuplicate,
       }}>
       {children}
     </GiftsContext.Provider>

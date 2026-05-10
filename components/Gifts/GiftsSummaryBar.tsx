@@ -13,6 +13,7 @@ import {
   exportGiftsToExcel,
   buildAmountSummaryForGifts,
 } from './helper'
+import GiftsGuestNameDuplicatesAlert from './GiftsGuestNameDuplicatesAlert'
 
 const GIFTS_EXPORT_INFO =
   'תוכלו גם לייצא לאקסל את המתנות באמצעות סינון האורחים למשל להורי הכלה. אם תרצו כל מסנן סננו את הטבלה כיצד שתראו לנכון וחזרו לחלון הזה.'
@@ -27,6 +28,7 @@ const GiftsSummaryBar = () => {
     sideFilter,
     categoryFilter,
     typeFilter,
+    guestNameDuplicateGroups,
   } = useGiftsContext()
   const [exportModalOpen, setExportModalOpen] = useState(false)
 
@@ -76,6 +78,8 @@ const GiftsSummaryBar = () => {
           </CustomButton>
         </div>
       </div>
+
+      <GiftsGuestNameDuplicatesAlert groups={guestNameDuplicateGroups} />
 
       <Modal
         isOpen={exportModalOpen}
