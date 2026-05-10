@@ -24,8 +24,8 @@ interface GiftsContextType {
   setSearchQuery: (query: string) => void
   sideFilter: SelectOption
   setSideFilter: (side: SelectOption) => void
-  categoryFilter: string
-  setCategoryFilter: (category: string) => void
+  categoryFilter: string[]
+  setCategoryFilter: (categories: string[]) => void
   typeFilter: string
   setTypeFilter: (type: string) => void
   filteredGifts: Gift[]
@@ -48,7 +48,7 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [sideFilter, setSideFilter] = useState<SelectOption>({ value: 'all', label: 'הכל' })
-  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([])
   const [typeFilter, setTypeFilter] = useState('all')
 
   useEffect(() => {
@@ -145,7 +145,7 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
         gift.guestName.toLowerCase().includes(q) ||
         gift.description.toLowerCase().includes(q)
       const matchSide = sideFilter.value === 'all' || gift.guestSide === sideFilter.label
-      const matchCategory = categoryFilter === 'all' || gift.guestCategory === categoryFilter
+      const matchCategory = categoryFilter.length === 0 || categoryFilter.includes(gift.guestCategory.trim())
       const matchType = typeFilter === 'all' || gift.type === typeFilter
       return matchSearch && matchSide && matchCategory && matchType
     })
@@ -165,7 +165,7 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [gifts])
 
   const hasFiltersOrSearch =
-    searchQuery.trim() !== '' || sideFilter.value !== 'all' || categoryFilter !== 'all' || typeFilter !== 'all'
+    searchQuery.trim() !== '' || sideFilter.value !== 'all' || categoryFilter.length > 0 || typeFilter !== 'all'
 
   const { keys: duplicateGuestNameKeys, groups: guestNameDuplicateGroups } = useMemo(
     () => buildGuestNameDuplicateInfo(gifts),
@@ -183,7 +183,7 @@ const GiftsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const clearAllFilters = () => {
     setSideFilter({ value: 'all', label: 'הכל' })
-    setCategoryFilter('all')
+    setCategoryFilter([])
     setTypeFilter('all')
     setSearchQuery('')
   }

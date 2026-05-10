@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useGiftsContext } from '@/context/GiftsContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGift, faFileExcel, faCircleInfo } from '@fortawesome/free-solid-svg-icons'
+import { faGift, faFileExcel, faCircleInfo, faFilePdf } from '@fortawesome/free-solid-svg-icons'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Modal from '@/components/Shared/Modal'
 import {
@@ -11,7 +11,9 @@ import {
   GIFT_TYPE_COLORS,
   formatCurrency,
   exportGiftsToExcel,
+  exportGiftsToPdf,
   buildAmountSummaryForGifts,
+  buildGiftActiveFilterLines,
 } from './helper'
 import GiftsGuestNameDuplicatesAlert from './GiftsGuestNameDuplicatesAlert'
 
@@ -35,17 +37,20 @@ const GiftsSummaryBar = () => {
   const exportSummary = useMemo(() => buildAmountSummaryForGifts(filteredGifts), [filteredGifts])
 
   const activeFilterLines = useMemo(() => {
-    const lines: string[] = []
-    const q = searchQuery.trim()
-    if (q) lines.push(`חיפוש: «${q}»`)
-    if (sideFilter.value !== 'all') lines.push(`צד: ${sideFilter.label}`)
-    if (categoryFilter !== 'all') lines.push(`קירבה: ${categoryFilter}`)
-    if (typeFilter !== 'all') lines.push(`סוג מתנה: ${GIFT_TYPE_LABELS[typeFilter] ?? typeFilter}`)
-    return lines
+    return buildGiftActiveFilterLines({
+      searchQuery,
+      sideLabel: sideFilter.value === 'all' ? null : sideFilter.label,
+      categoryValues: categoryFilter,
+      typeValue: typeFilter,
+    })
   }, [searchQuery, sideFilter, categoryFilter, typeFilter])
 
-  const handleExport = () => {
+  const handleExportExcel = () => {
     exportGiftsToExcel(filteredGifts, exportSummary.totalAmount, exportSummary.amountByType)
+    setExportModalOpen(false)
+  }
+  const handleExportPdf = async () => {
+    await exportGiftsToPdf(filteredGifts, exportSummary.totalAmount, exportSummary.amountByType)
     setExportModalOpen(false)
   }
 
@@ -73,8 +78,14 @@ const GiftsSummaryBar = () => {
             size={ButtonSize.SM}
             variant="white"
             onClick={() => setExportModalOpen(true)}
-            icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
-            ייצוא לאקסל
+            icon={
+              <div className="flex flex-row items-center gap-1">
+                <FontAwesomeIcon icon={faFileExcel} className="text-green-600" />
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <FontAwesomeIcon icon={faFilePdf} className="text-red-600" />
+              </div>
+            }>
+            ייצוא לאקסל | PDF
           </CustomButton>
         </div>
       </div>
@@ -87,7 +98,7 @@ const GiftsSummaryBar = () => {
         closeOnBackdropClick
         overlayClassName="animate-fade-in-0.5 overflow-y-auto"
         className="rounded-xl p-6 max-w-lg mx-4 max-h-[95vh] overflow-y-auto">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">ייצוא מתנות לאקסל</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">ייצוא מתנות</h2>
 
         <p className="text-sm text-gray-600 text-center mb-4">
           {filteredGifts.length} מתנות · {formatCurrency(exportSummary.totalAmount)}
@@ -112,14 +123,24 @@ const GiftsSummaryBar = () => {
           </div>
         )}
 
-        <CustomButton
-          className="w-full justify-center"
-          size={ButtonSize.MD}
-          variant="white"
-          onClick={handleExport}
-          icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
-          ייצוא לאקסל
-        </CustomButton>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <CustomButton
+            className="w-full justify-center"
+            size={ButtonSize.MD}
+            variant="white"
+            onClick={handleExportExcel}
+            icon={<FontAwesomeIcon icon={faFileExcel} className="text-green-600" />}>
+            ייצוא לאקסל
+          </CustomButton>
+          <CustomButton
+            className="w-full justify-center"
+            size={ButtonSize.MD}
+            variant="white"
+            onClick={handleExportPdf}
+            icon={<FontAwesomeIcon icon={faFilePdf} className="text-red-600" />}>
+            ייצוא ל-PDF
+          </CustomButton>
+        </div>
       </Modal>
     </div>
   )

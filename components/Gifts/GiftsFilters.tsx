@@ -4,13 +4,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFilter } from '@fortawesome/free-solid-svg-icons'
 import SelectDropdown, { SelectOption } from '@/components/Shared/SelectDropdown'
 import { GIFT_TYPE_OPTIONS } from './helper'
+import GiftsCategoryMultiSelect from './GiftsCategoryMultiSelect'
 
 interface GiftsFiltersProps {
   sideFilter: SelectOption
   onSideFilterChange: (value: SelectOption) => void
   sideFilterOptions: SelectOption[]
-  categoryFilter: string
-  onCategoryFilterChange: (value: string) => void
+  categoryFilter: string[]
+  onCategoryFilterChange: (value: string[]) => void
   categoryOptions: SelectOption[]
   typeFilter: string
   onTypeFilterChange: (value: string) => void
@@ -43,13 +44,11 @@ const GiftsFilters = ({
         searchable
       />
       <span className="whitespace-nowrap">קירבה:</span>
-      <SelectDropdown
-        value={categoryFilter}
+      <GiftsCategoryMultiSelect
+        values={categoryFilter}
         onChange={onCategoryFilterChange}
         options={categoryOptions}
-        placeholder="הכל"
-        className="min-w-32"
-        searchable
+        className="min-w-40"
       />
       <span className="whitespace-nowrap">סוג:</span>
       <SelectDropdown

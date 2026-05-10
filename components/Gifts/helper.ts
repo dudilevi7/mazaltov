@@ -3,6 +3,7 @@ import type { Gift } from '@/types/Gift'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import * as XLSX from 'xlsx-js-style'
 import moment from 'moment'
+import { buildGiftsPrintHtml } from './giftsPrintHtml'
 
 const HEADER_STYLE = {
   fill: { fgColor: { rgb: 'FF2563B5' }, patternType: 'solid' as const },
@@ -82,6 +83,26 @@ export const buildGuestNameDuplicateInfo = (
 export const formatCurrency = (amount: number): string =>
   amount.toLocaleString('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 })
 
+export const buildGiftActiveFilterLines = ({
+  searchQuery,
+  sideLabel,
+  categoryValues,
+  typeValue,
+}: {
+  searchQuery: string
+  sideLabel: string | null
+  categoryValues: string[]
+  typeValue: string
+}): string[] => {
+  const lines: string[] = []
+  const q = searchQuery.trim()
+  if (q) lines.push(`חיפוש: «${q}»`)
+  if (sideLabel) lines.push(`צד: ${sideLabel}`)
+  if (categoryValues.length > 0) lines.push(`קירבה: ${categoryValues.join(', ')}`)
+  if (typeValue !== 'all') lines.push(`סוג מתנה: ${GIFT_TYPE_LABELS[typeValue] ?? typeValue}`)
+  return lines
+}
+
 export const buildAmountSummaryForGifts = (
   gifts: Gift[]
 ): { totalAmount: number; amountByType: Record<string, number> } => {
@@ -130,6 +151,25 @@ export const exportGiftsToExcel = (gifts: Gift[], totalAmount: number, amountByT
   a.download = `gifts-${moment().format('DD-MM-YYYY')}.xlsx`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+export const exportGiftsToPdf = async (
+  gifts: Gift[],
+  totalAmount: number,
+  amountByType: Record<string, number>
+): Promise<void> => {
+  const html = buildGiftsPrintHtml(gifts, totalAmount, amountByType)
+  const printWindow = window.open('', '_blank', 'width=1024,height=768')
+  if (!printWindow) {
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank')
+    URL.revokeObjectURL(url)
+    return
+  }
+  printWindow.document.open()
+  printWindow.document.write(html)
+  printWindow.document.close()
 }
 
 const setGiftsSummaryToSheet = (

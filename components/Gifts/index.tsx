@@ -48,7 +48,7 @@ const Gifts = () => {
   )
   const categoryOptions: SelectOption[] = useMemo(() => {
     const categories = Array.from(new Set(gifts.map((g) => g.guestCategory.trim()).filter(Boolean)))
-    return [{ value: 'all', label: 'הכל' }, ...categories.map((c) => ({ value: c, label: c }))]
+    return categories.map((c) => ({ value: c, label: c }))
   }, [gifts])
 
   const openAdd = () => {
