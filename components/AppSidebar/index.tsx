@@ -78,7 +78,7 @@ const AppSidebar = () => {
             return (
               <Tooltip
                 content={!isSidebarOpen ? (isRtl ? item.labelHe : item.labelEn) : ''}
-                place={!isSidebarOpen ? (isRtl ? TooltipPlace.RIGHT : TooltipPlace.LEFT) : TooltipPlace.TOP}
+                place={!isSidebarOpen ? (isRtl ? TooltipPlace.LEFT : TooltipPlace.RIGHT) : TooltipPlace.TOP}
                 key={item.id}>
                 <button
                   onClick={() => handleItemClick(item)}
@@ -100,7 +100,7 @@ const AppSidebar = () => {
           <UserDetails />
           <Tooltip
             content={!isSidebarOpen ? (isRtl ? 'יציאה' : 'Logout') : ''}
-            place={!isSidebarOpen ? (isRtl ? TooltipPlace.RIGHT : TooltipPlace.LEFT) : TooltipPlace.TOP}>
+            place={!isSidebarOpen ? (isRtl ? TooltipPlace.LEFT : TooltipPlace.RIGHT) : TooltipPlace.TOP}>
             <button
               type="button"
               onClick={() => signOut()}
