@@ -2,7 +2,7 @@ import { internalServerError, notFound, unauthorized } from '@/lib/api/errorHand
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type ProviderRow, mapProviderRowToProvider, mapProviderToProviderRow } from '@/types/provider-row'
 import type { Provider } from '@/types/Provider'
-import { getUserId } from '@/lib/supabase/auth'
+import { getEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -10,16 +10,16 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[GET /api/providers] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[GET /api/providers] No accessible event')
       return unauthorized()
     }
 
     const { data, error } = await supabase
       .from('providers')
       .select('*')
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -28,7 +28,7 @@ export const GET = async (request: NextRequest) => {
     }
 
     const providers = (data ?? []).map((row) => mapProviderRowToProvider(row as ProviderRow))
-    Logger.info('[GET /api/providers] Providers fetched successfully', userId)
+    Logger.info('[GET /api/providers] Providers fetched successfully', ctx.userId)
     return NextResponse.json(providers)
   } catch (error) {
     Logger.error(`[GET /api/providers] ${error as string}`)
@@ -39,9 +39,9 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[POST /api/providers] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[POST /api/providers] No accessible event')
       return unauthorized()
     }
 
@@ -51,7 +51,8 @@ export const POST = async (request: NextRequest) => {
     }
 
     const row = {
-      user_id: userId,
+      user_id: ctx.userId,
+      event_id: ctx.eventId,
       ...mapProviderToProviderRow(body),
       updated_at: new Date().toISOString(),
     }
@@ -64,7 +65,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const provider = mapProviderRowToProvider(data as ProviderRow)
-    Logger.info('[POST /api/providers] Provider created successfully', userId)
+    Logger.info('[POST /api/providers] Provider created successfully', ctx.userId)
     return NextResponse.json(provider)
   } catch (error) {
     Logger.error(`[POST /api/providers] ${error as string}`)
@@ -75,9 +76,9 @@ export const POST = async (request: NextRequest) => {
 export const PUT = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[PUT /api/providers] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[PUT /api/providers] No accessible event')
       return unauthorized()
     }
 
@@ -94,6 +95,7 @@ export const PUT = async (request: NextRequest) => {
 
     const updates = {
       ...mapProviderToProviderRow(body),
+      user_id: ctx.userId,
       updated_at: new Date().toISOString(),
     }
 
@@ -101,7 +103,7 @@ export const PUT = async (request: NextRequest) => {
       .from('providers')
       .update(updates)
       .eq('id', id)
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .select()
       .maybeSingle()
 
@@ -114,7 +116,7 @@ export const PUT = async (request: NextRequest) => {
     }
 
     const provider = mapProviderRowToProvider(data as ProviderRow)
-    Logger.info('[PUT /api/providers] Provider updated successfully', userId)
+    Logger.info('[PUT /api/providers] Provider updated successfully', ctx.userId)
     return NextResponse.json(provider)
   } catch (error) {
     Logger.error(`[PUT /api/providers] ${error as string}`)
@@ -125,9 +127,9 @@ export const PUT = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[DELETE /api/providers] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[DELETE /api/providers] No accessible event')
       return unauthorized()
     }
 
@@ -141,14 +143,14 @@ export const DELETE = async (request: NextRequest) => {
       return NextResponse.json({ message: 'id required' }, { status: 400 })
     }
 
-    const { error } = await supabase.from('providers').delete().eq('id', id).eq('user_id', userId)
+    const { error } = await supabase.from('providers').delete().eq('id', id).eq('event_id', ctx.eventId)
 
     if (error) {
       Logger.error(`[DELETE /api/providers] ${error.message ?? 'Failed to delete provider'}`)
       return internalServerError(error.message ?? 'Failed to delete provider')
     }
 
-    Logger.info('[DELETE /api/providers] Provider deleted successfully', userId)
+    Logger.info('[DELETE /api/providers] Provider deleted successfully', ctx.userId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     Logger.error(`[DELETE /api/providers] ${error as string}`)

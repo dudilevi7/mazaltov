@@ -2,7 +2,7 @@ import { internalServerError, unauthorized } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type GuestRow, mapGuestRowToGuest, mapGuestToGuestRow } from '@/types/guest-row'
 import type { Guest } from '@/types/Guest'
-import { getUserId } from '@/lib/supabase/auth'
+import { getEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -14,9 +14,9 @@ type ImportBody = {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[POST /api/guests/import] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[POST /api/guests/import] No accessible event')
       return unauthorized()
     }
 
@@ -31,7 +31,8 @@ export const POST = async (request: NextRequest) => {
 
     const now = new Date().toISOString()
     const rows = body.guests.map((g) => ({
-      user_id: userId,
+      user_id: ctx.userId,
+      event_id: ctx.eventId,
       ...mapGuestToGuestRow(g),
       updated_at: now,
     }))
@@ -44,7 +45,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const created = (data ?? []).map((row) => mapGuestRowToGuest(row as GuestRow))
-    Logger.info(`[POST /api/guests/import] ${created.length} guests imported`, userId)
+    Logger.info(`[POST /api/guests/import] ${created.length} guests imported`, ctx.userId)
     return NextResponse.json(created)
   } catch (error) {
     Logger.error(`[POST /api/guests/import] ${error as string}`)

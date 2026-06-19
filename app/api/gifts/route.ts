@@ -2,7 +2,7 @@ import { internalServerError, notFound, unauthorized } from '@/lib/api/errorHand
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type GiftRow, mapGiftRowToGift, mapGiftToGiftRow } from '@/types/gift-row'
 import type { Gift } from '@/types/Gift'
-import { getUserId } from '@/lib/supabase/auth'
+import { getEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -10,16 +10,16 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[GET /api/gifts] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[GET /api/gifts] No accessible event')
       return unauthorized()
     }
 
     const { data, error } = await supabase
       .from('gifts')
       .select('*')
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -28,7 +28,7 @@ export const GET = async (request: NextRequest) => {
     }
 
     const gifts = (data ?? []).map((row) => mapGiftRowToGift(row as GiftRow))
-    Logger.info('[GET /api/gifts] Gifts fetched successfully', userId)
+    Logger.info('[GET /api/gifts] Gifts fetched successfully', ctx.userId)
     return NextResponse.json(gifts)
   } catch (error) {
     Logger.error(`[GET /api/gifts] ${error as string}`)
@@ -39,9 +39,9 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[POST /api/gifts] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[POST /api/gifts] No accessible event')
       return unauthorized()
     }
 
@@ -51,7 +51,8 @@ export const POST = async (request: NextRequest) => {
     }
 
     const row = {
-      user_id: userId,
+      user_id: ctx.userId,
+      event_id: ctx.eventId,
       ...mapGiftToGiftRow(body),
       updated_at: new Date().toISOString(),
     }
@@ -64,7 +65,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const gift = mapGiftRowToGift(data as GiftRow)
-    Logger.info('[POST /api/gifts] Gift created successfully', userId)
+    Logger.info('[POST /api/gifts] Gift created successfully', ctx.userId)
     return NextResponse.json(gift)
   } catch (error) {
     Logger.error(`[POST /api/gifts] ${error as string}`)
@@ -75,9 +76,9 @@ export const POST = async (request: NextRequest) => {
 export const PUT = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[PUT /api/gifts] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[PUT /api/gifts] No accessible event')
       return unauthorized()
     }
 
@@ -94,6 +95,7 @@ export const PUT = async (request: NextRequest) => {
 
     const updates = {
       ...mapGiftToGiftRow(body),
+      user_id: ctx.userId,
       updated_at: new Date().toISOString(),
     }
 
@@ -101,7 +103,7 @@ export const PUT = async (request: NextRequest) => {
       .from('gifts')
       .update(updates)
       .eq('id', id)
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .select()
       .maybeSingle()
 
@@ -114,7 +116,7 @@ export const PUT = async (request: NextRequest) => {
     }
 
     const gift = mapGiftRowToGift(data as GiftRow)
-    Logger.info('[PUT /api/gifts] Gift updated successfully', userId)
+    Logger.info('[PUT /api/gifts] Gift updated successfully', ctx.userId)
     return NextResponse.json(gift)
   } catch (error) {
     Logger.error(`[PUT /api/gifts] ${error as string}`)
@@ -125,9 +127,9 @@ export const PUT = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[DELETE /api/gifts] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[DELETE /api/gifts] No accessible event')
       return unauthorized()
     }
 
@@ -141,14 +143,14 @@ export const DELETE = async (request: NextRequest) => {
       return NextResponse.json({ message: 'id required' }, { status: 400 })
     }
 
-    const { error } = await supabase.from('gifts').delete().eq('id', id).eq('user_id', userId)
+    const { error } = await supabase.from('gifts').delete().eq('id', id).eq('event_id', ctx.eventId)
 
     if (error) {
       Logger.error(`[DELETE /api/gifts] ${error.message ?? 'Failed to delete gift'}`)
       return internalServerError(error.message ?? 'Failed to delete gift')
     }
 
-    Logger.info('[DELETE /api/gifts] Gift deleted successfully', userId)
+    Logger.info('[DELETE /api/gifts] Gift deleted successfully', ctx.userId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     Logger.error(`[DELETE /api/gifts] ${error as string}`)

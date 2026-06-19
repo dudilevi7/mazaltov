@@ -2,7 +2,7 @@ import { internalServerError, unauthorized } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type PublicNoteRow, mapPublicNoteRowToPublicNote, mapPublicNoteToPublicNoteRow } from '@/types/public-note-row'
 import type { PublicNote } from '@/types/PublicNote'
-import { getUserId } from '@/lib/supabase/auth'
+import { getEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -10,16 +10,16 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[GET /api/public-notes] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[GET /api/public-notes] No accessible event')
       return unauthorized()
     }
 
     const { data, error } = await supabase
       .from('public_notes')
       .select('*')
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -28,7 +28,7 @@ export const GET = async (request: NextRequest) => {
     }
 
     const notes = (data ?? []).map((row) => mapPublicNoteRowToPublicNote(row as PublicNoteRow))
-    Logger.info('[GET /api/public-notes] Public notes fetched successfully', userId)
+    Logger.info('[GET /api/public-notes] Public notes fetched successfully', ctx.userId)
     return NextResponse.json(notes)
   } catch (error) {
     Logger.error(`[GET /api/public-notes] ${error as string}`)
@@ -39,9 +39,9 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[POST /api/public-notes] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[POST /api/public-notes] No accessible event')
       return unauthorized()
     }
 
@@ -51,7 +51,8 @@ export const POST = async (request: NextRequest) => {
     }
 
     const row = {
-      user_id: userId,
+      user_id: ctx.userId,
+      event_id: ctx.eventId,
       ...mapPublicNoteToPublicNoteRow(body),
       updated_at: new Date().toISOString(),
     }
@@ -64,7 +65,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const note = mapPublicNoteRowToPublicNote(data as PublicNoteRow)
-    Logger.info('[POST /api/public-notes] Public note created successfully', userId)
+    Logger.info('[POST /api/public-notes] Public note created successfully', ctx.userId)
     return NextResponse.json(note)
   } catch (error) {
     Logger.error(`[POST /api/public-notes] ${error as string}`)
@@ -75,9 +76,9 @@ export const POST = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[DELETE /api/public-notes] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[DELETE /api/public-notes] No accessible event')
       return unauthorized()
     }
 
@@ -91,14 +92,14 @@ export const DELETE = async (request: NextRequest) => {
       return NextResponse.json({ message: 'id required' }, { status: 400 })
     }
 
-    const { error } = await supabase.from('public_notes').delete().eq('id', id).eq('user_id', userId)
+    const { error } = await supabase.from('public_notes').delete().eq('id', id).eq('event_id', ctx.eventId)
 
     if (error) {
       Logger.error(`[DELETE /api/public-notes] ${error.message ?? 'Failed to delete public note'}`)
       return internalServerError(error.message ?? 'Failed to delete public note')
     }
 
-    Logger.info('[DELETE /api/public-notes] Public note deleted successfully', userId)
+    Logger.info('[DELETE /api/public-notes] Public note deleted successfully', ctx.userId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     Logger.error(`[DELETE /api/public-notes] ${error as string}`)

@@ -1,10 +1,11 @@
 'use client'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Todo } from '../types/Todo'
 import { getFromLocalStorage, setToLocalStorage } from '@/lib/utils'
 import { LanguageDirection } from '@/types/General'
-import { MAZAL_TOV_SIDEBAR_OPEN_KEY } from '@/constants/localStorage'
+import { MAZAL_TOV_SIDEBAR_OPEN_KEY, MAZAL_TOV_ACTIVE_EVENT_KEY } from '@/constants/localStorage'
 import { EventSettings, EventType } from '@/types/Settings'
+import type { AccessibleEvent, EventMember, EventRole } from '@/types/eventMember'
 import { ShowToastParams, ToastData, ToastType } from '@/types/Toast'
 import Toast from '@/components/Toast'
 import useSupabase from '@/hooks/useSupabase'
@@ -31,6 +32,13 @@ interface AppContextType {
   hideToast: () => void
   isLoadingEventSettings: boolean
   isLoadingTodos: boolean
+  accessibleEvents: AccessibleEvent[]
+  activeEventId: string | null
+  currentRole: EventRole | null
+  setActiveEvent: (eventId: string) => void
+  eventMembers: EventMember[]
+  fetchEventMembers: (force?: boolean) => Promise<void>
+  setEventMembers: (members: EventMember[]) => void
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -64,6 +72,13 @@ export const AppContext = createContext<AppContextType>({
   hideToast: () => {},
   isLoadingEventSettings: false,
   isLoadingTodos: false,
+  accessibleEvents: [],
+  activeEventId: null,
+  currentRole: null,
+  setActiveEvent: () => {},
+  eventMembers: [],
+  fetchEventMembers: async () => {},
+  setEventMembers: () => {},
 })
 
 const getDefaultEventSettings = (): EventSettings => {
@@ -94,6 +109,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [toast, setToast] = useState<ToastData | null>(null)
   const [isLoadingEventSettings, setIsLoadingEventSettings] = useState<boolean>(false)
   const [isLoadingTodos, setIsLoadingTodos] = useState<boolean>(false)
+  const [accessibleEvents, setAccessibleEvents] = useState<AccessibleEvent[]>([])
+  const [activeEventId, setActiveEventId] = useState<string | null>(null)
+  const [currentRole, setCurrentRole] = useState<EventRole | null>(null)
+  const [eventMembers, setEventMembers] = useState<EventMember[]>([])
+  const membersLoadedFor = useRef<string | null>(null)
 
   const showToast = (params: ShowToastParams) => {
     setToast({ ...params, id: Date.now() })
@@ -114,9 +134,75 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated) return
 
+    initializeApp()
+  }, [user?.id, isAuthLoading, isAuthenticated])
+
+  const initializeApp = async () => {
+    await initEventAccess()
     fetchEvents()
     fetchTasks()
-  }, [user?.id, isAuthLoading, isAuthenticated])
+  }
+
+  const initEventAccess = async () => {
+    if (!user?.id) return
+    try {
+      const accepted = await fetchData<unknown, { accepted: number }>({
+        url: `${API_URL}${API_ROUTES.INVITE_ACCEPT}`,
+        method: METHODS.POST,
+      })
+      // Newly linked invitations: reload once so all providers refetch with access.
+      if (accepted?.accepted > 0 && typeof window !== 'undefined') {
+        window.location.reload()
+        return
+      }
+    } catch {
+      // No pending invitations is fine.
+    }
+    try {
+      const events = await fetchData<unknown, AccessibleEvent[]>({
+        url: `${API_URL}${API_ROUTES.MY_EVENTS}`,
+        method: METHODS.GET,
+      })
+      const list = Array.isArray(events) ? events : []
+      setAccessibleEvents(list)
+
+      let active = typeof window !== 'undefined' ? window.localStorage.getItem(MAZAL_TOV_ACTIVE_EVENT_KEY) : null
+      if (!active || !list.some((e) => e.eventId === active)) {
+        active = list.find((e) => e.isOwner)?.eventId ?? list[0]?.eventId ?? null
+        if (typeof window !== 'undefined') {
+          if (active) window.localStorage.setItem(MAZAL_TOV_ACTIVE_EVENT_KEY, active)
+          else window.localStorage.removeItem(MAZAL_TOV_ACTIVE_EVENT_KEY)
+        }
+      }
+      setActiveEventId(active)
+      setCurrentRole(list.find((e) => e.eventId === active)?.role ?? null)
+    } catch {
+      setAccessibleEvents([])
+    }
+  }
+
+  const setActiveEvent = (eventId: string) => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(MAZAL_TOV_ACTIVE_EVENT_KEY, eventId)
+    window.location.reload()
+  }
+
+  // Members are fetched once per active event and cached in context. Pass
+  // force=true to refresh after an invite/remove mutation.
+  const fetchEventMembers = async (force = false) => {
+    if (!activeEventId) return
+    if (!force && membersLoadedFor.current === activeEventId) return
+    try {
+      const data = await fetchData<unknown, EventMember[]>({
+        url: `${API_URL}${API_ROUTES.INVITE_USER}`,
+        method: METHODS.GET,
+      })
+      setEventMembers(Array.isArray(data) ? data : [])
+      membersLoadedFor.current = activeEventId
+    } catch {
+      setEventMembers([])
+    }
+  }
 
   useEffect(() => {
     setRowDirectionClassName(languageDirection === LanguageDirection.HEB ? 'flex-row-reverse' : 'flex-row')
@@ -256,6 +342,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         hideToast,
         isLoadingEventSettings,
         isLoadingTodos,
+        accessibleEvents,
+        activeEventId,
+        currentRole,
+        setActiveEvent,
+        eventMembers,
+        fetchEventMembers,
+        setEventMembers,
       }}>
       {children}
       <Toast />

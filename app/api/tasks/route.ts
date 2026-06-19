@@ -2,7 +2,7 @@ import { internalServerError, notFound, unauthorized } from '@/lib/api/errorHand
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type TaskRow, mapTaskRowToTodo, mapTodoToTaskRow } from '@/types/task'
 import type { Todo } from '@/types/Todo'
-import { getUserId } from '@/lib/supabase/auth'
+import { getEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -10,16 +10,16 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[GET /api/tasks] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[GET /api/tasks] No accessible event')
       return unauthorized()
     }
 
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -28,7 +28,7 @@ export const GET = async (request: NextRequest) => {
     }
 
     const todos = (data ?? []).map((row) => mapTaskRowToTodo(row as TaskRow))
-    Logger.info('[GET /api/tasks] Tasks fetched successfully', userId)
+    Logger.info('[GET /api/tasks] Tasks fetched successfully', ctx.userId)
     return NextResponse.json(todos)
   } catch (error) {
     Logger.error(`[GET /api/tasks] ${error as string}`)
@@ -39,9 +39,9 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[POST /api/tasks] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[POST /api/tasks] No accessible event')
       return unauthorized()
     }
 
@@ -51,7 +51,8 @@ export const POST = async (request: NextRequest) => {
     }
 
     const row = {
-      user_id: userId,
+      user_id: ctx.userId,
+      event_id: ctx.eventId,
       ...mapTodoToTaskRow(body),
       updated_at: new Date().toISOString(),
     }
@@ -64,7 +65,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const todo = mapTaskRowToTodo(data as TaskRow)
-    Logger.info('[POST /api/tasks] Task created successfully', userId)
+    Logger.info('[POST /api/tasks] Task created successfully', ctx.userId)
     return NextResponse.json(todo)
   } catch (error) {
     Logger.error(`[POST /api/tasks] ${error as string}`)
@@ -75,9 +76,9 @@ export const POST = async (request: NextRequest) => {
 export const PUT = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[PUT /api/tasks] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[PUT /api/tasks] No accessible event')
       return unauthorized()
     }
 
@@ -88,6 +89,7 @@ export const PUT = async (request: NextRequest) => {
 
     const updates = {
       ...mapTodoToTaskRow(body),
+      user_id: ctx.userId,
       updated_at: new Date().toISOString(),
     }
 
@@ -95,7 +97,7 @@ export const PUT = async (request: NextRequest) => {
       .from('tasks')
       .update(updates)
       .eq('id', body.id)
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .select()
       .maybeSingle()
 
@@ -108,7 +110,7 @@ export const PUT = async (request: NextRequest) => {
     }
 
     const todo = mapTaskRowToTodo(data as TaskRow)
-    Logger.info('[PUT /api/tasks] Task updated successfully', userId)
+    Logger.info('[PUT /api/tasks] Task updated successfully', ctx.userId)
     return NextResponse.json(todo)
   } catch (error) {
     Logger.error(`[PUT /api/tasks] ${error as string}`)
@@ -119,9 +121,9 @@ export const PUT = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[DELETE /api/tasks] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[DELETE /api/tasks] No accessible event')
       return unauthorized()
     }
 
@@ -135,14 +137,14 @@ export const DELETE = async (request: NextRequest) => {
       return NextResponse.json({ message: 'id required' }, { status: 400 })
     }
 
-    const { error } = await supabase.from('tasks').delete().eq('id', id).eq('user_id', userId)
+    const { error } = await supabase.from('tasks').delete().eq('id', id).eq('event_id', ctx.eventId)
 
     if (error) {
       Logger.error(`[DELETE /api/tasks] ${error.message ?? 'Failed to delete task'}`)
       return internalServerError(error.message ?? 'Failed to delete task')
     }
 
-    Logger.info('[DELETE /api/tasks] Task deleted successfully', userId)
+    Logger.info('[DELETE /api/tasks] Task deleted successfully', ctx.userId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     Logger.error(`[DELETE /api/tasks] ${error as string}`)

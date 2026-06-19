@@ -2,7 +2,7 @@ import { internalServerError, notFound, unauthorized } from '@/lib/api/errorHand
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type ShoppingItemRow, mapShoppingRowToItem, mapItemToShoppingRow } from '@/types/shopping-row'
 import type { ShoppingItem } from '@/types/ShoppingItem'
-import { getUserId } from '@/lib/supabase/auth'
+import { getEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -10,16 +10,16 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[GET /api/shopping] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[GET /api/shopping] No accessible event')
       return unauthorized()
     }
 
     const { data, error } = await supabase
       .from('shopping_items')
       .select('*')
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -28,7 +28,7 @@ export const GET = async (request: NextRequest) => {
     }
 
     const items = (data ?? []).map((row) => mapShoppingRowToItem(row as ShoppingItemRow))
-    Logger.info('[GET /api/shopping] Shopping items fetched successfully', userId)
+    Logger.info('[GET /api/shopping] Shopping items fetched successfully', ctx.userId)
     return NextResponse.json(items)
   } catch (error) {
     Logger.error(`[GET /api/shopping] ${error as string}`)
@@ -39,9 +39,9 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[POST /api/shopping] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[POST /api/shopping] No accessible event')
       return unauthorized()
     }
 
@@ -51,7 +51,8 @@ export const POST = async (request: NextRequest) => {
     }
 
     const row = {
-      user_id: userId,
+      user_id: ctx.userId,
+      event_id: ctx.eventId,
       ...mapItemToShoppingRow(body),
       updated_at: new Date().toISOString(),
     }
@@ -64,7 +65,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const item = mapShoppingRowToItem(data as ShoppingItemRow)
-    Logger.info('[POST /api/shopping] Shopping item created successfully', userId)
+    Logger.info('[POST /api/shopping] Shopping item created successfully', ctx.userId)
     return NextResponse.json(item)
   } catch (error) {
     Logger.error(`[POST /api/shopping] ${error as string}`)
@@ -75,9 +76,9 @@ export const POST = async (request: NextRequest) => {
 export const PUT = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[PUT /api/shopping] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[PUT /api/shopping] No accessible event')
       return unauthorized()
     }
 
@@ -88,6 +89,7 @@ export const PUT = async (request: NextRequest) => {
 
     const updates = {
       ...mapItemToShoppingRow(body),
+      user_id: ctx.userId,
       updated_at: new Date().toISOString(),
     }
 
@@ -95,7 +97,7 @@ export const PUT = async (request: NextRequest) => {
       .from('shopping_items')
       .update(updates)
       .eq('id', body.id)
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .select()
       .maybeSingle()
 
@@ -108,7 +110,7 @@ export const PUT = async (request: NextRequest) => {
     }
 
     const item = mapShoppingRowToItem(data as ShoppingItemRow)
-    Logger.info('[PUT /api/shopping] Shopping item updated successfully', userId)
+    Logger.info('[PUT /api/shopping] Shopping item updated successfully', ctx.userId)
     return NextResponse.json(item)
   } catch (error) {
     Logger.error(`[PUT /api/shopping] ${error as string}`)
@@ -119,9 +121,9 @@ export const PUT = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[DELETE /api/shopping] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[DELETE /api/shopping] No accessible event')
       return unauthorized()
     }
 
@@ -135,14 +137,14 @@ export const DELETE = async (request: NextRequest) => {
       return NextResponse.json({ message: 'id required' }, { status: 400 })
     }
 
-    const { error } = await supabase.from('shopping_items').delete().eq('id', id).eq('user_id', userId)
+    const { error } = await supabase.from('shopping_items').delete().eq('id', id).eq('event_id', ctx.eventId)
 
     if (error) {
       Logger.error(`[DELETE /api/shopping] ${error.message ?? 'Failed to delete shopping item'}`)
       return internalServerError(error.message ?? 'Failed to delete shopping item')
     }
 
-    Logger.info('[DELETE /api/shopping] Shopping item deleted successfully', userId)
+    Logger.info('[DELETE /api/shopping] Shopping item deleted successfully', ctx.userId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     Logger.error(`[DELETE /api/shopping] ${error as string}`)

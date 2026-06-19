@@ -12,6 +12,8 @@ import { faFlagUsa, faStarOfDavid } from '@fortawesome/free-solid-svg-icons'
 import { EVENT_TYPE_OPTIONS, LANGUAGE_OPTIONS, eventSettingsEquals, hasEventData } from './helper'
 import useSupabase from '@/hooks/useSupabase'
 import Invitation from './Invitation'
+import ShareEvent from './ShareEvent'
+import InviteUser from './ShareEvent/InviteUser'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import { ToastType } from '@/types/Toast'
 import SpinnerLoader from '../Shared/SpinnerLoader'
@@ -30,6 +32,7 @@ const Settings = () => {
     isLoadingEventSettings,
   } = useAppContext()
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<EventSettings>(eventSettings)
+  const [showInvite, setShowInvite] = useState(false)
 
   useEffect(() => {
     setLastSavedSnapshot(eventSettings)
@@ -134,6 +137,14 @@ const Settings = () => {
     return <SpinnerLoader size="lg" isLoadingPage />
   }
 
+  if (showInvite) {
+    return (
+      <div className="flex w-full flex-col font-sans" dir={languageDirection}>
+        <InviteUser onClose={() => setShowInvite(false)} />
+      </div>
+    )
+  }
+
   return (
     <div className="flex w-full flex-col font-sans" dir={languageDirection}>
       {user && (
@@ -149,6 +160,8 @@ const Settings = () => {
         </div>
       )}
       <div className="flex flex-col gap-6">
+        {user && <ShareEvent onOpenInvite={() => setShowInvite(true)} />}
+
         <section className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
           <div className="mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faHeart} className="text-pink-500" />

@@ -9,4 +9,7 @@ export const API_ROUTES = {
   GIFTS: '/api/gifts',
   INVITATION: '/api/invitation',
   PUBLIC_NOTES: '/api/public-notes',
+  INVITE_USER: '/api/invite-user',
+  INVITE_ACCEPT: '/api/invite-user/accept',
+  MY_EVENTS: '/api/my-events',
 }

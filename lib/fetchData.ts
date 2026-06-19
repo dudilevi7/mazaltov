@@ -1,5 +1,11 @@
 import { supabase } from '@/lib/supabase/client'
 import type { FetchDataOptions } from '@/types/General'
+import { MAZAL_TOV_ACTIVE_EVENT_KEY } from '@/constants/localStorage'
+
+export const getActiveEventId = (): string | null => {
+  if (typeof window === 'undefined') return null
+  return window.localStorage.getItem(MAZAL_TOV_ACTIVE_EVENT_KEY)
+}
 
 export const getAuthToken = async (): Promise<string | null> => {
   const {
@@ -27,6 +33,10 @@ const fetchData = async <TBody = unknown, TResponse = unknown>(
   }
   if (token) {
     requestHeaders['X-Supabase-Auth'] = token
+  }
+  const activeEventId = getActiveEventId()
+  if (activeEventId) {
+    requestHeaders['X-Event-Id'] = activeEventId
   }
 
   const config: RequestInit = {

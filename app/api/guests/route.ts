@@ -2,7 +2,7 @@ import { internalServerError, notFound, unauthorized } from '@/lib/api/errorHand
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type GuestRow, mapGuestRowToGuest, mapGuestToGuestRow } from '@/types/guest-row'
 import type { Guest } from '@/types/Guest'
-import { getUserId } from '@/lib/supabase/auth'
+import { getEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -10,16 +10,16 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[GET /api/guests] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[GET /api/guests] No accessible event')
       return unauthorized()
     }
 
     const { data, error } = await supabase
       .from('guests')
       .select('*')
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -28,7 +28,7 @@ export const GET = async (request: NextRequest) => {
     }
 
     const guests = (data ?? []).map((row) => mapGuestRowToGuest(row as GuestRow))
-    Logger.info('[GET /api/guests] Guests fetched successfully', userId)
+    Logger.info('[GET /api/guests] Guests fetched successfully', ctx.userId)
     return NextResponse.json(guests)
   } catch (error) {
     Logger.error(`[GET /api/guests] ${error as string}`)
@@ -39,9 +39,9 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[POST /api/guests] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[POST /api/guests] No accessible event')
       return unauthorized()
     }
 
@@ -51,7 +51,8 @@ export const POST = async (request: NextRequest) => {
     }
 
     const row = {
-      user_id: userId,
+      user_id: ctx.userId,
+      event_id: ctx.eventId,
       ...mapGuestToGuestRow(body),
       updated_at: new Date().toISOString(),
     }
@@ -64,7 +65,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const guest = mapGuestRowToGuest(data as GuestRow)
-    Logger.info('[POST /api/guests] Guest created successfully', userId)
+    Logger.info('[POST /api/guests] Guest created successfully', ctx.userId)
     return NextResponse.json(guest)
   } catch (error) {
     Logger.error(`[POST /api/guests] ${error as string}`)
@@ -75,9 +76,9 @@ export const POST = async (request: NextRequest) => {
 export const PUT = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[PUT /api/guests] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[PUT /api/guests] No accessible event')
       return unauthorized()
     }
 
@@ -94,6 +95,7 @@ export const PUT = async (request: NextRequest) => {
 
     const updates = {
       ...mapGuestToGuestRow(body),
+      user_id: ctx.userId,
       updated_at: new Date().toISOString(),
     }
 
@@ -101,7 +103,7 @@ export const PUT = async (request: NextRequest) => {
       .from('guests')
       .update(updates)
       .eq('id', id)
-      .eq('user_id', userId)
+      .eq('event_id', ctx.eventId)
       .select()
       .maybeSingle()
 
@@ -114,7 +116,7 @@ export const PUT = async (request: NextRequest) => {
     }
 
     const guest = mapGuestRowToGuest(data as GuestRow)
-    Logger.info('[PUT /api/guests] Guest updated successfully', userId)
+    Logger.info('[PUT /api/guests] Guest updated successfully', ctx.userId)
     return NextResponse.json(guest)
   } catch (error) {
     Logger.error(`[PUT /api/guests] ${error as string}`)
@@ -125,9 +127,9 @@ export const PUT = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const userId = await getUserId(supabase, request)
-    if (!userId) {
-      Logger.error('[DELETE /api/guests] User id not found')
+    const ctx = await getEventContext(supabase, request)
+    if (!ctx) {
+      Logger.error('[DELETE /api/guests] No accessible event')
       return unauthorized()
     }
 
@@ -141,14 +143,14 @@ export const DELETE = async (request: NextRequest) => {
       return NextResponse.json({ message: 'id required' }, { status: 400 })
     }
 
-    const { error } = await supabase.from('guests').delete().eq('id', id).eq('user_id', userId)
+    const { error } = await supabase.from('guests').delete().eq('id', id).eq('event_id', ctx.eventId)
 
     if (error) {
       Logger.error(`[DELETE /api/guests] ${error.message ?? 'Failed to delete guest'}`)
       return internalServerError(error.message ?? 'Failed to delete guest')
     }
 
-    Logger.info('[DELETE /api/guests] Guest deleted successfully', userId)
+    Logger.info('[DELETE /api/guests] Guest deleted successfully', ctx.userId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     Logger.error(`[DELETE /api/guests] ${error as string}`)
