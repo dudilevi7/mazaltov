@@ -1,4 +1,17 @@
 import { EventSettings, EventType } from '@/types/Settings'
+import { LanguageDirection } from '@/types/General'
+import type { AccessibleEvent } from '@/types/eventMember'
+import { getEventTypeDisplayName } from '../Settings/helper'
+
+export const getAccessibleEventLabel = (ev: AccessibleEvent, languageDirection: LanguageDirection): string => {
+  const isRtl = languageDirection === LanguageDirection.HEB
+  const names = [ev.brideName?.trim(), ev.groomName?.trim()].filter(Boolean).join(' & ')
+  const base =
+    names ||
+    (ev.eventType ? getEventTypeDisplayName(ev.eventType as EventType, languageDirection) : '') ||
+    (isRtl ? 'אירוע' : 'Event')
+  return ev.isOwner ? `${base} ${isRtl ? '(שלי)' : '(mine)'}` : base
+}
 
 export const getEventDisplayName = (settings: EventSettings): string => {
   if (settings.eventType === EventType.WEDDING) {

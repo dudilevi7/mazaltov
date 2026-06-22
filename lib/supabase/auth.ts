@@ -43,9 +43,9 @@ const getEventContext = async (
   }
 
   const accessibleUsersToEvent = new Map<string, EventRole>()
-  const { data: owned } = await supabase.from('events').select('id').eq('user_id', resolvedUserId).maybeSingle()
-  if (owned?.id) {
-    return { userId: resolvedUserId, eventId: owned.id as string, role: EventRole.ADMIN }
+  const { data: ownedEvent } = await supabase.from('events').select('id').eq('user_id', resolvedUserId).maybeSingle()
+  if (ownedEvent?.id) {
+    accessibleUsersToEvent.set(ownedEvent.id as string, EventRole.ADMIN)
   }
 
   const { data: memberships } = await supabase
