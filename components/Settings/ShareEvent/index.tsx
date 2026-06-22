@@ -37,6 +37,9 @@ const ShareEvent = ({ onOpenInvite }: ShareEventProps) => {
   const isAdmin = currentRole === 'admin'
 
   useEffect(() => {
+    if (!activeEventId) {
+      return
+    }
     fetchEventMembers()
   }, [activeEventId])
 
@@ -91,7 +94,7 @@ const ShareEvent = ({ onOpenInvite }: ShareEventProps) => {
         <button
           type="button"
           onClick={onOpenInvite}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700">
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 cursor-pointer">
           <FontAwesomeIcon icon={faUserPlus} />
           {isRtl ? 'שתף את האירוע למשתמש אחר' : 'Share event with another user'}
         </button>

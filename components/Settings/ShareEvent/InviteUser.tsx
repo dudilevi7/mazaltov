@@ -10,6 +10,8 @@ import fetchData, { METHODS } from '@/lib/fetchData'
 import { API_URL } from '@/constants'
 import { API_ROUTES } from '@/constants/apiRoutes'
 import { type EventMember, EventRole } from '@/types/eventMember'
+import CustomButton from '@/components/Button/custom-button'
+import useSupabase from '@/hooks/useSupabase'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -20,7 +22,8 @@ interface InviteUserProps {
 const InviteUser = ({ onClose }: InviteUserProps) => {
   const { languageDirection, currentRole, showToast, eventMembers, fetchEventMembers } = useAppContext()
   const isRtl = languageDirection === LanguageDirection.HEB
-  const isAdmin = currentRole === 'admin'
+  const isAdmin = currentRole === EventRole.ADMIN
+  const { user } = useSupabase()
 
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<EventRole>(EventRole.EDITOR)
@@ -81,7 +84,7 @@ const InviteUser = ({ onClose }: InviteUserProps) => {
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center gap-2 self-start text-sm text-gray-600 transition hover:text-gray-900">
+          className="flex items-center gap-2 self-start text-sm text-gray-600 transition hover:text-gray-900 cursor-pointer">
           <FontAwesomeIcon icon={faArrowRight} className={isRtl ? '' : 'rotate-180'} />
           {isRtl ? 'חזרה להגדרות' : 'Back to settings'}
         </button>
@@ -128,13 +131,13 @@ const InviteUser = ({ onClose }: InviteUserProps) => {
               </select>
             </div>
 
-            <button
+            <CustomButton
+              className="justify-center"
               type="submit"
               disabled={!canSubmit}
-              className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:enabled:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
-              <FontAwesomeIcon icon={faUserPlus} />
+              icon={<FontAwesomeIcon icon={faUserPlus} />}>
               {isRtl ? 'שלח הזמנה' : 'Send invitation'}
-            </button>
+            </CustomButton>
           </form>
         )}
       </section>
@@ -158,7 +161,7 @@ const InviteUser = ({ onClose }: InviteUserProps) => {
                     }`}>
                     {m.status === 'active' ? (isRtl ? 'פעיל' : 'Active') : isRtl ? 'ממתין' : 'Pending'}
                   </span>
-                  {isAdmin && (
+                  {isAdmin && user?.id !== m.userId && (
                     <button
                       type="button"
                       onClick={() => handleRemove(m.id)}
