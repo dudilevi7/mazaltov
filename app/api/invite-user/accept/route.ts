@@ -2,6 +2,7 @@ import { internalServerError, unauthorized } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import Logger from '@/lib/api/logger'
+import { EventMemberStatus } from '@/types/eventMember'
 
 // Called after login. Links any pending invitations addressed to the caller's
 // email to their user id and marks them active.
@@ -15,7 +16,7 @@ export const POST = async (request: NextRequest) => {
 
     const { data, error } = await supabase
       .from('event_members')
-      .update({ user_id: user.id, status: 'active', updated_at: new Date().toISOString() })
+      .update({ user_id: user.id, status: EventMemberStatus.ACTIVE, updated_at: new Date().toISOString() })
       .ilike('email', user.email)
       .is('user_id', null)
       .select('id')

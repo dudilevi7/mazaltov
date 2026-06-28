@@ -142,24 +142,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     fetchEvents()
     fetchTasks()
   }
-
-  const initEventAccess = async () => {
-    if (!user?.id) return
+  const acceptEventInviation = async () => {
     try {
       const accepted = await fetchData<unknown, { accepted: number }>({
         url: `${API_URL}${API_ROUTES.INVITE_ACCEPT}`,
         method: METHODS.POST,
       })
-      // Newly linked invitations: reload once so all providers refetch with access.
-      if (accepted?.accepted > 0 && typeof window !== 'undefined') {
-        window.location.reload()
-        return
-      }
     } catch {
       // No pending invitations is fine.
     }
+  }
+  const initEventAccess = async () => {
+    if (!user?.id) return
     try {
-      const events = await fetchData<unknown, AccessibleEvent[]>({
+      const { events, isEventPending } = await fetchData<
+        unknown,
+        { events: AccessibleEvent[]; isEventPending: boolean }
+      >({
         url: `${API_URL}${API_ROUTES.MY_EVENTS}`,
         method: METHODS.GET,
       })
@@ -176,6 +175,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       }
       setActiveEventId(active)
       setCurrentRole(list.find((e) => e.eventId === active)?.role ?? null)
+      if (isEventPending) {
+        await acceptEventInviation()
+      }
     } catch {
       setAccessibleEvents([])
     }
@@ -194,7 +196,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (!force && membersLoadedFor.current === activeEventId) return
     try {
       const data = await fetchData<unknown, EventMember[]>({
-        url: `${API_URL}${API_ROUTES.INVITE_USER}`,
+        url: `${API_URL}${API_ROUTES.EVENT_MEMBERS}`,
         method: METHODS.GET,
       })
       setEventMembers(Array.isArray(data) ? data : [])

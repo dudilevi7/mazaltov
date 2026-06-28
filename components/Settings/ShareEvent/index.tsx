@@ -5,7 +5,9 @@ import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faShareNodes, faUserPlus } from '@fortawesome/free-solid-svg-icons'
+import SelectDropdown from '@/components/Shared/SelectDropdown'
 import { EventMemberStatus } from '@/types/eventMember'
+import { getAccessibleEventLabel } from '@/components/AppHeader/helper'
 
 const roleLabel = (role: string, isRtl: boolean) => {
   if (role === 'admin') return isRtl ? 'מנהל' : 'Admin'
@@ -53,17 +55,15 @@ const ShareEvent = ({ onOpenInvite }: ShareEventProps) => {
       {accessibleEvents.length > 1 && (
         <div className="mb-4 flex flex-col gap-1">
           <label className="text-xs font-medium text-gray-600">{isRtl ? 'אירוע פעיל' : 'Active event'}</label>
-          <select
+          <SelectDropdown
             value={activeEventId ?? ''}
-            onChange={(e) => setActiveEvent(e.target.value)}
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400">
-            {accessibleEvents.map((ev) => (
-              <option key={ev.eventId} value={ev.eventId}>
-                {(ev.brideName || ev.ownerName || ev.eventType || ev.eventId) +
-                  (ev.isOwner ? (isRtl ? ' (שלי)' : ' (mine)') : '')}
-              </option>
-            ))}
-          </select>
+            onChange={setActiveEvent}
+            placeholder={isRtl ? 'בחר אירוע' : 'Select event'}
+            options={accessibleEvents.map((ev) => ({
+              value: ev.eventId,
+              label: getAccessibleEventLabel(ev, languageDirection),
+            }))}
+          />
         </div>
       )}
 

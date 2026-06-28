@@ -1,7 +1,7 @@
 import { forbidden, internalServerError, unauthorized } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getEventContext } from '@/lib/supabase/auth'
-import { type EventMemberRow, mapEventMemberRowToEventMember, EventRole } from '@/types/eventMember'
+import { type EventMemberRow, mapEventMemberRowToEventMember, EventRole, EventMemberStatus } from '@/types/eventMember'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -11,37 +11,16 @@ const VALID_ROLES: EventRole[] = [EventRole.ADMIN, EventRole.EDITOR]
 
 type InviteBody = { email: string; role: EventRole }
 
-export const GET = async (request: NextRequest) => {
-  try {
-    const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) return unauthorized()
-
-    const { data, error } = await supabase
-      .from('event_members')
-      .select('*')
-      .eq('event_id', ctx.eventId)
-      .order('created_at', { ascending: true })
-
-    if (error) {
-      Logger.error(`[GET /api/invite-user] ${error.message}`)
-      return internalServerError(error.message)
-    }
-
-    const members = (data ?? []).map((row) => mapEventMemberRowToEventMember(row as EventMemberRow))
-    return NextResponse.json(members)
-  } catch (error) {
-    Logger.error(`[GET /api/invite-user] ${error as string}`)
-    return internalServerError(error as string)
-  }
-}
-
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
     const ctx = await getEventContext(supabase, request)
-    if (!ctx) return unauthorized()
-    if (ctx.role !== 'admin') return forbidden('Only admins can invite users')
+    if (!ctx) {
+      return unauthorized()
+    }
+    if (ctx.role !== 'admin') {
+      return forbidden('Only admins can invite users')
+    }
 
     const body = await parseBody<InviteBody>(request)
     const email = body?.email?.trim().toLowerCase()
@@ -71,7 +50,7 @@ export const POST = async (request: NextRequest) => {
         event_id: ctx.eventId,
         email,
         role,
-        status: 'pending',
+        status: EventMemberStatus.PENDING,
         invited_by: ctx.userId,
       })
       .select()

@@ -11,5 +11,6 @@ export const API_ROUTES = {
   PUBLIC_NOTES: '/api/public-notes',
   INVITE_USER: '/api/invite-user',
   INVITE_ACCEPT: '/api/invite-user/accept',
+  EVENT_MEMBERS: '/api/event-members',
   MY_EVENTS: '/api/my-events',
 }

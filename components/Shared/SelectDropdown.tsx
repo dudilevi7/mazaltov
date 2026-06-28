@@ -56,7 +56,10 @@ const SelectDropdown = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
           afterLeave={() => setSearchQuery('')}>
-          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
+          <Listbox.Options
+            anchor="bottom start"
+            dir={languageDirection}
+            className="z-50 max-h-60 w-(--button-width) [--anchor-gap:4px] rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
             {searchable && (
               <div className="sticky top-0 bg-white px-2 py-2 border-b border-gray-200">
                 <div className="relative">

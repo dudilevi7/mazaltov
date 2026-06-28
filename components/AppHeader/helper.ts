@@ -6,10 +6,9 @@ import { getEventTypeDisplayName } from '../Settings/helper'
 export const getAccessibleEventLabel = (ev: AccessibleEvent, languageDirection: LanguageDirection): string => {
   const isRtl = languageDirection === LanguageDirection.HEB
   const names = [ev.brideName?.trim(), ev.groomName?.trim()].filter(Boolean).join(' & ')
-  const base =
-    names ||
-    (ev.eventType ? getEventTypeDisplayName(ev.eventType as EventType, languageDirection) : '') ||
-    (isRtl ? 'אירוע' : 'Event')
+  const base = ev.eventType
+    ? getEventTypeDisplayName(ev.eventType as EventType, languageDirection, ev.customEventType as string)
+    : names
   return ev.isOwner ? `${base} ${isRtl ? '(שלי)' : '(mine)'}` : base
 }
 

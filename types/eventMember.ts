@@ -34,6 +34,7 @@ export interface AccessibleEvent {
   role: EventRole
   isOwner: boolean
   eventType: string | null
+  customEventType: string | null
   ownerName: string | null
   brideName: string | null
   groomName: string | null

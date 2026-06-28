@@ -3,6 +3,7 @@ import { getAccessibleEventLabel, getEventDisplayName } from './helper'
 import moment from 'moment'
 import { getEventTypeDisplayName } from '../Settings/helper'
 import { LanguageDirection } from '@/types/General'
+import SelectDropdown from '../Shared/SelectDropdown'
 
 const EventDetails = () => {
   const { eventSettings, languageDirection, isSidebarOpen, accessibleEvents, activeEventId, setActiveEvent } =
@@ -22,28 +23,9 @@ const EventDetails = () => {
 
   return (
     <div
-      className={`absolute bottom-8 ${placementOfDetails} flex flex-col gap-1 bg-linear-to-r from-blue-500 to-blue-600 text-white
-         px-3 py-1.5 rounded-e-md z-40 animate-fade-in-0.5 shadow-lg shadow-blue-500/20 max-w-[170px]`}
+      className={`absolute bottom-0 ${placementOfDetails} flex flex-col gap-1 bg-linear-to-r from-blue-100 to-blue-300 text-gray-800
+         px-3 py-1.5 z-40 animate-fade-in-0.5 shadow-lg shadow-blue-500/20 w-[144px]`}
       dir={languageDirection}>
-      {hasMultipleEvents && (
-        <div className="flex flex-col">
-          <label htmlFor="event-switcher" className="sr-only">
-            {isRtl ? 'בחר אירוע' : 'Select event'}
-          </label>
-          <select
-            id="event-switcher"
-            value={activeEventId ?? ''}
-            onChange={(e) => setActiveEvent(e.target.value)}
-            className="w-full cursor-pointer rounded-md border border-white/30 bg-blue-700/40 px-1.5 py-1 text-xs font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-            {accessibleEvents.map((ev) => (
-              <option key={ev.eventId} value={ev.eventId} className="text-gray-800">
-                {getAccessibleEventLabel(ev, languageDirection)}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
       {eventDisplayName && (
         <>
           <div className="flex flex-row gap-0.5 font-bold">
@@ -56,6 +38,24 @@ const EventDetails = () => {
             <span className="text-xs rounded-md">{moment(eventSettings.eventDate).format('DD/MM/YYYY')}</span>
           )}
         </>
+      )}
+      {hasMultipleEvents && (
+        <div className="flex flex-col">
+          <label htmlFor="event-switcher" className="sr-only">
+            {isRtl ? 'בחר אירוע' : 'Select event'}
+          </label>
+          <SelectDropdown
+            value={activeEventId ?? ''}
+            onChange={setActiveEvent}
+            buttonClassName="!text-gray-700 !text-xs"
+            className="w-full text-xs font-semibold text-white"
+            placeholder={isRtl ? 'בחר אירוע' : 'Select event'}
+            options={accessibleEvents.map((ev) => ({
+              value: ev.eventId,
+              label: getAccessibleEventLabel(ev, languageDirection),
+            }))}
+          />
+        </div>
       )}
     </div>
   )
