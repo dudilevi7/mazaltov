@@ -35,8 +35,11 @@ const BudgetContent: React.FC<BudgetContentProps> = ({ setIsIncomesModalOpen }) 
           <span className={balance >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
             מאזן: {formatCurrency(balance)}
           </span>
-          <Tooltip content="מאזן הוא ההפרש בין התוצאות להכנסות המשוערות">
-            <FontAwesomeIcon icon={faInfoCircle} className="text-red-500 hover:text-red-700 cursor-pointer text-sm" />
+          <Tooltip content="מאזן הוא ההפרש בין ההכנסות להוצאות">
+            <FontAwesomeIcon
+              icon={faInfoCircle}
+              className={` cursor-pointer text-sm ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}
+            />
           </Tooltip>
         </div>
       )}
