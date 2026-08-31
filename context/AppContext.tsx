@@ -65,7 +65,7 @@ export const AppContext = createContext<AppContextType>({
   updateTodo: () => {},
   removeTodo: () => {},
   updateEventSettings: () => {},
-  isSidebarOpen: true,
+  isSidebarOpen: false,
   setSidebarOpen: () => {},
   toast: null,
   showToast: () => {},
@@ -123,7 +123,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isSidebarOpen, setSidebarOpenState] = useState<boolean>(() => {
     const stored = getFromLocalStorage(MAZAL_TOV_SIDEBAR_OPEN_KEY, null)
-    return stored !== null ? stored : true
+    return stored !== null ? stored : false
   })
 
   const setSidebarOpen = (open: boolean) => {

@@ -7,6 +7,7 @@ export const API_ROUTES = {
   GUESTS_IMPORT: '/api/guests/import',
   SHOPPING: '/api/shopping',
   GIFTS: '/api/gifts',
+  TRIPS: '/api/trips',
   INVITATION: '/api/invitation',
   PUBLIC_NOTES: '/api/public-notes',
   INVITE_USER: '/api/invite-user',

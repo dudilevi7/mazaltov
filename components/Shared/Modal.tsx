@@ -33,7 +33,7 @@ const Modal = ({
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 ${overlayClassName}`}
       onClick={closeOnBackdropClick ? onClose : undefined}>
       <div
-        className={`relative w-full max-w-md rounded-lg bg-white shadow-xl animate-fade-in ${className} overflow-y-auto`}
+        className={`relative w-full max-w-md rounded-lg bg-white shadow-xl animate-fade-in ${className} overflow-y-auto max-h-full`}
         onClick={closeOnBackdropClick ? (e) => e.stopPropagation() : undefined}>
         {header ? (
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">

@@ -10,6 +10,7 @@ import {
   faCoins,
   faGear,
   faGift,
+  faPlane,
 } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { useAppContext } from '@/context/AppContext'
@@ -39,6 +40,7 @@ const PAGE_CONFIGS: PageConfig[] = [
   { path: '/guests', labelHe: 'אורחים', labelEn: 'Guests', icon: faUsers },
   { path: '/gifts', labelHe: 'מתנות', labelEn: 'Gifts', icon: faGift },
   { path: '/budget', labelHe: 'תקציב', labelEn: 'Budget', icon: faCoins },
+  { path: '/trips', labelHe: 'טיולים', labelEn: 'Trips', icon: faPlane },
   {
     path: '/settings',
     labelHe: 'הגדרות',

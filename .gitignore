@@ -17,6 +17,7 @@
 /.next/
 /out/
 /supabase/migrations
+/supabase
 # production
 /build
 

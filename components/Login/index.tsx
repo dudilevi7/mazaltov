@@ -38,6 +38,7 @@ const Login = () => {
         <div className="flex flex-col items-center text-center">
           <Logo className="" />
           <p className="mt-1 text-sm text-gray-500">Sign in to manage your event</p>
+          <span className=" text-sm text-gray-500">כנס ונהל את האירוע שלך</span>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
           <div>
