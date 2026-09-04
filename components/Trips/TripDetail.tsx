@@ -66,6 +66,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
     id: string
     title: string
   } | null>(null)
+  const [groupedFlightIds, setGroupedFlightIds] = useState<Set<string>>(() => new Set())
 
   const section = (key: keyof typeof TRIP_SECTION_META) =>
     isRtl ? TRIP_SECTION_META[key].he : TRIP_SECTION_META[key].en
@@ -187,6 +188,19 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
     (s) => !trip.tasks.some((t) => t.templateId === s.templateId)
   )
   const sortedFlights = sortFlightsByDateAsc(trip.flights)
+  const groupedReturnIds = new Set(
+    sortedFlights
+      .filter((f) => !f.isReturn && f.returnFlightId && groupedFlightIds.has(f.id))
+      .map((f) => f.returnFlightId as string)
+  )
+  const toggleFlightGroup = (outboundId: string) => {
+    setGroupedFlightIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(outboundId)) next.delete(outboundId)
+      else next.add(outboundId)
+      return next
+    })
+  }
   const sortedHotels = sortHotelsByDateAsc(trip.hotels)
   const sortedAttractions = sortAttractionsByDateAsc(trip.attractions)
   const sortedCosts = sortAdditionalCostsByDateAsc(trip.additionalCosts ?? [])
@@ -240,18 +254,44 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
           setFlightModalOpen(true)
         }}
         addLabel={copy.addFlight}>
-        {sortedFlights.map((flight) => (
-          <FlightRow
-            key={flight.id}
-            flight={flight}
-            editLabel={copy.edit}
-            deleteLabel={copy.delete}
-            onEdit={() => openFlightEditor(flight)}
-            onDelete={() =>
-              setItemToDelete({ kind: 'flight', id: flight.id, title: flight.flightCompany || copy.addFlight })
-            }
-          />
-        ))}
+        <div className="flex flex-col">
+          {sortedFlights.map((flight) => {
+            const pairedReturn = !flight.isReturn ? getPairedReturn(trip.flights, flight) : undefined
+            const isGrouped = !!(pairedReturn && groupedFlightIds.has(flight.id))
+            const isHiddenInList = flight.isReturn && groupedReturnIds.has(flight.id)
+
+            return (
+              <div
+                key={flight.id}
+                className={`grid transition-[grid-template-rows,margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  isHiddenInList ? 'mb-0 grid-rows-[0fr]' : 'mb-2 grid-rows-[1fr] last:mb-0'
+                }`}>
+                <div
+                  className={`min-h-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    isHiddenInList ? 'pointer-events-none -translate-y-1 opacity-0' : 'translate-y-0 opacity-100'
+                  }`}
+                  aria-hidden={isHiddenInList}>
+                  <FlightRow
+                    flight={flight}
+                    pairedReturn={pairedReturn}
+                    isGrouped={isGrouped}
+                    onToggleGroup={pairedReturn ? () => toggleFlightGroup(flight.id) : undefined}
+                    editLabel={copy.edit}
+                    deleteLabel={copy.delete}
+                    onEdit={() => openFlightEditor(flight)}
+                    onDelete={() =>
+                      setItemToDelete({
+                        kind: 'flight',
+                        id: flight.id,
+                        title: flight.flightCompany || copy.addFlight,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </TripSection>
 
       <TripSection

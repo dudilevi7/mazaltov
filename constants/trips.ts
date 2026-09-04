@@ -119,6 +119,7 @@ export const getTripCopy = (isRtl: boolean) => ({
   connection: isRtl ? 'קונקשן (אופציונלי)' : 'Connection (optional)',
   addReturn: isRtl ? 'הוסף טיסת חזור' : 'Add return flight',
   returnFlight: isRtl ? 'טיסת חזור' : 'Return flight',
+  groupReturnFlight: isRtl ? 'הצג טיסת חזור' : 'Show return flight',
   price: isRtl ? 'מחיר' : 'Price',
   currency: isRtl ? 'מטבע' : 'Currency',
   hotelName: isRtl ? 'שם המלון' : 'Hotel name',
