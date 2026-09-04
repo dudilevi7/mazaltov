@@ -22,6 +22,16 @@ interface Flight {
   price: number
   currency: TripCurrency
   isReturn: boolean
+  returnFlightId?: string
+}
+
+interface AdditionalCost {
+  id: string
+  name: string
+  date: string
+  description: string
+  price: number
+  currency: TripCurrency
 }
 
 interface Hotel {
@@ -62,9 +72,10 @@ interface Trip {
   hotels: Hotel[]
   attractions: Attraction[]
   tasks: TripTask[]
+  additionalCosts: AdditionalCost[]
   createdAt: number
   updatedAt: number
 }
 
 export { TripType, TripCurrency }
-export type { Trip, Flight, Hotel, Attraction, TripTask }
+export type { Trip, Flight, Hotel, Attraction, TripTask, AdditionalCost }

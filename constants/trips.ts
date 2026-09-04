@@ -77,6 +77,7 @@ export const TRIP_SECTION_META = {
   flights: { he: 'טיסות', en: 'Flights', icon: faPlane },
   hotels: { he: 'מלונות', en: 'Hotels', icon: faHotel },
   attractions: { he: 'אטרקציות', en: 'Attractions', icon: faCamera },
+  additionalCosts: { he: 'עלויות נלוות', en: 'Additional costs', icon: faMoneyBill },
   tasks: { he: 'משימות', en: 'Tasks', icon: faListCheck },
 } as const
 
@@ -99,6 +100,10 @@ export const getTripCopy = (isRtl: boolean) => ({
   editHotel: isRtl ? 'עריכת מלון' : 'Edit hotel',
   addAttraction: isRtl ? 'הוסף אטרקציה' : 'Add attraction',
   editAttraction: isRtl ? 'עריכת אטרקציה' : 'Edit attraction',
+  addCost: isRtl ? 'הוסף עלות נלווית' : 'Add additional cost',
+  editCost: isRtl ? 'עריכת עלות נלווית' : 'Edit additional cost',
+  costName: isRtl ? 'שם' : 'Name',
+  roundTripPrice: isRtl ? 'מחיר כולל לטיסת הלוך חזור' : 'Total price for round trip',
   addTask: isRtl ? 'הוסף משימה' : 'Add task',
   editTask: isRtl ? 'עריכת משימה' : 'Edit task',
   emptyFlights: isRtl ? 'אין טיסות עדיין' : 'No flights yet',
@@ -138,5 +143,6 @@ export const getTripCopy = (isRtl: boolean) => ({
   flightsCount: isRtl ? 'טיסות' : 'Flights',
   hotelsCount: isRtl ? 'מלונות' : 'Hotels',
   attractionsCount: isRtl ? 'אטרקציות' : 'Attractions',
+  additionalCostsCount: isRtl ? 'עלויות נלוות' : 'Additional costs',
   tasksCount: isRtl ? 'משימות' : 'Tasks',
 })

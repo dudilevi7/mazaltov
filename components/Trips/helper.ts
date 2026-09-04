@@ -1,5 +1,5 @@
 import { TripCurrency } from '@/types/Trip'
-import type { Attraction, Flight, Hotel, Trip } from '@/types/Trip'
+import type { AdditionalCost, Attraction, Flight, Hotel, Trip } from '@/types/Trip'
 import moment from 'moment'
 
 export const newNestedId = () => crypto.randomUUID()
@@ -33,9 +33,13 @@ export const computeTripTotals = (trip: Trip): CurrencyTotals => {
     if (!amount) return
     totals[currency] = (totals[currency] ?? 0) + amount
   }
-  trip.flights.forEach((f) => add(f.price, f.currency))
+  trip.flights.forEach((f) => {
+    if (f.isReturn) return
+    add(f.price, f.currency)
+  })
   trip.hotels.forEach((h) => add(h.totalPrice, h.currency))
   trip.attractions.forEach((a) => add(a.price, a.currency))
+  ;(trip.additionalCosts ?? []).forEach((c) => add(c.price, c.currency))
   return totals
 }
 
@@ -85,14 +89,31 @@ export const computeTripDateRange = (trip: Trip): { start: string; end: string }
   }
 }
 
-export const sortFlightsByDateDesc = (flights: Flight[]) =>
-  [...flights].sort((a, b) => toTime(b.departureAt) - toTime(a.departureAt))
+export const sortFlightsByDateAsc = (flights: Flight[]) =>
+  [...flights].sort((a, b) => toTime(a.departureAt) - toTime(b.departureAt))
 
-export const sortHotelsByDateDesc = (hotels: Hotel[]) =>
-  [...hotels].sort((a, b) => toTime(b.checkIn || b.checkOut) - toTime(a.checkIn || a.checkOut))
+export const sortHotelsByDateAsc = (hotels: Hotel[]) =>
+  [...hotels].sort((a, b) => toTime(a.checkIn || a.checkOut) - toTime(b.checkIn || b.checkOut))
 
-export const sortAttractionsByDateDesc = (attractions: Attraction[]) =>
-  [...attractions].sort((a, b) => toTime(b.date) - toTime(a.date))
+export const sortAttractionsByDateAsc = (attractions: Attraction[]) =>
+  [...attractions].sort((a, b) => toTime(a.date) - toTime(b.date))
+
+export const sortAdditionalCostsByDateAsc = (costs: AdditionalCost[]) =>
+  [...costs].sort((a, b) => toTime(a.date) - toTime(b.date))
+
+export const getPairedReturn = (flights: Flight[], outbound: Flight): Flight | undefined =>
+  outbound.returnFlightId ? flights.find((f) => f.id === outbound.returnFlightId) : undefined
+
+export const getOutboundForReturn = (flights: Flight[], returnFlight: Flight): Flight | undefined =>
+  flights.find((f) => f.returnFlightId === returnFlight.id)
+
+export const linkedFlightIds = (flights: Flight[], flightId: string): Set<string> => {
+  const ids = new Set<string>([flightId])
+  const flight = flights.find((f) => f.id === flightId)
+  if (flight?.returnFlightId) ids.add(flight.returnFlightId)
+  flights.filter((f) => f.returnFlightId === flightId).forEach((f) => ids.add(f.id))
+  return ids
+}
 
 export const INPUT_CLASS =
   'w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
@@ -107,6 +128,14 @@ export const emptyFlight = (): Omit<Flight, 'id'> => ({
   price: 0,
   currency: TripCurrency.ILS,
   isReturn: false,
+})
+
+export const emptyAdditionalCost = (): Omit<AdditionalCost, 'id'> => ({
+  name: '',
+  date: '',
+  description: '',
+  price: 0,
+  currency: TripCurrency.ILS,
 })
 
 export const emptyHotel = (): Omit<Hotel, 'id'> => ({

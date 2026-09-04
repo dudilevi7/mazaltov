@@ -6,6 +6,7 @@ import {
   faCamera,
   faHotel,
   faListCheck,
+  faMoneyBill,
   faPen,
   faPlane,
   faTrash,
@@ -47,6 +48,7 @@ const TripCard = ({ trip, onOpen, onEdit, onDelete, editLabel, deleteLabel }: Tr
     { icon: faPlane, label: copy.flightsCount, value: String(trip.flights.length) },
     { icon: faHotel, label: copy.hotelsCount, value: String(trip.hotels.length) },
     { icon: faCamera, label: copy.attractionsCount, value: String(trip.attractions.length) },
+    { icon: faMoneyBill, label: copy.additionalCostsCount, value: String((trip.additionalCosts ?? []).length) },
     { icon: faListCheck, label: copy.tasksCount, value: `${doneTasks}/${trip.tasks.length}` },
   ]
 

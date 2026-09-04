@@ -1,4 +1,4 @@
-import type { Attraction, Flight, Hotel, Trip, TripTask } from '@/types/Trip'
+import type { AdditionalCost, Attraction, Flight, Hotel, Trip, TripTask } from '@/types/Trip'
 import { TripType } from '@/types/Trip'
 
 export type TripRow = {
@@ -11,6 +11,7 @@ export type TripRow = {
   hotels: Hotel[]
   attractions: Attraction[]
   tasks: TripTask[]
+  additional_costs: AdditionalCost[]
   created_at: string
   updated_at: string
 }
@@ -28,6 +29,7 @@ export const mapTripRowToTrip = (row: TripRow): Trip => ({
   hotels: asArray(row.hotels),
   attractions: asArray(row.attractions),
   tasks: asArray(row.tasks),
+  additionalCosts: asArray(row.additional_costs ?? (row as TripRow & { costs?: AdditionalCost[] }).costs),
   createdAt: row.created_at ? new Date(row.created_at).getTime() : 0,
   updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : 0,
 })
@@ -40,6 +42,7 @@ export const mapTripToTripRow = (trip: Partial<Trip>) => {
   if (trip.hotels !== undefined) row.hotels = trip.hotels
   if (trip.attractions !== undefined) row.attractions = trip.attractions
   if (trip.tasks !== undefined) row.tasks = trip.tasks
+  if (trip.additionalCosts !== undefined) row.additional_costs = trip.additionalCosts
   return row
 }
 
@@ -50,6 +53,7 @@ export const mapTripToTripRowForInsert = (trip: Partial<Trip>) => ({
   hotels: trip.hotels ?? [],
   attractions: trip.attractions ?? [],
   tasks: trip.tasks ?? [],
+  additional_costs: trip.additionalCosts ?? [],
 })
 
 export const TRIP_TYPES = ['honeymoon', 'bachelor', 'bachelorette', 'other'] as const

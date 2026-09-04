@@ -50,6 +50,7 @@ const Trips = () => {
         hotels: [],
         attractions: [],
         tasks: [],
+        additionalCosts: [],
       })
     }
     setIsModalOpen(false)

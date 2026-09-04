@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronLeft, faChevronRight, faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
-import type { Attraction, Flight, Hotel, Trip, TripTask } from '@/types/Trip'
+import type { AdditionalCost, Attraction, Flight, Hotel, Trip, TripTask } from '@/types/Trip'
 import { LanguageDirection } from '@/types/General'
 import { useAppContext } from '@/context/AppContext'
 import { useTripsContext } from '@/context/TripsContext'
@@ -11,7 +11,17 @@ import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import ActionButton, { ActionButtonSize, ActionButtonVariant } from '@/components/Button/action-button'
 import DeleteModal from '@/components/DeleteModal'
 import { getTripCopy, SUGGESTED_TRIP_TASKS, TRIP_SECTION_META, TRIP_TYPE_META } from '@/constants/trips'
-import { computeTripTotals, newNestedId, sortAttractionsByDateDesc, sortFlightsByDateDesc, sortHotelsByDateDesc } from './helper'
+import {
+  computeTripTotals,
+  getOutboundForReturn,
+  getPairedReturn,
+  linkedFlightIds,
+  newNestedId,
+  sortAttractionsByDateAsc,
+  sortAdditionalCostsByDateAsc,
+  sortFlightsByDateAsc,
+  sortHotelsByDateAsc,
+} from './helper'
 import TripCostSummary from './TripCostSummary'
 import TripSection from './TripSection'
 import FlightRow from './FlightRow'
@@ -22,6 +32,8 @@ import FlightModal, { type FlightFormResult } from './FlightModal'
 import HotelModal from './HotelModal'
 import AttractionModal from './AttractionModal'
 import TripTaskModal from './TripTaskModal'
+import CostModal from './CostModal'
+import CostRow from './CostRow'
 
 interface TripDetailProps {
   trip: Trip
@@ -40,31 +52,73 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
 
   const [flightModalOpen, setFlightModalOpen] = useState(false)
   const [editingFlight, setEditingFlight] = useState<Flight | null>(null)
+  const [editingReturnFlight, setEditingReturnFlight] = useState<Flight | null>(null)
   const [hotelModalOpen, setHotelModalOpen] = useState(false)
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null)
   const [attractionModalOpen, setAttractionModalOpen] = useState(false)
   const [editingAttraction, setEditingAttraction] = useState<Attraction | null>(null)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TripTask | null>(null)
-  const [itemToDelete, setItemToDelete] = useState<{ kind: 'flight' | 'hotel' | 'attraction' | 'task'; id: string; title: string } | null>(
-    null
-  )
+  const [costModalOpen, setCostModalOpen] = useState(false)
+  const [editingCost, setEditingCost] = useState<AdditionalCost | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<{
+    kind: 'flight' | 'hotel' | 'attraction' | 'task' | 'cost'
+    id: string
+    title: string
+  } | null>(null)
 
   const section = (key: keyof typeof TRIP_SECTION_META) =>
     isRtl ? TRIP_SECTION_META[key].he : TRIP_SECTION_META[key].en
 
   const handleSaveFlight = (result: FlightFormResult) => {
-    if (editingFlight) {
-      updateTrip(trip.id, {
-        flights: trip.flights.map((f) => (f.id === editingFlight.id ? { ...result.outbound, id: f.id } : f)),
-      })
-    } else {
-      const next = [{ ...result.outbound, id: newNestedId() }]
-      if (result.returnFlight) next.push({ ...result.returnFlight, id: newNestedId() })
-      updateTrip(trip.id, { flights: [...trip.flights, ...next] })
+    const outboundId = editingFlight?.isReturn
+      ? (getOutboundForReturn(trip.flights, editingFlight)?.id ?? editingFlight.id)
+      : (editingFlight?.id ?? newNestedId())
+    const existingReturnId = editingFlight
+      ? editingFlight.isReturn
+        ? editingFlight.id
+        : editingFlight.returnFlightId
+      : undefined
+    const returnId = result.returnFlight ? existingReturnId ?? newNestedId() : undefined
+
+    const outbound: Flight = {
+      ...result.outbound,
+      id: outboundId,
+      isReturn: false,
+      returnFlightId: returnId,
+      price: result.outbound.price,
     }
+    const returnLeg: Flight | undefined = result.returnFlight
+      ? { ...result.returnFlight, id: returnId as string, isReturn: true, price: 0, returnFlightId: outboundId }
+      : undefined
+
+    const replaceIds = linkedFlightIds(trip.flights, outboundId)
+    if (existingReturnId) replaceIds.add(existingReturnId)
+    const rest = trip.flights.filter((f) => !replaceIds.has(f.id))
+    updateTrip(trip.id, { flights: returnLeg ? [...rest, outbound, returnLeg] : [...rest, outbound] })
     setFlightModalOpen(false)
     setEditingFlight(null)
+    setEditingReturnFlight(null)
+  }
+
+  const openFlightEditor = (flight: Flight) => {
+    const outbound = flight.isReturn ? getOutboundForReturn(trip.flights, flight) ?? flight : flight
+    setEditingFlight(outbound)
+    setEditingReturnFlight(getPairedReturn(trip.flights, outbound) ?? null)
+    setFlightModalOpen(true)
+  }
+
+  const handleSaveCost = (cost: Omit<AdditionalCost, 'id'>) => {
+    const additionalCosts = trip.additionalCosts ?? []
+    if (editingCost) {
+      updateTrip(trip.id, {
+        additionalCosts: additionalCosts.map((c) => (c.id === editingCost.id ? { ...cost, id: c.id } : c)),
+      })
+    } else {
+      updateTrip(trip.id, { additionalCosts: [...additionalCosts, { ...cost, id: newNestedId() }] })
+    }
+    setCostModalOpen(false)
+    setEditingCost(null)
   }
 
   const handleSaveHotel = (hotel: Omit<Hotel, 'id'>) => {
@@ -115,11 +169,14 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
   const handleConfirmDelete = () => {
     if (!itemToDelete) return
     if (itemToDelete.kind === 'flight') {
-      updateTrip(trip.id, { flights: trip.flights.filter((f) => f.id !== itemToDelete.id) })
+      const ids = linkedFlightIds(trip.flights, itemToDelete.id)
+      updateTrip(trip.id, { flights: trip.flights.filter((f) => !ids.has(f.id)) })
     } else if (itemToDelete.kind === 'hotel') {
       updateTrip(trip.id, { hotels: trip.hotels.filter((h) => h.id !== itemToDelete.id) })
     } else if (itemToDelete.kind === 'attraction') {
       updateTrip(trip.id, { attractions: trip.attractions.filter((a) => a.id !== itemToDelete.id) })
+    } else if (itemToDelete.kind === 'cost') {
+      updateTrip(trip.id, { additionalCosts: (trip.additionalCosts ?? []).filter((c) => c.id !== itemToDelete.id) })
     } else {
       updateTrip(trip.id, { tasks: trip.tasks.filter((t) => t.id !== itemToDelete.id) })
     }
@@ -129,9 +186,10 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
   const remainingSuggested = SUGGESTED_TRIP_TASKS.filter(
     (s) => !trip.tasks.some((t) => t.templateId === s.templateId)
   )
-  const sortedFlights = sortFlightsByDateDesc(trip.flights)
-  const sortedHotels = sortHotelsByDateDesc(trip.hotels)
-  const sortedAttractions = sortAttractionsByDateDesc(trip.attractions)
+  const sortedFlights = sortFlightsByDateAsc(trip.flights)
+  const sortedHotels = sortHotelsByDateAsc(trip.hotels)
+  const sortedAttractions = sortAttractionsByDateAsc(trip.attractions)
+  const sortedCosts = sortAdditionalCostsByDateAsc(trip.additionalCosts ?? [])
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in-0.5" dir={languageDirection}>
@@ -178,6 +236,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
         count={trip.flights.length}
         onAdd={() => {
           setEditingFlight(null)
+          setEditingReturnFlight(null)
           setFlightModalOpen(true)
         }}
         addLabel={copy.addFlight}>
@@ -187,10 +246,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
             flight={flight}
             editLabel={copy.edit}
             deleteLabel={copy.delete}
-            onEdit={() => {
-              setEditingFlight(flight)
-              setFlightModalOpen(true)
-            }}
+            onEdit={() => openFlightEditor(flight)}
             onDelete={() =>
               setItemToDelete({ kind: 'flight', id: flight.id, title: flight.flightCompany || copy.addFlight })
             }
@@ -245,6 +301,31 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
               setAttractionModalOpen(true)
             }}
             onDelete={() => setItemToDelete({ kind: 'attraction', id: attraction.id, title: attraction.name })}
+          />
+        ))}
+      </TripSection>
+
+      <TripSection
+        key={`additional-costs-${trip.id}`}
+        icon={TRIP_SECTION_META.additionalCosts.icon}
+        title={section('additionalCosts')}
+        count={(trip.additionalCosts ?? []).length}
+        onAdd={() => {
+          setEditingCost(null)
+          setCostModalOpen(true)
+        }}
+        addLabel={copy.addCost}>
+        {sortedCosts.map((cost) => (
+          <CostRow
+            key={cost.id}
+            cost={cost}
+            editLabel={copy.edit}
+            deleteLabel={copy.delete}
+            onEdit={() => {
+              setEditingCost(cost)
+              setCostModalOpen(true)
+            }}
+            onDelete={() => setItemToDelete({ kind: 'cost', id: cost.id, title: cost.name })}
           />
         ))}
       </TripSection>
@@ -306,9 +387,11 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
           onClose={() => {
             setFlightModalOpen(false)
             setEditingFlight(null)
+            setEditingReturnFlight(null)
           }}
           onSave={handleSaveFlight}
           flight={editingFlight}
+          pairedReturn={editingReturnFlight}
           isRtl={isRtl}
         />
       )}
@@ -345,6 +428,18 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
           }}
           onSave={handleSaveTask}
           task={editingTask}
+          isRtl={isRtl}
+        />
+      )}
+      {costModalOpen && (
+        <CostModal
+          isOpen={costModalOpen}
+          onClose={() => {
+            setCostModalOpen(false)
+            setEditingCost(null)
+          }}
+          onSave={handleSaveCost}
+          cost={editingCost}
           isRtl={isRtl}
         />
       )}

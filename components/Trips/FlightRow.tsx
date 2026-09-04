@@ -6,6 +6,8 @@ import type { Flight } from '@/types/Trip'
 import { formatTripCost, formatTripDateTime } from './helper'
 import TripItemActions from './TripItemActions'
 import { useAppContext } from '@/context/AppContext'
+import { getTripCopy } from '@/constants/trips'
+import { LanguageDirection } from '@/types/General'
 
 interface FlightRowProps {
   flight: Flight
@@ -17,6 +19,11 @@ interface FlightRowProps {
 
 const FlightRow = ({ flight, onEdit, onDelete, editLabel, deleteLabel }: FlightRowProps) => {
   const { languageDirection } = useAppContext()
+  const isRtl = languageDirection === LanguageDirection.HEB
+  const copy = getTripCopy(isRtl)
+  const showRoundTripPrice = !flight.isReturn && !!flight.returnFlightId && flight.price > 0
+  const showOneWayPrice = !flight.isReturn && !flight.returnFlightId && flight.price > 0
+
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:gap-3">
       <FontAwesomeIcon icon={flight.isReturn ? faPlaneArrival : faPlane} className="shrink-0 text-gray-500" />
@@ -37,8 +44,13 @@ const FlightRow = ({ flight, onEdit, onDelete, editLabel, deleteLabel }: FlightR
             {flight.connection}
           </div>
         )}
+        {showRoundTripPrice && (
+          <div className="mt-1 text-sm text-gray-700">
+            {copy.roundTripPrice} — <strong>{formatTripCost(flight.price, flight.currency)}</strong>
+          </div>
+        )}
       </div>
-      {flight.price > 0 && (
+      {showOneWayPrice && (
         <span className="shrink-0 text-sm font-medium text-gray-700">
           {formatTripCost(flight.price, flight.currency)}
         </span>

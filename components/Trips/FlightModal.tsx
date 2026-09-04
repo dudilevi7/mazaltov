@@ -20,6 +20,7 @@ interface FlightModalProps {
   onClose: () => void
   onSave: (result: FlightFormResult) => void
   flight?: Flight | null
+  pairedReturn?: Flight | null
   isRtl: boolean
 }
 
@@ -29,12 +30,16 @@ const FlightFields = ({
   copy,
   sourceReadOnly,
   destReadOnly,
+  showPrice = true,
+  priceLabel,
 }: {
   values: Omit<Flight, 'id'>
   onChange: (next: Omit<Flight, 'id'>) => void
   copy: ReturnType<typeof getTripCopy>
   sourceReadOnly?: boolean
   destReadOnly?: boolean
+  showPrice?: boolean
+  priceLabel?: string
 }) => (
   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
     <div className="md:col-span-2">
@@ -100,30 +105,39 @@ const FlightFields = ({
         className={INPUT_CLASS}
       />
     </div>
-    <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">{copy.price}</label>
-      <input
-        type="number"
-        min={0}
-        step={0.01}
-        value={values.price || ''}
-        onChange={(e) => onChange({ ...values, price: parseFloat(e.target.value) || 0 })}
-        className={INPUT_CLASS}
-      />
-    </div>
-    <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">{copy.currency}</label>
-      <SelectDropdown
-        value={values.currency}
-        onChange={(value) => onChange({ ...values, currency: value as TripCurrency })}
-        options={CURRENCY_OPTIONS}
-        className="w-full"
-      />
-    </div>
+    {showPrice && (
+      <>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{priceLabel ?? copy.price}</label>
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={values.price || ''}
+            onChange={(e) => onChange({ ...values, price: parseFloat(e.target.value) || 0 })}
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{copy.currency}</label>
+          <SelectDropdown
+            value={values.currency}
+            onChange={(value) => onChange({ ...values, currency: value as TripCurrency })}
+            options={CURRENCY_OPTIONS}
+            className="w-full"
+          />
+        </div>
+      </>
+    )}
   </div>
 )
 
-const FlightModal = ({ isOpen, onClose, onSave, flight, isRtl }: FlightModalProps) => {
+const withoutId = (flight: Flight): Omit<Flight, 'id'> => {
+  const { id: _id, ...rest } = flight
+  return rest
+}
+
+const FlightModal = ({ isOpen, onClose, onSave, flight, pairedReturn, isRtl }: FlightModalProps) => {
   const copy = getTripCopy(isRtl)
   const isEdit = !!flight
   const [outbound, setOutbound] = useState(emptyFlight())
@@ -133,15 +147,20 @@ const FlightModal = ({ isOpen, onClose, onSave, flight, isRtl }: FlightModalProp
   useEffect(() => {
     if (!isOpen) return
     if (flight) {
-      const { id: _id, ...rest } = flight
-      setOutbound(rest)
-      setAddReturn(false)
+      setOutbound(withoutId(flight))
+      if (pairedReturn) {
+        setAddReturn(true)
+        setReturnFlight(withoutId(pairedReturn))
+      } else {
+        setAddReturn(false)
+        setReturnFlight(emptyFlight())
+      }
     } else {
       setOutbound(emptyFlight())
       setAddReturn(false)
       setReturnFlight(emptyFlight())
     }
-  }, [isOpen, flight])
+  }, [isOpen, flight, pairedReturn])
 
   useEffect(() => {
     if (!addReturn) return
@@ -152,14 +171,20 @@ const FlightModal = ({ isOpen, onClose, onSave, flight, isRtl }: FlightModalProp
       destination: outbound.source,
       currency: outbound.currency,
       isReturn: true,
+      price: 0,
     }))
   }, [addReturn, outbound.source, outbound.destination, outbound.flightCompany, outbound.currency])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSave({
-      outbound: { ...outbound, isReturn: isEdit ? outbound.isReturn : false },
-      returnFlight: !isEdit && addReturn ? { ...returnFlight, isReturn: true } : undefined,
+      outbound: {
+        ...outbound,
+        isReturn: false,
+        price: outbound.price,
+        returnFlightId: undefined,
+      },
+      returnFlight: addReturn ? { ...returnFlight, isReturn: true, price: 0 } : undefined,
     })
   }
 
@@ -170,18 +195,15 @@ const FlightModal = ({ isOpen, onClose, onSave, flight, isRtl }: FlightModalProp
       className="max-w-xl text-right"
       header={isEdit ? copy.editFlight : copy.addFlight}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6" dir={isRtl ? 'rtl' : 'ltr'}>
-        <FlightFields values={outbound} onChange={setOutbound} copy={copy} />
-        {isEdit && (
-          <CustomCheckbox
-            checked={outbound.isReturn}
-            onChange={(checked) => setOutbound({ ...outbound, isReturn: checked })}
-            label={copy.returnFlight}
-          />
-        )}
-        {!isEdit && (
-          <CustomCheckbox checked={addReturn} onChange={setAddReturn} label={copy.addReturn} />
-        )}
-        {!isEdit && addReturn && (
+        <FlightFields
+          values={outbound}
+          onChange={setOutbound}
+          copy={copy}
+          showPrice
+          priceLabel={addReturn ? copy.roundTripPrice : copy.price}
+        />
+        <CustomCheckbox checked={addReturn} onChange={setAddReturn} label={copy.addReturn} />
+        {addReturn && (
           <div className="border-t border-gray-200 pt-4">
             <h3 className="mb-3 text-sm font-semibold text-gray-800">{copy.returnFlight}</h3>
             <FlightFields
@@ -190,6 +212,7 @@ const FlightModal = ({ isOpen, onClose, onSave, flight, isRtl }: FlightModalProp
               copy={copy}
               sourceReadOnly
               destReadOnly
+              showPrice={false}
             />
           </div>
         )}
