@@ -1,5 +1,5 @@
 import { TripCurrency } from '@/types/Trip'
-import type { AdditionalCost, Attraction, Flight, Hotel, Trip } from '@/types/Trip'
+import type { AdditionalCost, Attraction, Flight, Hotel, Trip, TripLocation } from '@/types/Trip'
 import moment from 'moment'
 
 export const newNestedId = () => crypto.randomUUID()
@@ -27,19 +27,93 @@ export const toDateTimeLocal = (value: string): string => {
 
 export type CurrencyTotals = Partial<Record<TripCurrency, number>>
 
-export const computeTripTotals = (trip: Trip): CurrencyTotals => {
+export const ALL_LOCATIONS = 'all'
+
+export const locationKey = (value: string): string => value.trim().toLocaleLowerCase()
+
+export const matchesLocation = (fields: Array<string | undefined>, location: string): boolean => {
+  const key = locationKey(location)
+  if (!key) return true
+  return fields.some((field) => locationKey(field ?? '') === key)
+}
+
+export const getPairedReturn = (flights: Flight[], outbound: Flight): Flight | undefined =>
+  outbound.returnFlightId ? flights.find((f) => f.id === outbound.returnFlightId) : undefined
+
+export const getOutboundForReturn = (flights: Flight[], returnFlight: Flight): Flight | undefined =>
+  flights.find((f) => f.returnFlightId === returnFlight.id)
+
+export const linkedFlightIds = (flights: Flight[], flightId: string): Set<string> => {
+  const ids = new Set<string>([flightId])
+  const flight = flights.find((f) => f.id === flightId)
+  if (flight?.returnFlightId) ids.add(flight.returnFlightId)
+  flights.filter((f) => f.returnFlightId === flightId).forEach((f) => ids.add(f.id))
+  return ids
+}
+
+export const collectTripLocations = (trip: Trip, locale = 'en'): TripLocation[] => {
+  const seen = new Map<string, TripLocation>()
+  const add = (raw?: string, countryCode?: string) => {
+    const trimmed = (raw ?? '').trim()
+    if (!trimmed) return
+    const key = locationKey(trimmed)
+    const existing = seen.get(key)
+    const code = countryCode?.trim().toLowerCase()
+    if (!existing) seen.set(key, { name: trimmed, countryCode: code || undefined })
+    else if (!existing.countryCode && code) existing.countryCode = code
+  }
+
+  trip.flights.forEach((f) => {
+    add(f.source, f.sourceCountryCode)
+    add(f.destination, f.destinationCountryCode)
+  })
+  trip.hotels.forEach((h) => {
+    add(h.city, h.countryCode)
+    add(h.country, h.countryCode)
+  })
+  ;(trip.additionalCosts ?? []).forEach((c) => add(c.location, c.countryCode))
+
+  return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name, locale, { sensitivity: 'base' }))
+}
+
+export const filterFlightsByLocation = (flights: Flight[], location: string): Flight[] => {
+  if (!location.trim()) return flights
+  const ids = new Set<string>()
+  flights.forEach((f) => {
+    if (matchesLocation([f.source, f.destination], location)) {
+      linkedFlightIds(flights, f.id).forEach((id) => ids.add(id))
+    }
+  })
+  return flights.filter((f) => ids.has(f.id))
+}
+
+export const filterHotelsByLocation = (hotels: Hotel[], location: string): Hotel[] =>
+  location.trim() ? hotels.filter((h) => matchesLocation([h.city, h.country], location)) : hotels
+
+export const filterAdditionalCostsByLocation = (costs: AdditionalCost[], location: string): AdditionalCost[] =>
+  location.trim() ? costs.filter((c) => matchesLocation([c.location], location)) : costs
+
+export const computeTripTotals = (trip: Trip, location = ''): CurrencyTotals => {
+  const loc = location.trim()
   const totals: CurrencyTotals = {}
   const add = (amount: number, currency: TripCurrency) => {
     if (!amount) return
     totals[currency] = (totals[currency] ?? 0) + amount
   }
-  trip.flights.forEach((f) => {
+  const flights = loc ? filterFlightsByLocation(trip.flights, loc) : trip.flights
+  flights.forEach((f) => {
     if (f.isReturn) return
     add(f.price, f.currency)
   })
-  trip.hotels.forEach((h) => add(h.totalPrice, h.currency))
-  trip.attractions.forEach((a) => add(a.price, a.currency))
-  ;(trip.additionalCosts ?? []).forEach((c) => add(c.price, c.currency))
+  const hotels = loc ? filterHotelsByLocation(trip.hotels, loc) : trip.hotels
+  hotels.forEach((h) => add(h.totalPrice, h.currency))
+  if (!loc) {
+    trip.attractions.forEach((a) => add(a.price, a.currency))
+  }
+  const costs = loc
+    ? filterAdditionalCostsByLocation(trip.additionalCosts ?? [], loc)
+    : (trip.additionalCosts ?? [])
+  costs.forEach((c) => add(c.price, c.currency))
   return totals
 }
 
@@ -101,20 +175,6 @@ export const sortAttractionsByDateAsc = (attractions: Attraction[]) =>
 export const sortAdditionalCostsByDateAsc = (costs: AdditionalCost[]) =>
   [...costs].sort((a, b) => toTime(a.date) - toTime(b.date))
 
-export const getPairedReturn = (flights: Flight[], outbound: Flight): Flight | undefined =>
-  outbound.returnFlightId ? flights.find((f) => f.id === outbound.returnFlightId) : undefined
-
-export const getOutboundForReturn = (flights: Flight[], returnFlight: Flight): Flight | undefined =>
-  flights.find((f) => f.returnFlightId === returnFlight.id)
-
-export const linkedFlightIds = (flights: Flight[], flightId: string): Set<string> => {
-  const ids = new Set<string>([flightId])
-  const flight = flights.find((f) => f.id === flightId)
-  if (flight?.returnFlightId) ids.add(flight.returnFlightId)
-  flights.filter((f) => f.returnFlightId === flightId).forEach((f) => ids.add(f.id))
-  return ids
-}
-
 export const INPUT_CLASS =
   'w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
@@ -125,6 +185,8 @@ export const emptyFlight = (): Omit<Flight, 'id'> => ({
   connection: '',
   source: '',
   destination: '',
+  sourceCountryCode: '',
+  destinationCountryCode: '',
   price: 0,
   currency: TripCurrency.ILS,
   isReturn: false,
@@ -134,6 +196,8 @@ export const emptyAdditionalCost = (): Omit<AdditionalCost, 'id'> => ({
   name: '',
   date: '',
   description: '',
+  location: '',
+  countryCode: '',
   price: 0,
   currency: TripCurrency.ILS,
 })
@@ -143,6 +207,7 @@ export const emptyHotel = (): Omit<Hotel, 'id'> => ({
   bookingUrl: '',
   country: '',
   city: '',
+  countryCode: '',
   checkIn: '',
   checkOut: '',
   description: '',

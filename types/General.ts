@@ -12,4 +12,5 @@ export type FetchDataOptions<T = unknown> = {
   headers?: Record<string, string>
   cache?: RequestCache
   next?: { revalidate?: number | false; tags?: string[] }
+  signal?: AbortSignal
 }

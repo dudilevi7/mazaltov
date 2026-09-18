@@ -11,6 +11,19 @@ enum TripCurrency {
   EUR = 'EUR',
 }
 
+interface PlaceSuggestion {
+  id: string
+  name: string
+  country: string
+  countryCode: string
+  label: string
+}
+
+interface TripLocation {
+  name: string
+  countryCode?: string
+}
+
 interface Flight {
   id: string
   flightCompany: string
@@ -19,6 +32,8 @@ interface Flight {
   connection: string
   source: string
   destination: string
+  sourceCountryCode?: string
+  destinationCountryCode?: string
   price: number
   currency: TripCurrency
   isReturn: boolean
@@ -30,6 +45,8 @@ interface AdditionalCost {
   name: string
   date: string
   description: string
+  location?: string
+  countryCode?: string
   price: number
   currency: TripCurrency
 }
@@ -40,6 +57,7 @@ interface Hotel {
   bookingUrl: string
   country: string
   city: string
+  countryCode?: string
   checkIn: string
   checkOut: string
   description: string
@@ -78,4 +96,4 @@ interface Trip {
 }
 
 export { TripType, TripCurrency }
-export type { Trip, Flight, Hotel, Attraction, TripTask, AdditionalCost }
+export type { Trip, Flight, Hotel, Attraction, TripTask, AdditionalCost, PlaceSuggestion, TripLocation }

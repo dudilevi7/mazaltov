@@ -24,7 +24,7 @@ export enum METHODS {
 const fetchData = async <TBody = unknown, TResponse = unknown>(
   options: FetchDataOptions<TBody>
 ): Promise<TResponse> => {
-  const { url, method = METHODS.GET, body, headers = {}, cache, next } = options
+  const { url, method = METHODS.GET, body, headers = {}, cache, next, signal } = options
   const token = await getAuthToken()
 
   const requestHeaders: Record<string, string> = {
@@ -44,6 +44,7 @@ const fetchData = async <TBody = unknown, TResponse = unknown>(
     headers: requestHeaders,
     ...(cache !== undefined && { cache }),
     ...(next !== undefined && { next }),
+    ...(signal !== undefined && { signal }),
   }
   if (body !== undefined && method !== METHODS.GET) {
     config.body = JSON.stringify(body)

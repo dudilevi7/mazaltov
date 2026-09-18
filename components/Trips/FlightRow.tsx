@@ -8,6 +8,7 @@ import TripItemActions from './TripItemActions'
 import { useAppContext } from '@/context/AppContext'
 import { getTripCopy } from '@/constants/trips'
 import { LanguageDirection } from '@/types/General'
+import PlaceFlag from './PlaceFlag'
 
 export const AnimateCollapse = ({ open, children }: { open: boolean; children: React.ReactNode }) => (
   <div
@@ -55,8 +56,16 @@ const FlightBody = ({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium text-gray-900">{flight.flightCompany || '—'}</span>
-          <span className="text-sm text-gray-700" dir={languageDirection}>
-            {flight.source} {'←'} {flight.destination}
+          <span className="flex flex-wrap items-center gap-1 text-sm text-gray-700" dir={languageDirection}>
+            <span className="inline-flex items-center gap-1">
+              <PlaceFlag countryCode={flight.sourceCountryCode} />
+              {flight.source}
+            </span>
+            <span>{'←'}</span>
+            <span className="inline-flex items-center gap-1">
+              <PlaceFlag countryCode={flight.destinationCountryCode} />
+              {flight.destination}
+            </span>
           </span>
         </div>
         <div className="text-sm text-gray-500">

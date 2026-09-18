@@ -15,6 +15,7 @@ interface CollapsibleContainerProps {
   actions?: React.ReactNode
   children?: React.ReactNode
   className?: string
+  showZeroCount?: boolean
 }
 
 const CollapsibleContainer = ({
@@ -26,6 +27,7 @@ const CollapsibleContainer = ({
   actions,
   children,
   className = '',
+  showZeroCount = false,
 }: CollapsibleContainerProps) => {
   const { languageDirection } = useAppContext()
   const isRtl = languageDirection === LanguageDirection.HEB
@@ -53,7 +55,7 @@ const CollapsibleContainer = ({
             className={`h-3 w-3 shrink-0 text-gray-400 transition-transform ${isOpen ? '' : collapsedRotate}`}
           />
           <div className="flex min-w-0 items-center gap-2">{title}</div>
-          {count != null && count > 0 && <span className="text-sm text-gray-500">({count})</span>}
+          {count != null && (count > 0 || showZeroCount) && <span className="text-sm text-gray-500">({count})</span>}
         </button>
         {actions && (
           <div className="shrink-0" onClick={(e) => e.stopPropagation()}>

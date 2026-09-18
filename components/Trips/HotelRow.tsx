@@ -5,6 +5,7 @@ import { faHotel, faLink } from '@fortawesome/free-solid-svg-icons'
 import type { Hotel } from '@/types/Trip'
 import { formatTripCost, formatTripDate } from './helper'
 import TripItemActions from './TripItemActions'
+import PlaceFlag from './PlaceFlag'
 
 interface HotelRowProps {
   hotel: Hotel
@@ -34,9 +35,14 @@ const HotelRow = ({ hotel, onEdit, onDelete, editLabel, deleteLabel, bookingLabe
         )}
       </div>
       <div className="text-sm text-gray-500">
-        {[hotel.city, hotel.country].filter(Boolean).join(', ')}
+        {hotel.city || hotel.country ? (
+          <span className="inline-flex items-center gap-1">
+            <PlaceFlag countryCode={hotel.countryCode} />
+            {[hotel.city, hotel.country].filter(Boolean).join(', ')}
+          </span>
+        ) : null}
         {hotel.checkIn || hotel.checkOut
-          ? ` · ${formatTripDate(hotel.checkIn)}${hotel.checkOut ? ` – ${formatTripDate(hotel.checkOut)}` : ''}`
+          ? `${hotel.city || hotel.country ? ' · ' : ''}${formatTripDate(hotel.checkIn)}${hotel.checkOut ? ` – ${formatTripDate(hotel.checkOut)}` : ''}`
           : ''}
       </div>
       {hotel.description && <div className="truncate text-sm text-gray-500">{hotel.description}</div>}

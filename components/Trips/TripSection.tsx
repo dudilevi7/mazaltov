@@ -15,16 +15,21 @@ interface TripSectionProps {
   addLabel: string
   children: React.ReactNode
   headerExtra?: React.ReactNode
+  emptyMessage?: string
 }
 
-const TripSection = ({ icon, title, count, onAdd, addLabel, children, headerExtra }: TripSectionProps) => {
-  const [isOpen, setIsOpen] = useState(count > 0)
+const TripSection = ({ icon, title, count, onAdd, addLabel, children, headerExtra, emptyMessage }: TripSectionProps) => {
+  const [isOpen, setIsOpen] = useState(count > 0 || !!emptyMessage)
   const prevCount = useRef(count)
 
   useEffect(() => {
     if (prevCount.current === 0 && count > 0) setIsOpen(true)
     prevCount.current = count
   }, [count])
+
+  useEffect(() => {
+    if (emptyMessage && count === 0) setIsOpen(true)
+  }, [emptyMessage, count])
 
   return (
     <CollapsibleContainer
@@ -41,11 +46,16 @@ const TripSection = ({ icon, title, count, onAdd, addLabel, children, headerExtr
         <CustomButton size={ButtonSize.SM} onClick={onAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
           {addLabel}
         </CustomButton>
-      }>
-      {headerExtra || count > 0 ? (
+      }
+      showZeroCount={!!emptyMessage && count === 0}>
+      {headerExtra || count > 0 || emptyMessage ? (
         <>
           {headerExtra}
-          {count > 0 ? <div className="flex flex-col gap-2">{children}</div> : null}
+          {count > 0 ? (
+            <div className="flex flex-col gap-2">{children}</div>
+          ) : emptyMessage ? (
+            <p className="text-sm text-gray-500">{emptyMessage}</p>
+          ) : null}
         </>
       ) : null}
     </CollapsibleContainer>

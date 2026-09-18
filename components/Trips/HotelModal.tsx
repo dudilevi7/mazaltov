@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Hotel } from '@/types/Trip'
+import type { Hotel, PlaceSuggestion } from '@/types/Trip'
 import { TripCurrency } from '@/types/Trip'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import Modal from '@/components/Shared/Modal'
 import { CURRENCY_OPTIONS, getTripCopy } from '@/constants/trips'
 import { INPUT_CLASS, emptyHotel } from './helper'
+import LocationAutocomplete from './LocationAutocomplete'
 
 interface HotelModalProps {
   isOpen: boolean
@@ -15,9 +16,10 @@ interface HotelModalProps {
   onSave: (hotel: Omit<Hotel, 'id'>) => void
   hotel?: Hotel | null
   isRtl: boolean
+  existingPlaces?: PlaceSuggestion[]
 }
 
-const HotelModal = ({ isOpen, onClose, onSave, hotel, isRtl }: HotelModalProps) => {
+const HotelModal = ({ isOpen, onClose, onSave, hotel, isRtl, existingPlaces = [] }: HotelModalProps) => {
   const copy = getTripCopy(isRtl)
   const isEdit = !!hotel
   const [values, setValues] = useState(emptyHotel())
@@ -26,7 +28,7 @@ const HotelModal = ({ isOpen, onClose, onSave, hotel, isRtl }: HotelModalProps) 
     if (!isOpen) return
     if (hotel) {
       const { id: _id, ...rest } = hotel
-      setValues(rest)
+      setValues({ ...emptyHotel(), ...rest })
     } else {
       setValues(emptyHotel())
     }
@@ -53,20 +55,32 @@ const HotelModal = ({ isOpen, onClose, onSave, hotel, isRtl }: HotelModalProps) 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">{copy.country}</label>
-            <input
-              type="text"
+            <LocationAutocomplete
               value={values.country}
-              onChange={(e) => setValues({ ...values, country: e.target.value })}
-              className={INPUT_CLASS}
+              countryCode={values.countryCode}
+              existingPlaces={existingPlaces}
+              onChange={({ name, country, countryCode }) =>
+                setValues({
+                  ...values,
+                  country: country || name,
+                  countryCode: countryCode ?? '',
+                })
+              }
             />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">{copy.city}</label>
-            <input
-              type="text"
+            <LocationAutocomplete
               value={values.city}
-              onChange={(e) => setValues({ ...values, city: e.target.value })}
-              className={INPUT_CLASS}
+              countryCode={values.countryCode}
+              existingPlaces={existingPlaces}
+              onChange={({ name, country, countryCode }) =>
+                setValues({
+                  ...values,
+                  city: name,
+                  ...(country ? { country, countryCode: countryCode ?? values.countryCode } : { countryCode: countryCode ?? '' }),
+                })
+              }
             />
           </div>
           <div>

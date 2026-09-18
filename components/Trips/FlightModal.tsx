@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Flight } from '@/types/Trip'
+import type { Flight, PlaceSuggestion } from '@/types/Trip'
 import { TripCurrency } from '@/types/Trip'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
@@ -9,6 +9,7 @@ import CustomCheckbox from '@/components/Shared/CustomCheckbox'
 import Modal from '@/components/Shared/Modal'
 import { CURRENCY_OPTIONS, getTripCopy } from '@/constants/trips'
 import { INPUT_CLASS, emptyFlight, toDateTimeLocal } from './helper'
+import LocationAutocomplete from './LocationAutocomplete'
 
 export interface FlightFormResult {
   outbound: Omit<Flight, 'id'>
@@ -22,12 +23,14 @@ interface FlightModalProps {
   flight?: Flight | null
   pairedReturn?: Flight | null
   isRtl: boolean
+  existingPlaces?: PlaceSuggestion[]
 }
 
 const FlightFields = ({
   values,
   onChange,
   copy,
+  existingPlaces = [],
   sourceReadOnly,
   destReadOnly,
   showPrice = true,
@@ -36,6 +39,7 @@ const FlightFields = ({
   values: Omit<Flight, 'id'>
   onChange: (next: Omit<Flight, 'id'>) => void
   copy: ReturnType<typeof getTripCopy>
+  existingPlaces?: PlaceSuggestion[]
   sourceReadOnly?: boolean
   destReadOnly?: boolean
   showPrice?: boolean
@@ -54,24 +58,28 @@ const FlightFields = ({
     </div>
     <div>
       <label className="mb-1 block text-sm font-medium text-gray-700">{copy.from}</label>
-      <input
-        type="text"
+      <LocationAutocomplete
         value={values.source}
-        onChange={(e) => onChange({ ...values, source: e.target.value })}
-        required
-        readOnly={sourceReadOnly}
-        className={`${INPUT_CLASS} ${sourceReadOnly ? 'bg-gray-100 text-gray-900' : ''}`}
+        countryCode={values.sourceCountryCode}
+        existingPlaces={existingPlaces}
+        disabled={sourceReadOnly}
+        required={!sourceReadOnly}
+        onChange={({ name, countryCode }) =>
+          onChange({ ...values, source: name, sourceCountryCode: countryCode ?? '' })
+        }
       />
     </div>
     <div>
       <label className="mb-1 block text-sm font-medium text-gray-700">{copy.to}</label>
-      <input
-        type="text"
+      <LocationAutocomplete
         value={values.destination}
-        onChange={(e) => onChange({ ...values, destination: e.target.value })}
-        required
-        readOnly={destReadOnly}
-        className={`${INPUT_CLASS} ${destReadOnly ? 'bg-gray-100 text-gray-900' : ''}`}
+        countryCode={values.destinationCountryCode}
+        existingPlaces={existingPlaces}
+        disabled={destReadOnly}
+        required={!destReadOnly}
+        onChange={({ name, countryCode }) =>
+          onChange({ ...values, destination: name, destinationCountryCode: countryCode ?? '' })
+        }
       />
     </div>
     <div>
@@ -137,7 +145,7 @@ const withoutId = (flight: Flight): Omit<Flight, 'id'> => {
   return rest
 }
 
-const FlightModal = ({ isOpen, onClose, onSave, flight, pairedReturn, isRtl }: FlightModalProps) => {
+const FlightModal = ({ isOpen, onClose, onSave, flight, pairedReturn, isRtl, existingPlaces = [] }: FlightModalProps) => {
   const copy = getTripCopy(isRtl)
   const isEdit = !!flight
   const [outbound, setOutbound] = useState(emptyFlight())
@@ -169,11 +177,13 @@ const FlightModal = ({ isOpen, onClose, onSave, flight, pairedReturn, isRtl }: F
       flightCompany: prev.flightCompany || outbound.flightCompany,
       source: outbound.destination,
       destination: outbound.source,
+      sourceCountryCode: outbound.destinationCountryCode,
+      destinationCountryCode: outbound.sourceCountryCode,
       currency: outbound.currency,
       isReturn: true,
       price: 0,
     }))
-  }, [addReturn, outbound.source, outbound.destination, outbound.flightCompany, outbound.currency])
+  }, [addReturn, outbound.source, outbound.destination, outbound.sourceCountryCode, outbound.destinationCountryCode, outbound.flightCompany, outbound.currency])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -199,6 +209,7 @@ const FlightModal = ({ isOpen, onClose, onSave, flight, pairedReturn, isRtl }: F
           values={outbound}
           onChange={setOutbound}
           copy={copy}
+          existingPlaces={existingPlaces}
           showPrice
           priceLabel={addReturn ? copy.roundTripPrice : copy.price}
         />
@@ -210,6 +221,7 @@ const FlightModal = ({ isOpen, onClose, onSave, flight, pairedReturn, isRtl }: F
               values={returnFlight}
               onChange={setReturnFlight}
               copy={copy}
+              existingPlaces={existingPlaces}
               sourceReadOnly
               destReadOnly
               showPrice={false}

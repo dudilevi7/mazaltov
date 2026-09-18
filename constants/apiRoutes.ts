@@ -8,6 +8,7 @@ export const API_ROUTES = {
   SHOPPING: '/api/shopping',
   GIFTS: '/api/gifts',
   TRIPS: '/api/trips',
+  PLACES_AUTOCOMPLETE: '/api/places/autocomplete',
   INVITATION: '/api/invitation',
   PUBLIC_NOTES: '/api/public-notes',
   INVITE_USER: '/api/invite-user',

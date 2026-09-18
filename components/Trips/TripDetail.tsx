@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronLeft, faChevronRight, faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
-import type { AdditionalCost, Attraction, Flight, Hotel, Trip, TripTask } from '@/types/Trip'
+import type { AdditionalCost, Attraction, Flight, Hotel, PlaceSuggestion, Trip, TripTask } from '@/types/Trip'
 import { LanguageDirection } from '@/types/General'
 import { useAppContext } from '@/context/AppContext'
 import { useTripsContext } from '@/context/TripsContext'
@@ -12,10 +12,16 @@ import ActionButton, { ActionButtonSize, ActionButtonVariant } from '@/component
 import DeleteModal from '@/components/DeleteModal'
 import { getTripCopy, SUGGESTED_TRIP_TASKS, TRIP_SECTION_META, TRIP_TYPE_META } from '@/constants/trips'
 import {
+  ALL_LOCATIONS,
+  collectTripLocations,
   computeTripTotals,
+  filterAdditionalCostsByLocation,
+  filterFlightsByLocation,
+  filterHotelsByLocation,
   getOutboundForReturn,
   getPairedReturn,
   linkedFlightIds,
+  locationKey,
   newNestedId,
   sortAttractionsByDateAsc,
   sortAdditionalCostsByDateAsc,
@@ -23,6 +29,7 @@ import {
   sortHotelsByDateAsc,
 } from './helper'
 import TripCostSummary from './TripCostSummary'
+import TripLocationFilter from './TripLocationFilter'
 import TripSection from './TripSection'
 import FlightRow from './FlightRow'
 import HotelRow from './HotelRow'
@@ -34,6 +41,7 @@ import AttractionModal from './AttractionModal'
 import TripTaskModal from './TripTaskModal'
 import CostModal from './CostModal'
 import CostRow from './CostRow'
+import { flagEmoji } from './PlaceFlag'
 
 interface TripDetailProps {
   trip: Trip
@@ -48,7 +56,6 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
   const isRtl = languageDirection === LanguageDirection.HEB
   const copy = getTripCopy(isRtl)
   const typeMeta = TRIP_TYPE_META[trip.tripType]
-  const totals = computeTripTotals(trip)
 
   const [flightModalOpen, setFlightModalOpen] = useState(false)
   const [editingFlight, setEditingFlight] = useState<Flight | null>(null)
@@ -67,6 +74,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
     title: string
   } | null>(null)
   const [groupedFlightIds, setGroupedFlightIds] = useState<Set<string>>(() => new Set())
+  const [locationFilter, setLocationFilter] = useState(ALL_LOCATIONS)
 
   const section = (key: keyof typeof TRIP_SECTION_META) =>
     isRtl ? TRIP_SECTION_META[key].he : TRIP_SECTION_META[key].en
@@ -187,7 +195,43 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
   const remainingSuggested = SUGGESTED_TRIP_TASKS.filter(
     (s) => !trip.tasks.some((t) => t.templateId === s.templateId)
   )
-  const sortedFlights = sortFlightsByDateAsc(trip.flights)
+  const locations = useMemo(() => collectTripLocations(trip, isRtl ? 'he' : 'en'), [trip, isRtl])
+  const locationOptions = useMemo(
+    () =>
+      locations.map((location) => ({
+        value: location.name,
+        label: [flagEmoji(location.countryCode), location.name].filter(Boolean).join(' '),
+      })),
+    [locations]
+  )
+  const existingPlaces = useMemo<PlaceSuggestion[]>(
+    () =>
+      locations.map((location) => ({
+        id: `local-${locationKey(location.name)}`,
+        name: location.name,
+        country: '',
+        countryCode: location.countryCode ?? '',
+        label: location.name,
+      })),
+    [locations]
+  )
+
+  useEffect(() => {
+    if (locationFilter === ALL_LOCATIONS) return
+    const canonical = locations.find((l) => locationKey(l.name) === locationKey(locationFilter))
+    if (!canonical) setLocationFilter(ALL_LOCATIONS)
+    else if (canonical.name !== locationFilter) setLocationFilter(canonical.name)
+  }, [locations, locationFilter])
+
+  const isLocationFiltered = locationFilter !== ALL_LOCATIONS
+  const selectedLocation = isLocationFiltered ? locationFilter : ''
+  const totals = computeTripTotals(trip, selectedLocation)
+  const totalsLabel = isLocationFiltered ? `${copy.totalCost} · ${locationFilter}` : copy.totalCost
+  const emptyFiltered = isLocationFiltered ? copy.emptyFilteredSection : undefined
+
+  const sortedFlights = sortFlightsByDateAsc(
+    isLocationFiltered ? filterFlightsByLocation(trip.flights, locationFilter) : trip.flights
+  )
   const groupedReturnIds = new Set(
     sortedFlights
       .filter((f) => !f.isReturn && f.returnFlightId && groupedFlightIds.has(f.id))
@@ -201,9 +245,15 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
       return next
     })
   }
-  const sortedHotels = sortHotelsByDateAsc(trip.hotels)
+  const sortedHotels = sortHotelsByDateAsc(
+    isLocationFiltered ? filterHotelsByLocation(trip.hotels, locationFilter) : trip.hotels
+  )
   const sortedAttractions = sortAttractionsByDateAsc(trip.attractions)
-  const sortedCosts = sortAdditionalCostsByDateAsc(trip.additionalCosts ?? [])
+  const sortedCosts = sortAdditionalCostsByDateAsc(
+    isLocationFiltered
+      ? filterAdditionalCostsByLocation(trip.additionalCosts ?? [], locationFilter)
+      : (trip.additionalCosts ?? [])
+  )
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in-0.5" dir={languageDirection}>
@@ -241,13 +291,24 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
         </span>
       </div>
 
-      <TripCostSummary totals={totals} label={copy.totalCost} />
+      {locations.length > 0 && (
+        <TripLocationFilter
+          value={locationFilter}
+          onChange={setLocationFilter}
+          options={locationOptions}
+          label={copy.locationFilter}
+          allLabel={copy.allLocations}
+        />
+      )}
+
+      <TripCostSummary totals={totals} label={totalsLabel} />
 
       <TripSection
         key={`flights-${trip.id}`}
         icon={TRIP_SECTION_META.flights.icon}
         title={section('flights')}
-        count={trip.flights.length}
+        count={sortedFlights.length}
+        emptyMessage={emptyFiltered}
         onAdd={() => {
           setEditingFlight(null)
           setEditingReturnFlight(null)
@@ -298,7 +359,8 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
         key={`hotels-${trip.id}`}
         icon={TRIP_SECTION_META.hotels.icon}
         title={section('hotels')}
-        count={trip.hotels.length}
+        count={sortedHotels.length}
+        emptyMessage={emptyFiltered}
         onAdd={() => {
           setEditingHotel(null)
           setHotelModalOpen(true)
@@ -320,36 +382,39 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
         ))}
       </TripSection>
 
-      <TripSection
-        key={`attractions-${trip.id}`}
-        icon={TRIP_SECTION_META.attractions.icon}
-        title={section('attractions')}
-        count={trip.attractions.length}
-        onAdd={() => {
-          setEditingAttraction(null)
-          setAttractionModalOpen(true)
-        }}
-        addLabel={copy.addAttraction}>
-        {sortedAttractions.map((attraction) => (
-          <AttractionRow
-            key={attraction.id}
-            attraction={attraction}
-            editLabel={copy.edit}
-            deleteLabel={copy.delete}
-            onEdit={() => {
-              setEditingAttraction(attraction)
-              setAttractionModalOpen(true)
-            }}
-            onDelete={() => setItemToDelete({ kind: 'attraction', id: attraction.id, title: attraction.name })}
-          />
-        ))}
-      </TripSection>
+      {!isLocationFiltered && (
+        <TripSection
+          key={`attractions-${trip.id}`}
+          icon={TRIP_SECTION_META.attractions.icon}
+          title={section('attractions')}
+          count={trip.attractions.length}
+          onAdd={() => {
+            setEditingAttraction(null)
+            setAttractionModalOpen(true)
+          }}
+          addLabel={copy.addAttraction}>
+          {sortedAttractions.map((attraction) => (
+            <AttractionRow
+              key={attraction.id}
+              attraction={attraction}
+              editLabel={copy.edit}
+              deleteLabel={copy.delete}
+              onEdit={() => {
+                setEditingAttraction(attraction)
+                setAttractionModalOpen(true)
+              }}
+              onDelete={() => setItemToDelete({ kind: 'attraction', id: attraction.id, title: attraction.name })}
+            />
+          ))}
+        </TripSection>
+      )}
 
       <TripSection
         key={`additional-costs-${trip.id}`}
         icon={TRIP_SECTION_META.additionalCosts.icon}
         title={section('additionalCosts')}
-        count={(trip.additionalCosts ?? []).length}
+        count={sortedCosts.length}
+        emptyMessage={emptyFiltered}
         onAdd={() => {
           setEditingCost(null)
           setCostModalOpen(true)
@@ -432,6 +497,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
           onSave={handleSaveFlight}
           flight={editingFlight}
           pairedReturn={editingReturnFlight}
+          existingPlaces={existingPlaces}
           isRtl={isRtl}
         />
       )}
@@ -444,6 +510,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
           }}
           onSave={handleSaveHotel}
           hotel={editingHotel}
+          existingPlaces={existingPlaces}
           isRtl={isRtl}
         />
       )}
@@ -481,6 +548,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
           onSave={handleSaveCost}
           cost={editingCost}
           isRtl={isRtl}
+          existingPlaces={existingPlaces}
         />
       )}
       <DeleteModal
