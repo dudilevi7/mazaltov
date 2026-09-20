@@ -40,6 +40,14 @@ interface Flight {
   returnFlightId?: string
 }
 
+enum AdditionalCostType {
+  FOOD = 'food',
+  TRANSITIONS = 'transitions',
+  SHOPPING = 'shopping',
+  COMMUNICATION = 'communication',
+  OTHER = 'other',
+}
+
 interface AdditionalCost {
   id: string
   name: string
@@ -47,6 +55,7 @@ interface AdditionalCost {
   description: string
   location?: string
   countryCode?: string
+  costType?: AdditionalCostType
   price: number
   currency: TripCurrency
 }
@@ -95,5 +104,5 @@ interface Trip {
   updatedAt: number
 }
 
-export { TripType, TripCurrency }
+export { TripType, TripCurrency, AdditionalCostType }
 export type { Trip, Flight, Hotel, Attraction, TripTask, AdditionalCost, PlaceSuggestion, TripLocation }

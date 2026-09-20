@@ -45,7 +45,7 @@ const HotelRow = ({ hotel, onEdit, onDelete, editLabel, deleteLabel, bookingLabe
           ? `${hotel.city || hotel.country ? ' · ' : ''}${formatTripDate(hotel.checkIn)}${hotel.checkOut ? ` – ${formatTripDate(hotel.checkOut)}` : ''}`
           : ''}
       </div>
-      {hotel.description && <div className="truncate text-sm text-gray-500">{hotel.description}</div>}
+      {hotel.description && <div className="whitespace-pre-wrap text-sm text-gray-500">{hotel.description}</div>}
     </div>
     {hotel.totalPrice > 0 && (
       <span className="shrink-0 text-sm font-medium text-gray-700">

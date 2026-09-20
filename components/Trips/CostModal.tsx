@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { AdditionalCostType, TripCurrency } from '@/types/Trip'
 import type { AdditionalCost, PlaceSuggestion } from '@/types/Trip'
-import { TripCurrency } from '@/types/Trip'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import Modal from '@/components/Shared/Modal'
-import { CURRENCY_OPTIONS, getTripCopy } from '@/constants/trips'
+import { CURRENCY_OPTIONS, getCostTypeOptions, getTripCopy } from '@/constants/trips'
 import { INPUT_CLASS, emptyAdditionalCost } from './helper'
 import LocationAutocomplete from './LocationAutocomplete'
 
@@ -42,15 +42,26 @@ const CostModal = ({ isOpen, onClose, onSave, cost, isRtl, existingPlaces = [] }
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="text-right" header={isEdit ? copy.editCost : copy.addCost}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6" dir={isRtl ? 'rtl' : 'ltr'}>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">{copy.costName}</label>
-          <input
-            type="text"
-            value={values.name}
-            onChange={(e) => setValues({ ...values, name: e.target.value })}
-            required
-            className={INPUT_CLASS}
-          />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{copy.costName}</label>
+            <input
+              type="text"
+              value={values.name}
+              onChange={(e) => setValues({ ...values, name: e.target.value })}
+              required
+              className={INPUT_CLASS}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{copy.costType}</label>
+            <SelectDropdown
+              value={values.costType ?? AdditionalCostType.OTHER}
+              onChange={(value) => setValues({ ...values, costType: value as AdditionalCostType })}
+              options={getCostTypeOptions(isRtl)}
+              className="w-full"
+            />
+          </div>
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{copy.date}</label>

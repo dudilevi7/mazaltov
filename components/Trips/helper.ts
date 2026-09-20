@@ -1,4 +1,4 @@
-import { TripCurrency } from '@/types/Trip'
+import { TripCurrency, AdditionalCostType } from '@/types/Trip'
 import type { AdditionalCost, Attraction, Flight, Hotel, Trip, TripLocation } from '@/types/Trip'
 import moment from 'moment'
 
@@ -198,6 +198,7 @@ export const emptyAdditionalCost = (): Omit<AdditionalCost, 'id'> => ({
   description: '',
   location: '',
   countryCode: '',
+  costType: AdditionalCostType.OTHER,
   price: 0,
   currency: TripCurrency.ILS,
 })

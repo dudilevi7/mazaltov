@@ -19,10 +19,10 @@ const AttractionRow = ({ attraction, onEdit, onDelete, editLabel, deleteLabel }:
     <FontAwesomeIcon icon={faCamera} className="shrink-0 text-gray-500" />
     <div className="min-w-0 flex-1">
       <span className="font-medium text-gray-900">{attraction.name}</span>
-      <div className="text-sm text-gray-500">
-        {attraction.date ? formatTripDate(attraction.date) : ''}
-        {attraction.description ? `${attraction.date ? ' · ' : ''}${attraction.description}` : ''}
-      </div>
+      {attraction.date ? <div className="text-sm text-gray-500">{formatTripDate(attraction.date)}</div> : null}
+      {attraction.description ? (
+        <div className="whitespace-pre-wrap text-sm text-gray-500">{attraction.description}</div>
+      ) : null}
     </div>
     {attraction.price > 0 && (
       <span className="shrink-0 text-sm font-medium text-gray-700">
