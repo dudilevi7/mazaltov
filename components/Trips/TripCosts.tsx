@@ -18,7 +18,7 @@ const TripCosts = ({ trip, location, emptyMessage, isRtl, existingPlaces }: Trip
   const [editing, setEditing] = useState<AdditionalCost | null>(null)
   const [toDelete, setToDelete] = useState<AdditionalCost | null>(null)
   const costs = sortAdditionalCostsByDateAsc(
-    location ? filterAdditionalCostsByLocation(trip.additionalCosts ?? [], location) : (trip.additionalCosts ?? [])
+    location ? filterAdditionalCostsByLocation(trip, location) : (trip.additionalCosts ?? [])
   )
 
   const handleSave = (cost: Omit<AdditionalCost, 'id'>) => {

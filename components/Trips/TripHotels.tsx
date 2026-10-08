@@ -17,7 +17,7 @@ const TripHotels = ({ trip, location, emptyMessage, isRtl, existingPlaces }: Tri
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Hotel | null>(null)
   const [toDelete, setToDelete] = useState<Hotel | null>(null)
-  const hotels = sortHotelsByDateAsc(location ? filterHotelsByLocation(trip.hotels, location) : trip.hotels)
+  const hotels = sortHotelsByDateAsc(location ? filterHotelsByLocation(trip, location) : trip.hotels)
 
   const handleSave = (hotel: Omit<Hotel, 'id'>) => {
     if (editing) {

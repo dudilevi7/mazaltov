@@ -26,7 +26,7 @@ const TripFlights = ({ trip, location, emptyMessage, isRtl, existingPlaces }: Tr
   const [toDelete, setToDelete] = useState<Flight | null>(null)
   const [groupedIds, setGroupedIds] = useState<Set<string>>(() => new Set())
 
-  const flights = sortFlightsByDateAsc(location ? filterFlightsByLocation(trip.flights, location) : trip.flights)
+  const flights = sortFlightsByDateAsc(location ? filterFlightsByLocation(trip, location) : trip.flights)
   const groupedReturnIds = new Set(
     flights.filter((flight) => !flight.isReturn && flight.returnFlightId && groupedIds.has(flight.id)).map((flight) => flight.returnFlightId as string)
   )
