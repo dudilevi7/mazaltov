@@ -12,11 +12,12 @@ const THROTTLE_MS = 1100
 const USER_AGENT = 'MazalTov/1.0 (wedding planning app)'
 
 type NominatimAddress = {
+  house_number?: string
+  road?: string
   city?: string
   town?: string
   village?: string
   municipality?: string
-  county?: string
   state?: string
   country?: string
   country_code?: string
@@ -24,7 +25,9 @@ type NominatimAddress = {
 
 type NominatimItem = {
   place_id: number
+  name?: string
   display_name: string
+  namedetails?: Record<string, string>
   address?: NominatimAddress
 }
 
@@ -45,20 +48,21 @@ const waitForNominatimSlot = () => {
   return next
 }
 
-const toSuggestion = (item: NominatimItem): PlaceSuggestion | null => {
+const same = (a: string, b: string) => a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase()
+
+const toSuggestion = (item: NominatimItem, lang: string): PlaceSuggestion | null => {
+  const details = item.namedetails ?? {}
   const countryCode = (item.address?.country_code ?? '').toLowerCase()
   const country = item.address?.country ?? ''
-  const name =
-    item.address?.city ||
-    item.address?.town ||
-    item.address?.village ||
-    item.address?.municipality ||
-    item.address?.state ||
-    country ||
-    item.display_name.split(',')[0]?.trim()
+  const city = item.address?.city || item.address?.town || item.address?.village || item.address?.municipality || ''
+  const street = [item.address?.house_number, item.address?.road].filter(Boolean).join(' ')
+  const name = (details[`name:${lang}`] || item.name || details.name || street || city || country).trim()
   if (!name) return null
-  const label = country && country.toLocaleLowerCase() !== name.toLocaleLowerCase() ? `${name}, ${country}` : name
-  return { id: String(item.place_id), name, country, countryCode, label }
+  const parts: string[] = []
+  ;[name, city, country].forEach((part) => {
+    if (part && !parts.some((existing) => same(existing, part))) parts.push(part)
+  })
+  return { id: String(item.place_id), name, country, countryCode, label: parts.join(', ') }
 }
 
 export const GET = async (request: NextRequest) => {
@@ -77,6 +81,7 @@ export const GET = async (request: NextRequest) => {
     url.searchParams.set('q', q)
     url.searchParams.set('format', 'jsonv2')
     url.searchParams.set('addressdetails', '1')
+    url.searchParams.set('namedetails', '1')
     url.searchParams.set('limit', String(LIMIT))
     url.searchParams.set('accept-language', lang)
 
@@ -93,9 +98,9 @@ export const GET = async (request: NextRequest) => {
     const seen = new Set<string>()
     const suggestions: PlaceSuggestion[] = []
     for (const item of items) {
-      const suggestion = toSuggestion(item)
+      const suggestion = toSuggestion(item, lang)
       if (!suggestion) continue
-      const key = `${suggestion.name.toLocaleLowerCase()}|${suggestion.countryCode}`
+      const key = suggestion.label.toLocaleLowerCase()
       if (seen.has(key)) continue
       seen.add(key)
       suggestions.push(suggestion)

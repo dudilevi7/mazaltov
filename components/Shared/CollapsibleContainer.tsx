@@ -16,6 +16,7 @@ interface CollapsibleContainerProps {
   children?: React.ReactNode
   className?: string
   showZeroCount?: boolean
+  suffix?: React.ReactNode
 }
 
 const CollapsibleContainer = ({
@@ -28,6 +29,7 @@ const CollapsibleContainer = ({
   children,
   className = '',
   showZeroCount = false,
+  suffix,
 }: CollapsibleContainerProps) => {
   const { languageDirection } = useAppContext()
   const isRtl = languageDirection === LanguageDirection.HEB
@@ -56,6 +58,7 @@ const CollapsibleContainer = ({
           />
           <div className="flex min-w-0 items-center gap-2">{title}</div>
           {count != null && (count > 0 || showZeroCount) && <span className="text-sm text-gray-500">({count})</span>}
+          {suffix}
         </button>
         {actions && (
           <div className="shrink-0" onClick={(e) => e.stopPropagation()}>

@@ -1,47 +1,19 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronLeft, faChevronRight, faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
-import type { AdditionalCost, Attraction, Flight, Hotel, PlaceSuggestion, Trip, TripTask } from '@/types/Trip'
+import type { PlaceSuggestion, Trip } from '@/types/Trip'
 import { LanguageDirection } from '@/types/General'
 import { useAppContext } from '@/context/AppContext'
-import { useTripsContext } from '@/context/TripsContext'
-import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
-import ActionButton, { ActionButtonSize, ActionButtonVariant } from '@/components/Button/action-button'
-import DeleteModal from '@/components/DeleteModal'
-import { getTripCopy, SUGGESTED_TRIP_TASKS, TRIP_SECTION_META, TRIP_TYPE_META } from '@/constants/trips'
-import {
-  ALL_LOCATIONS,
-  collectTripLocations,
-  computeTripTotals,
-  filterAdditionalCostsByLocation,
-  filterFlightsByLocation,
-  filterHotelsByLocation,
-  getOutboundForReturn,
-  getPairedReturn,
-  linkedFlightIds,
-  locationKey,
-  newNestedId,
-  sortAttractionsByDateAsc,
-  sortAdditionalCostsByDateAsc,
-  sortFlightsByDateAsc,
-  sortHotelsByDateAsc,
-} from './helper'
-import TripCostSummary from './TripCostSummary'
-import TripLocationFilter from './TripLocationFilter'
-import TripSection from './TripSection'
-import FlightRow from './FlightRow'
-import HotelRow from './HotelRow'
-import AttractionRow from './AttractionRow'
-import TaskRow from './TaskRow'
-import FlightModal, { type FlightFormResult } from './FlightModal'
-import HotelModal from './HotelModal'
-import AttractionModal from './AttractionModal'
-import TripTaskModal from './TripTaskModal'
-import CostModal from './CostModal'
-import CostRow from './CostRow'
+import { getTripCopy } from '@/constants/trips'
+import { ALL_LOCATIONS, locationKey } from './helper'
+import { collectTripLocations, computeTripTotals } from './tripLocations'
 import { flagEmoji } from './PlaceFlag'
+import TripDetailHeader from './TripDetailHeader'
+import TripFlights from './TripFlights'
+import TripHotels from './TripHotels'
+import TripAttractions from './TripAttractions'
+import TripCosts from './TripCosts'
+import TripTasks from './TripTasks'
 
 interface TripDetailProps {
   trip: Trip
@@ -52,156 +24,13 @@ interface TripDetailProps {
 
 const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps) => {
   const { languageDirection } = useAppContext()
-  const { updateTrip } = useTripsContext()
   const isRtl = languageDirection === LanguageDirection.HEB
   const copy = getTripCopy(isRtl)
-  const typeMeta = TRIP_TYPE_META[trip.tripType]
-
-  const [flightModalOpen, setFlightModalOpen] = useState(false)
-  const [editingFlight, setEditingFlight] = useState<Flight | null>(null)
-  const [editingReturnFlight, setEditingReturnFlight] = useState<Flight | null>(null)
-  const [hotelModalOpen, setHotelModalOpen] = useState(false)
-  const [editingHotel, setEditingHotel] = useState<Hotel | null>(null)
-  const [attractionModalOpen, setAttractionModalOpen] = useState(false)
-  const [editingAttraction, setEditingAttraction] = useState<Attraction | null>(null)
-  const [taskModalOpen, setTaskModalOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<TripTask | null>(null)
-  const [costModalOpen, setCostModalOpen] = useState(false)
-  const [editingCost, setEditingCost] = useState<AdditionalCost | null>(null)
-  const [itemToDelete, setItemToDelete] = useState<{
-    kind: 'flight' | 'hotel' | 'attraction' | 'task' | 'cost'
-    id: string
-    title: string
-  } | null>(null)
-  const [groupedFlightIds, setGroupedFlightIds] = useState<Set<string>>(() => new Set())
   const [locationFilter, setLocationFilter] = useState(ALL_LOCATIONS)
 
-  const section = (key: keyof typeof TRIP_SECTION_META) =>
-    isRtl ? TRIP_SECTION_META[key].he : TRIP_SECTION_META[key].en
-
-  const handleSaveFlight = (result: FlightFormResult) => {
-    const outboundId = editingFlight?.isReturn
-      ? (getOutboundForReturn(trip.flights, editingFlight)?.id ?? editingFlight.id)
-      : (editingFlight?.id ?? newNestedId())
-    const existingReturnId = editingFlight
-      ? editingFlight.isReturn
-        ? editingFlight.id
-        : editingFlight.returnFlightId
-      : undefined
-    const returnId = result.returnFlight ? existingReturnId ?? newNestedId() : undefined
-
-    const outbound: Flight = {
-      ...result.outbound,
-      id: outboundId,
-      isReturn: false,
-      returnFlightId: returnId,
-      price: result.outbound.price,
-    }
-    const returnLeg: Flight | undefined = result.returnFlight
-      ? { ...result.returnFlight, id: returnId as string, isReturn: true, price: 0, returnFlightId: outboundId }
-      : undefined
-
-    const replaceIds = linkedFlightIds(trip.flights, outboundId)
-    if (existingReturnId) replaceIds.add(existingReturnId)
-    const rest = trip.flights.filter((f) => !replaceIds.has(f.id))
-    updateTrip(trip.id, { flights: returnLeg ? [...rest, outbound, returnLeg] : [...rest, outbound] })
-    setFlightModalOpen(false)
-    setEditingFlight(null)
-    setEditingReturnFlight(null)
-  }
-
-  const openFlightEditor = (flight: Flight) => {
-    const outbound = flight.isReturn ? getOutboundForReturn(trip.flights, flight) ?? flight : flight
-    setEditingFlight(outbound)
-    setEditingReturnFlight(getPairedReturn(trip.flights, outbound) ?? null)
-    setFlightModalOpen(true)
-  }
-
-  const handleSaveCost = (cost: Omit<AdditionalCost, 'id'>) => {
-    const additionalCosts = trip.additionalCosts ?? []
-    if (editingCost) {
-      updateTrip(trip.id, {
-        additionalCosts: additionalCosts.map((c) => (c.id === editingCost.id ? { ...cost, id: c.id } : c)),
-      })
-    } else {
-      updateTrip(trip.id, { additionalCosts: [...additionalCosts, { ...cost, id: newNestedId() }] })
-    }
-    setCostModalOpen(false)
-    setEditingCost(null)
-  }
-
-  const handleSaveHotel = (hotel: Omit<Hotel, 'id'>) => {
-    if (editingHotel) {
-      updateTrip(trip.id, {
-        hotels: trip.hotels.map((h) => (h.id === editingHotel.id ? { ...hotel, id: h.id } : h)),
-      })
-    } else {
-      updateTrip(trip.id, { hotels: [...trip.hotels, { ...hotel, id: newNestedId() }] })
-    }
-    setHotelModalOpen(false)
-    setEditingHotel(null)
-  }
-
-  const handleSaveAttraction = (attraction: Omit<Attraction, 'id'>) => {
-    if (editingAttraction) {
-      updateTrip(trip.id, {
-        attractions: trip.attractions.map((a) =>
-          a.id === editingAttraction.id ? { ...attraction, id: a.id } : a
-        ),
-      })
-    } else {
-      updateTrip(trip.id, { attractions: [...trip.attractions, { ...attraction, id: newNestedId() }] })
-    }
-    setAttractionModalOpen(false)
-    setEditingAttraction(null)
-  }
-
-  const handleSaveTask = (task: Omit<TripTask, 'id'>) => {
-    if (editingTask) {
-      updateTrip(trip.id, {
-        tasks: trip.tasks.map((t) => (t.id === editingTask.id ? { ...task, id: t.id } : t)),
-      })
-    } else {
-      updateTrip(trip.id, { tasks: [...trip.tasks, { ...task, id: newNestedId() }] })
-    }
-    setTaskModalOpen(false)
-    setEditingTask(null)
-  }
-
-  const handleAddSuggested = (templateId: string, title: string) => {
-    if (trip.tasks.some((t) => t.templateId === templateId)) return
-    updateTrip(trip.id, {
-      tasks: [...trip.tasks, { id: newNestedId(), title, isDone: false, isSuggested: true, templateId }],
-    })
-  }
-
-  const handleConfirmDelete = () => {
-    if (!itemToDelete) return
-    if (itemToDelete.kind === 'flight') {
-      const ids = linkedFlightIds(trip.flights, itemToDelete.id)
-      updateTrip(trip.id, { flights: trip.flights.filter((f) => !ids.has(f.id)) })
-    } else if (itemToDelete.kind === 'hotel') {
-      updateTrip(trip.id, { hotels: trip.hotels.filter((h) => h.id !== itemToDelete.id) })
-    } else if (itemToDelete.kind === 'attraction') {
-      updateTrip(trip.id, { attractions: trip.attractions.filter((a) => a.id !== itemToDelete.id) })
-    } else if (itemToDelete.kind === 'cost') {
-      updateTrip(trip.id, { additionalCosts: (trip.additionalCosts ?? []).filter((c) => c.id !== itemToDelete.id) })
-    } else {
-      updateTrip(trip.id, { tasks: trip.tasks.filter((t) => t.id !== itemToDelete.id) })
-    }
-    setItemToDelete(null)
-  }
-
-  const remainingSuggested = SUGGESTED_TRIP_TASKS.filter(
-    (s) => !trip.tasks.some((t) => t.templateId === s.templateId)
-  )
   const locations = useMemo(() => collectTripLocations(trip, isRtl ? 'he' : 'en'), [trip, isRtl])
   const locationOptions = useMemo(
-    () =>
-      locations.map((location) => ({
-        value: location.name,
-        label: [flagEmoji(location.countryCode), location.name].filter(Boolean).join(' '),
-      })),
+    () => locations.map((location) => ({ value: location.name, label: [flagEmoji(location.countryCode), location.name].filter(Boolean).join(' ') })),
     [locations]
   )
   const existingPlaces = useMemo<PlaceSuggestion[]>(
@@ -218,345 +47,41 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
 
   useEffect(() => {
     if (locationFilter === ALL_LOCATIONS) return
-    const canonical = locations.find((l) => locationKey(l.name) === locationKey(locationFilter))
+    const canonical = locations.find((location) => locationKey(location.name) === locationKey(locationFilter))
     if (!canonical) setLocationFilter(ALL_LOCATIONS)
     else if (canonical.name !== locationFilter) setLocationFilter(canonical.name)
   }, [locations, locationFilter])
 
-  const isLocationFiltered = locationFilter !== ALL_LOCATIONS
-  const selectedLocation = isLocationFiltered ? locationFilter : ''
+  const selectedLocation = locationFilter === ALL_LOCATIONS ? '' : locationFilter
   const totals = computeTripTotals(trip, selectedLocation)
-  const totalsLabel = isLocationFiltered ? `${copy.totalCost} · ${locationFilter}` : copy.totalCost
-  const emptyFiltered = isLocationFiltered ? copy.emptyFilteredSection : undefined
-
-  const sortedFlights = sortFlightsByDateAsc(
-    isLocationFiltered ? filterFlightsByLocation(trip.flights, locationFilter) : trip.flights
-  )
-  const groupedReturnIds = new Set(
-    sortedFlights
-      .filter((f) => !f.isReturn && f.returnFlightId && groupedFlightIds.has(f.id))
-      .map((f) => f.returnFlightId as string)
-  )
-  const toggleFlightGroup = (outboundId: string) => {
-    setGroupedFlightIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(outboundId)) next.delete(outboundId)
-      else next.add(outboundId)
-      return next
-    })
+  const slice = {
+    trip,
+    location: selectedLocation,
+    emptyMessage: selectedLocation ? copy.emptyFilteredSection : undefined,
+    isRtl,
+    existingPlaces,
   }
-  const sortedHotels = sortHotelsByDateAsc(
-    isLocationFiltered ? filterHotelsByLocation(trip.hotels, locationFilter) : trip.hotels
-  )
-  const sortedAttractions = sortAttractionsByDateAsc(trip.attractions)
-  const sortedCosts = sortAdditionalCostsByDateAsc(
-    isLocationFiltered
-      ? filterAdditionalCostsByLocation(trip.additionalCosts ?? [], locationFilter)
-      : (trip.additionalCosts ?? [])
-  )
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in-0.5" dir={languageDirection}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <CustomButton
-          variant="white"
-          size={ButtonSize.SM}
-          onClick={onBack}
-          icon={<FontAwesomeIcon icon={languageDirection === LanguageDirection.HEB ? faChevronRight : faChevronLeft} />}>
-          {copy.back}
-        </CustomButton>
-        <div className="flex items-center gap-0.5">
-          <ActionButton
-            icon={faPen}
-            variant={ActionButtonVariant.EDIT}
-            size={ActionButtonSize.SM}
-            tooltip={copy.edit}
-            onClick={onEditTrip}
-          />
-          <ActionButton
-            icon={faTrash}
-            variant={ActionButtonVariant.DELETE}
-            size={ActionButtonSize.SM}
-            tooltip={copy.delete}
-            onClick={onDeleteTrip}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <FontAwesomeIcon icon={typeMeta.icon} className={typeMeta.color} />
-        <h1 className="text-lg font-semibold text-gray-800">{trip.name}</h1>
-        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-          {isRtl ? typeMeta.he : typeMeta.en}
-        </span>
-      </div>
-
-      {locations.length > 0 && (
-        <TripLocationFilter
-          value={locationFilter}
-          onChange={setLocationFilter}
-          options={locationOptions}
-          label={copy.locationFilter}
-          allLabel={copy.allLocations}
-        />
-      )}
-
-      <TripCostSummary totals={totals} label={totalsLabel} />
-
-      <TripSection
-        key={`flights-${trip.id}`}
-        icon={TRIP_SECTION_META.flights.icon}
-        title={section('flights')}
-        count={sortedFlights.length}
-        emptyMessage={emptyFiltered}
-        onAdd={() => {
-          setEditingFlight(null)
-          setEditingReturnFlight(null)
-          setFlightModalOpen(true)
-        }}
-        addLabel={copy.addFlight}>
-        <div className="flex flex-col">
-          {sortedFlights.map((flight) => {
-            const pairedReturn = !flight.isReturn ? getPairedReturn(trip.flights, flight) : undefined
-            const isGrouped = !!(pairedReturn && groupedFlightIds.has(flight.id))
-            const isHiddenInList = flight.isReturn && groupedReturnIds.has(flight.id)
-
-            return (
-              <div
-                key={flight.id}
-                className={`grid transition-[grid-template-rows,margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                  isHiddenInList ? 'mb-0 grid-rows-[0fr]' : 'mb-2 grid-rows-[1fr] last:mb-0'
-                }`}>
-                <div
-                  className={`min-h-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                    isHiddenInList ? 'pointer-events-none -translate-y-1 opacity-0' : 'translate-y-0 opacity-100'
-                  }`}
-                  aria-hidden={isHiddenInList}>
-                  <FlightRow
-                    flight={flight}
-                    pairedReturn={pairedReturn}
-                    isGrouped={isGrouped}
-                    onToggleGroup={pairedReturn ? () => toggleFlightGroup(flight.id) : undefined}
-                    editLabel={copy.edit}
-                    deleteLabel={copy.delete}
-                    onEdit={() => openFlightEditor(flight)}
-                    onDelete={() =>
-                      setItemToDelete({
-                        kind: 'flight',
-                        id: flight.id,
-                        title: flight.flightCompany || copy.addFlight,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </TripSection>
-
-      <TripSection
-        key={`hotels-${trip.id}`}
-        icon={TRIP_SECTION_META.hotels.icon}
-        title={section('hotels')}
-        count={sortedHotels.length}
-        emptyMessage={emptyFiltered}
-        onAdd={() => {
-          setEditingHotel(null)
-          setHotelModalOpen(true)
-        }}
-        addLabel={copy.addHotel}>
-        {sortedHotels.map((hotel) => (
-          <HotelRow
-            key={hotel.id}
-            hotel={hotel}
-            editLabel={copy.edit}
-            deleteLabel={copy.delete}
-            bookingLabel={copy.bookingLink}
-            onEdit={() => {
-              setEditingHotel(hotel)
-              setHotelModalOpen(true)
-            }}
-            onDelete={() => setItemToDelete({ kind: 'hotel', id: hotel.id, title: hotel.name })}
-          />
-        ))}
-      </TripSection>
-
-      {!isLocationFiltered && (
-        <TripSection
-          key={`attractions-${trip.id}`}
-          icon={TRIP_SECTION_META.attractions.icon}
-          title={section('attractions')}
-          count={trip.attractions.length}
-          onAdd={() => {
-            setEditingAttraction(null)
-            setAttractionModalOpen(true)
-          }}
-          addLabel={copy.addAttraction}>
-          {sortedAttractions.map((attraction) => (
-            <AttractionRow
-              key={attraction.id}
-              attraction={attraction}
-              editLabel={copy.edit}
-              deleteLabel={copy.delete}
-              onEdit={() => {
-                setEditingAttraction(attraction)
-                setAttractionModalOpen(true)
-              }}
-              onDelete={() => setItemToDelete({ kind: 'attraction', id: attraction.id, title: attraction.name })}
-            />
-          ))}
-        </TripSection>
-      )}
-
-      <TripSection
-        key={`additional-costs-${trip.id}`}
-        icon={TRIP_SECTION_META.additionalCosts.icon}
-        title={section('additionalCosts')}
-        count={sortedCosts.length}
-        emptyMessage={emptyFiltered}
-        onAdd={() => {
-          setEditingCost(null)
-          setCostModalOpen(true)
-        }}
-        addLabel={copy.addCost}>
-        {sortedCosts.map((cost) => (
-          <CostRow
-            key={cost.id}
-            cost={cost}
-            editLabel={copy.edit}
-            deleteLabel={copy.delete}
-            onEdit={() => {
-              setEditingCost(cost)
-              setCostModalOpen(true)
-            }}
-            onDelete={() => setItemToDelete({ kind: 'cost', id: cost.id, title: cost.name })}
-          />
-        ))}
-      </TripSection>
-
-      <TripSection
-        key={`tasks-${trip.id}`}
-        icon={TRIP_SECTION_META.tasks.icon}
-        title={section('tasks')}
-        count={trip.tasks.length}
-        onAdd={() => {
-          setEditingTask(null)
-          setTaskModalOpen(true)
-        }}
-        addLabel={copy.addTask}
-        headerExtra={
-          remainingSuggested.length > 0 ? (
-            <div className="mb-3">
-              <p className="mb-2 text-sm text-gray-500">{copy.suggestedTasks}</p>
-              <div className="flex flex-wrap gap-2">
-                {remainingSuggested.map((s) => (
-                  <button
-                    key={s.templateId}
-                    type="button"
-                    onClick={() => handleAddSuggested(s.templateId, isRtl ? s.he : s.en)}
-                    className="flex items-center gap-2 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700">
-                    <FontAwesomeIcon icon={s.icon} />
-                    {isRtl ? s.he : s.en}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null
-        }>
-        {trip.tasks.map((task) => (
-          <TaskRow
-            key={task.id}
-            task={task}
-            editLabel={copy.edit}
-            deleteLabel={copy.delete}
-            onToggle={(checked) =>
-              updateTrip(
-                trip.id,
-                { tasks: trip.tasks.map((t) => (t.id === task.id ? { ...t, isDone: checked } : t)) },
-                { silent: true }
-              )
-            }
-            onEdit={() => {
-              setEditingTask(task)
-              setTaskModalOpen(true)
-            }}
-            onDelete={() => setItemToDelete({ kind: 'task', id: task.id, title: task.title })}
-          />
-        ))}
-      </TripSection>
-
-      {flightModalOpen && (
-        <FlightModal
-          isOpen={flightModalOpen}
-          onClose={() => {
-            setFlightModalOpen(false)
-            setEditingFlight(null)
-            setEditingReturnFlight(null)
-          }}
-          onSave={handleSaveFlight}
-          flight={editingFlight}
-          pairedReturn={editingReturnFlight}
-          existingPlaces={existingPlaces}
-          isRtl={isRtl}
-        />
-      )}
-      {hotelModalOpen && (
-        <HotelModal
-          isOpen={hotelModalOpen}
-          onClose={() => {
-            setHotelModalOpen(false)
-            setEditingHotel(null)
-          }}
-          onSave={handleSaveHotel}
-          hotel={editingHotel}
-          existingPlaces={existingPlaces}
-          isRtl={isRtl}
-        />
-      )}
-      {attractionModalOpen && (
-        <AttractionModal
-          isOpen={attractionModalOpen}
-          onClose={() => {
-            setAttractionModalOpen(false)
-            setEditingAttraction(null)
-          }}
-          onSave={handleSaveAttraction}
-          attraction={editingAttraction}
-          isRtl={isRtl}
-        />
-      )}
-      {taskModalOpen && (
-        <TripTaskModal
-          isOpen={taskModalOpen}
-          onClose={() => {
-            setTaskModalOpen(false)
-            setEditingTask(null)
-          }}
-          onSave={handleSaveTask}
-          task={editingTask}
-          isRtl={isRtl}
-        />
-      )}
-      {costModalOpen && (
-        <CostModal
-          isOpen={costModalOpen}
-          onClose={() => {
-            setCostModalOpen(false)
-            setEditingCost(null)
-          }}
-          onSave={handleSaveCost}
-          cost={editingCost}
-          isRtl={isRtl}
-          existingPlaces={existingPlaces}
-        />
-      )}
-      <DeleteModal
-        isOpen={!!itemToDelete}
-        onClose={() => setItemToDelete(null)}
-        onConfirm={handleConfirmDelete}
-        title={itemToDelete?.title || ''}
+      <TripDetailHeader
+        trip={trip}
+        isRtl={isRtl}
+        totals={totals}
+        totalsLabel={selectedLocation ? `${copy.totalCost} · ${locationFilter}` : copy.totalCost}
+        locations={locations.map((location) => location.name)}
+        locationFilter={locationFilter}
+        locationOptions={locationOptions}
+        onLocationChange={setLocationFilter}
+        onBack={onBack}
+        onEditTrip={onEditTrip}
+        onDeleteTrip={onDeleteTrip}
       />
+      <TripFlights {...slice} />
+      <TripHotels {...slice} />
+      {!selectedLocation && <TripAttractions trip={trip} isRtl={isRtl} />}
+      <TripCosts {...slice} />
+      <TripTasks trip={trip} isRtl={isRtl} />
     </div>
   )
 }

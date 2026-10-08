@@ -17,7 +17,8 @@ import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
 import { getTripCopy, TRIP_TYPE_META } from '@/constants/trips'
 import ActionButton, { ActionButtonSize, ActionButtonVariant } from '@/components/Button/action-button'
-import { computeTripDateRange, computeTripTotals, formatTripCost, hasAnyCost } from './helper'
+import { computeTripDateRange, formatTripCost, hasAnyCost } from './helper'
+import { computeTripTotals } from './tripLocations'
 
 interface TripCardProps {
   trip: Trip
