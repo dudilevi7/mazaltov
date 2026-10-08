@@ -16,6 +16,7 @@ import { faPlus, faFilterCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import type { Gift } from '@/types/Gift'
 import type { SelectOption } from '@/components/Shared/SelectDropdown'
 import { getSideOptions, getSideLabels } from '@/components/Guests/helper'
+import useEventGate from '@/hooks/useEventGate'
 
 const Gifts = () => {
   const {
@@ -38,6 +39,7 @@ const Gifts = () => {
   } = useGiftsContext()
   const { guests } = useGuestsContext()
   const { languageDirection, eventSettings } = useAppContext()
+  const { canCreate, gateTooltip } = useEventGate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGift, setEditingGift] = useState<Gift | null>(null)
 
@@ -89,7 +91,12 @@ const Gifts = () => {
         <GiftsSummaryBar />
 
         <div className="flex items-center gap-2">
-          <CustomButton size={ButtonSize.SM} onClick={openAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
+          <CustomButton
+            size={ButtonSize.SM}
+            onClick={openAdd}
+            disabled={!canCreate}
+            tooltip={gateTooltip}
+            icon={<FontAwesomeIcon icon={faPlus} />}>
             הוסף מתנה
           </CustomButton>
         </div>

@@ -1,5 +1,6 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import Logger from '../api/logger'
+import { noEvent, unauthorized } from '../api/errorHandling'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { EventRole } from '@/types/eventMember'
 
@@ -81,4 +82,16 @@ const getEventContext = async (
   return { userId: resolvedUserId, eventId, role }
 }
 
-export { getUserId, getEventContext }
+// Like getEventContext, but returns a ready-to-send error response that tells
+// "not authenticated" (401) apart from "authenticated, no event yet" (NO_EVENT).
+const requireEventContext = async (
+  supabase: SupabaseClient,
+  request: NextRequest
+): Promise<EventContext | NextResponse> => {
+  const userId = await getUserId(supabase, request)
+  if (!userId) return unauthorized()
+  const ctx = await getEventContext(supabase, request, userId)
+  return ctx ?? noEvent()
+}
+
+export { getUserId, getEventContext, requireEventContext }

@@ -30,6 +30,8 @@ const Settings = () => {
     updateEventSettings,
     showToast,
     isLoadingEventSettings,
+    activeEventId,
+    refreshEventAccess,
   } = useAppContext()
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<EventSettings>(eventSettings)
   const [showInvite, setShowInvite] = useState(false)
@@ -53,6 +55,8 @@ const Settings = () => {
       })
       updateEventSettings(updated)
       setLastSavedSnapshot(updated)
+      // First save creates the event; pick it up so create actions unlock without a reload.
+      if (!activeEventId) await refreshEventAccess()
       showToast({
         type: ToastType.SUCCESS,
         title: isRtl ? 'נשמר' : 'Saved',

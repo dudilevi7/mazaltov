@@ -7,6 +7,7 @@ import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Modal from '@/components/Shared/Modal'
 import ImportFormatSelection from './ImportFormatSelection'
 import MazalTovImportFlow from './MazalTovImportFlow'
+import useEventGate from '@/hooks/useEventGate'
 
 enum ImportView {
   SELECT = 'select',
@@ -17,6 +18,7 @@ enum ImportView {
 const ImportGuestsExcelButton = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [view, setView] = useState<ImportView>(ImportView.SELECT)
+  const { canCreate, gateTooltip } = useEventGate()
 
   const handleClose = () => {
     setIsOpen(false)
@@ -28,6 +30,8 @@ const ImportGuestsExcelButton = () => {
       <CustomButton
         size={ButtonSize.SM}
         onClick={() => setIsOpen(true)}
+        disabled={!canCreate}
+        tooltip={gateTooltip}
         className="bg-green-600 hover:bg-green-700 text-white"
         icon={<FontAwesomeIcon icon={faUpload} />}>
         ייבא מאקסל

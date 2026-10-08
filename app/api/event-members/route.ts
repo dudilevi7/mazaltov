@@ -1,6 +1,6 @@
-import { internalServerError, unauthorized } from '@/lib/api/errorHandling'
+import { internalServerError } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { getEventContext } from '@/lib/supabase/auth'
+import { requireEventContext } from '@/lib/supabase/auth'
 import { type EventMemberRow, mapEventMemberRowToEventMember } from '@/types/eventMember'
 import { NextRequest, NextResponse } from 'next/server'
 import Logger from '@/lib/api/logger'
@@ -8,9 +8,9 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
-      return unauthorized()
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
+      return ctx
     }
 
     const { data, error } = await supabase

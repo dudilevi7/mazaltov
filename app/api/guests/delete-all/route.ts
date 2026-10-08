@@ -1,16 +1,16 @@
-import { internalServerError, unauthorized } from '@/lib/api/errorHandling'
+import { internalServerError } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { getEventContext } from '@/lib/supabase/auth'
+import { requireEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import Logger from '@/lib/api/logger'
 
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
       Logger.error('[DELETE /api/guests/delete-all] No accessible event')
-      return unauthorized()
+      return ctx
     }
 
     const { error } = await supabase.from('guests').delete().eq('event_id', ctx.eventId)

@@ -43,11 +43,13 @@ const CustomButton = ({
   disabled = false,
   tooltip,
 }: CustomButtonProps) => {
+  // Disabled buttons swallow mouse events, so let the Tooltip wrapper receive hover instead.
+  const hoverViaWrapper = disabled && !!tooltip
   return (
-    <Tooltip content={tooltip}>
+    <Tooltip content={tooltip} className={hoverViaWrapper ? 'cursor-not-allowed' : ''}>
       <button
         type={type}
-        className={`cursor-pointer inline-flex items-center gap-1 ${variantStyles[variant]} ${sizeStyles[size]} ${className} ${disabled ? 'opacity-50 !cursor-not-allowed' : ''}`}
+        className={`cursor-pointer inline-flex items-center gap-1 ${variantStyles[variant]} ${sizeStyles[size]} ${className} ${disabled ? 'opacity-50 !cursor-not-allowed' : ''} ${hoverViaWrapper ? 'pointer-events-none' : ''}`}
         onClick={onClick}
         disabled={disabled}>
         {icon && <span className="flex items-center">{icon}</span>}

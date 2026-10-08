@@ -14,10 +14,12 @@ import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faCartShopping } from '@fortawesome/free-solid-svg-icons'
 import { formatCurrency } from '@/lib/utils'
+import useEventGate from '@/hooks/useEventGate'
 
 const ShoppingList = () => {
   const { items, addItem, updateItem, removeItem, togglePurchased, isLoadingItems } = useShoppingContext()
   const { languageDirection } = useAppContext()
+  const { canCreate, gateTooltip } = useEventGate()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null)
@@ -87,7 +89,7 @@ const ShoppingList = () => {
     <div className="flex flex-1 flex-col overflow-hidden animate-fade-in">
       <div className="mb-4 flex shrink-0 items-center justify-between gap-3" dir="rtl">
         <div className="flex items-center gap-3">
-          <CustomButton onClick={handleOpenCreate}>
+          <CustomButton onClick={handleOpenCreate} disabled={!canCreate} tooltip={gateTooltip}>
             <FontAwesomeIcon icon={faPlus} className="ml-1 h-3 w-3" />
             הוסף פריט
           </CustomButton>

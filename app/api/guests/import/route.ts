@@ -1,8 +1,8 @@
-import { internalServerError, unauthorized } from '@/lib/api/errorHandling'
+import { internalServerError } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type GuestRow, mapGuestRowToGuest, mapGuestToGuestRow } from '@/types/guest-row'
 import type { Guest } from '@/types/Guest'
-import { getEventContext } from '@/lib/supabase/auth'
+import { requireEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -14,10 +14,10 @@ type ImportBody = {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
       Logger.error('[POST /api/guests/import] No accessible event')
-      return unauthorized()
+      return ctx
     }
 
     const body = await parseBody<ImportBody>(request)

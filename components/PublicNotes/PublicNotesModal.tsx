@@ -15,6 +15,7 @@ import PublicNoteItem from './PublicNoteItem'
 import PublicNoteEditor from './PublicNoteEditor'
 import type { PublicNote } from '@/types/PublicNote'
 import type { EventSettings } from '@/types/Settings'
+import useEventGate from '@/hooks/useEventGate'
 
 interface PublicNotesModalProps {
   isOpen: boolean
@@ -27,6 +28,7 @@ const PublicNotesModal = ({ isOpen, onClose }: PublicNotesModalProps) => {
     usePublicNotesContext()
   const isHeb = languageDirection === LanguageDirection.HEB
   const labels = isHeb ? PUBLIC_NOTE_LABELS.HEB : PUBLIC_NOTE_LABELS.ENG
+  const { canCreate, gateTooltip } = useEventGate()
 
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<PublicNote | null>(null)
@@ -71,7 +73,12 @@ const PublicNotesModal = ({ isOpen, onClose }: PublicNotesModalProps) => {
         header={
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">{labels.title}</h2>
-            <CustomButton size={ButtonSize.SM} onClick={handleAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
+            <CustomButton
+              size={ButtonSize.SM}
+              onClick={handleAdd}
+              disabled={!canCreate}
+              tooltip={gateTooltip}
+              icon={<FontAwesomeIcon icon={faPlus} />}>
               {labels.addNote}
             </CustomButton>
           </div>

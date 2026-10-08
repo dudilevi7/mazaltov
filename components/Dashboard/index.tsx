@@ -12,7 +12,6 @@ import {
   faListCheck,
   faCoins,
   faLocationDot,
-  faGear,
   faNoteSticky,
   faCircleInfo,
 } from '@fortawesome/free-solid-svg-icons'
@@ -33,6 +32,7 @@ import ProgressBar from '@/components/Shared/ProgressBar'
 import Card, { CardVariant } from '@/components/Shared/Card'
 import Tooltip from '@/components/Tooltip'
 import PublicNotesModal from '@/components/PublicNotes/PublicNotesModal'
+import EventSetupGuide from '@/components/Shared/EventSetupGuide'
 
 const EVENT_TYPE_ICON: Record<EventType, IconDefinition> = {
   [EventType.WEDDING]: faRing,
@@ -79,43 +79,36 @@ const Dashboard = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-0.5 p-2" dir={languageDirection}>
-      <Card className="flex flex-col items-start gap-3 h-full">
-        {showEvent ? (
-          <>
-            <div className="flex items-center gap-2 border-b border-gray-200 pb-0.5">
-              <FontAwesomeIcon icon={eventIcon} className="text-blue-500 text-2xl" />
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-gray-800">
-                  {eventTypeName}
-                  {eventTypeName && eventName ? ' - ' : ''}
-                  {eventName}
-                </span>
-              </div>
+      {showEvent ? (
+        <Card className="flex flex-col items-start gap-3 h-full">
+          <div className="flex items-center gap-2 border-b border-gray-200 pb-0.5">
+            <FontAwesomeIcon icon={eventIcon} className="text-blue-500 text-2xl" />
+            <div className="flex flex-col">
+              <span className="text-lg font-bold text-gray-800">
+                {eventTypeName}
+                {eventTypeName && eventName ? ' - ' : ''}
+                {eventName}
+              </span>
             </div>
-            <div className="flex flex-col gap-2 mt-1 text-sm text-gray-800">
-              {eventSettings.eventDate && (
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faCalendarDays} className="text-blue-500 text-xl" />
-                  <span className="text-gray-800">{moment(eventSettings.eventDate).format('YYYY | MM | DD')}</span>
-                </div>
-              )}
-              {eventSettings.eventHall && (
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faLocationDot} className="text-blue-500 text-xl" />
-                  <span>{eventSettings.eventHall}</span>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center m-auto justify-center h-full gap-3 text-gray-800">
-            <FontAwesomeIcon icon={faGear} className="text-blue-500 text-2xl" />
-            <span className="text-sm text-gray-800">
-              {isHeb ? 'הגדר פרטי אירוע בהגדרות' : 'Set up event in settings'}
-            </span>
           </div>
-        )}
-      </Card>
+          <div className="flex flex-col gap-2 mt-1 text-sm text-gray-800">
+            {eventSettings.eventDate && (
+              <div className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faCalendarDays} className="text-blue-500 text-xl" />
+                <span className="text-gray-800">{moment(eventSettings.eventDate).format('YYYY | MM | DD')}</span>
+              </div>
+            )}
+            {eventSettings.eventHall && (
+              <div className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faLocationDot} className="text-blue-500 text-xl" />
+                <span>{eventSettings.eventHall}</span>
+              </div>
+            )}
+          </div>
+        </Card>
+      ) : (
+        <EventSetupGuide variant="card" />
+      )}
       <Card
         variant={CardVariant.GRADIENT}
         onClick={() => router.push('/guests')}

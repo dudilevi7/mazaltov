@@ -4,6 +4,8 @@ import type { Todo } from '@/types/Todo'
 import { useCalendarContext } from '@/context/CalendarContext'
 import { useAppContext } from '@/context/AppContext'
 import { LanguageDirection } from '@/types/General'
+import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import useEventGate from '@/hooks/useEventGate'
 
 interface CalendarDayTasksDisplayProps {
   onAddTask: () => void
@@ -14,6 +16,7 @@ interface CalendarDayTasksDisplayProps {
 const CalendarDayTasksDisplay = ({ onAddTask, onEdit, onDelete }: CalendarDayTasksDisplayProps) => {
   const { selectedDate, todosForSelectedDate } = useCalendarContext()
   const { languageDirection } = useAppContext()
+  const { canCreate, gateTooltip } = useEventGate()
 
   const locale = languageDirection === LanguageDirection.HEB ? 'he-IL' : 'en-US'
   const isRtl = languageDirection === LanguageDirection.HEB
@@ -34,11 +37,14 @@ const CalendarDayTasksDisplay = ({ onAddTask, onEdit, onDelete }: CalendarDayTas
             {isRtl ? 'משימות ליום זה' : 'Tasks for this day'}
           </p>
         </div>
-        <button
-          className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-600 transition-colors"
-          onClick={onAddTask}>
+        <CustomButton
+          size={ButtonSize.MD}
+          className="text-sm font-medium shadow-sm transition-colors"
+          onClick={onAddTask}
+          disabled={!canCreate}
+          tooltip={gateTooltip}>
           {isRtl ? 'הוסף משימה' : 'Add task'}
-        </button>
+        </CustomButton>
       </div>
 
       {todosForSelectedDate.length === 0 ? (

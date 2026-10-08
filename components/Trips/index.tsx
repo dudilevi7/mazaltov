@@ -15,9 +15,11 @@ import { getTripCopy, TRIP_TYPE_META } from '@/constants/trips'
 import TripCard from './TripCard'
 import TripDetail from './TripDetail'
 import TripModal, { type TripFormData } from './TripModal'
+import useEventGate from '@/hooks/useEventGate'
 
 const Trips = () => {
   const { languageDirection } = useAppContext()
+  const { canCreate, gateTooltip } = useEventGate()
   const { trips, isLoadingTrips, addTrip, updateTrip, deleteTrip } = useTripsContext()
   const isRtl = languageDirection === LanguageDirection.HEB
   const copy = getTripCopy(isRtl)
@@ -87,6 +89,8 @@ const Trips = () => {
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <CustomButton
                 size={ButtonSize.SM}
+                disabled={!canCreate}
+                tooltip={gateTooltip}
                 onClick={() => {
                   setEditingTrip(null)
                   setIsModalOpen(true)

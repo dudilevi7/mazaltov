@@ -5,7 +5,7 @@ export enum CardVariant {
   SUBTLE = 'subtle',
 }
 
-interface CardProps {
+interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onClick' | 'className'> {
   children: React.ReactNode
   onClick?: () => void
   className?: string
@@ -21,9 +21,12 @@ const variantStyles: Record<CardVariant, string> = {
     'bg-linear-to-r from-white to-gray-50 border-gray-200 hover:border-gray-300 group cursor-pointer transition-shadow',
 }
 
-const Card = ({ children, onClick, className = '', variant = CardVariant.DEFAULT }: CardProps) => {
+const Card = ({ children, onClick, className = '', variant = CardVariant.DEFAULT, ...rest }: CardProps) => {
   return (
-    <div onClick={onClick} className={`rounded-lg p-6 transition-all border ${variantStyles[variant]} ${className}`}>
+    <div
+      {...rest}
+      onClick={onClick}
+      className={`rounded-lg p-6 transition-all border ${variantStyles[variant]} ${className}`}>
       {children}
     </div>
   )

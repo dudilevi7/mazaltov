@@ -1,8 +1,8 @@
-import { internalServerError, notFound, unauthorized } from '@/lib/api/errorHandling'
+import { internalServerError, notFound } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { type ShoppingItemRow, mapShoppingRowToItem, mapItemToShoppingRow } from '@/types/shopping-row'
 import type { ShoppingItem } from '@/types/ShoppingItem'
-import { getEventContext } from '@/lib/supabase/auth'
+import { requireEventContext } from '@/lib/supabase/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
 import Logger from '@/lib/api/logger'
@@ -10,10 +10,10 @@ import Logger from '@/lib/api/logger'
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
       Logger.error('[GET /api/shopping] No accessible event')
-      return unauthorized()
+      return ctx
     }
 
     const { data, error } = await supabase
@@ -39,10 +39,10 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
       Logger.error('[POST /api/shopping] No accessible event')
-      return unauthorized()
+      return ctx
     }
 
     const body = await parseBody<Omit<ShoppingItem, 'id' | 'createdAt' | 'updatedAt'>>(request)
@@ -76,10 +76,10 @@ export const POST = async (request: NextRequest) => {
 export const PUT = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
       Logger.error('[PUT /api/shopping] No accessible event')
-      return unauthorized()
+      return ctx
     }
 
     const body = await parseBody<ShoppingItem>(request)
@@ -121,10 +121,10 @@ export const PUT = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
       Logger.error('[DELETE /api/shopping] No accessible event')
-      return unauthorized()
+      return ctx
     }
 
     const idParam = request.nextUrl.searchParams.get('id')

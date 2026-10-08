@@ -6,6 +6,7 @@ import type { Provider } from '@/types/Provider'
 import type { Todo } from '@/types/Todo'
 import { formatCurrency } from '@/lib/utils'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
+import useEventGate from '@/hooks/useEventGate'
 
 interface ProviderCardContentProps {
   provider: Provider
@@ -24,6 +25,7 @@ const ProviderCardContent = ({
 }: ProviderCardContentProps) => {
   const { price, advancePayment, toBePaid, comments, paymentMethod } = provider
   const hasTasks = providerTasks.length > 0
+  const { canCreate, gateTooltip } = useEventGate()
 
   return (
     <div className="flex flex-col gap-1">
@@ -61,6 +63,8 @@ const ProviderCardContent = ({
           variant="white"
           className="bg-gray-100 hover:bg-blue-200 hover:text-blue-600"
           onClick={() => onAddProviderTask(provider)}
+          disabled={!canCreate}
+          tooltip={gateTooltip}
           icon={<FontAwesomeIcon icon={faPlus} />}>
           הוסף משימת ספק
         </CustomButton>

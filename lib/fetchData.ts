@@ -1,6 +1,17 @@
 import { supabase } from '@/lib/supabase/client'
 import type { FetchDataOptions } from '@/types/General'
 import { MAZAL_TOV_ACTIVE_EVENT_KEY } from '@/constants/localStorage'
+import { NO_EVENT_ERROR_CODE, NO_EVENT_EVENT_NAME } from '@/constants/eventSetup'
+
+export class FetchDataError extends Error {
+  status: number
+  code?: string
+  constructor(message: string, status: number, code?: string) {
+    super(message)
+    this.status = status
+    this.code = code
+  }
+}
 
 export const getActiveEventId = (): string | null => {
   if (typeof window === 'undefined') return null
@@ -52,7 +63,12 @@ const fetchData = async <TBody = unknown, TResponse = unknown>(
 
   const res = await fetch(url, config)
   if (!res.ok) {
-    throw new Error(`fetchData failed: ${res.status} ${res.statusText}`)
+    const payload = await res.json().catch(() => null)
+    const code = typeof payload?.error === 'string' ? payload.error : undefined
+    if (code === NO_EVENT_ERROR_CODE && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(NO_EVENT_EVENT_NAME))
+    }
+    throw new FetchDataError(payload?.message ?? `fetchData failed: ${res.status} ${res.statusText}`, res.status, code)
   }
 
   const contentType = res.headers.get('content-type')

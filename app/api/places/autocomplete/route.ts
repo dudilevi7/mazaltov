@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { getEventContext } from '@/lib/supabase/auth'
-import { unauthorized, internalServerError } from '@/lib/api/errorHandling'
+import { requireEventContext } from '@/lib/supabase/auth'
+import { internalServerError } from '@/lib/api/errorHandling'
 import Logger from '@/lib/api/logger'
 import type { PlaceSuggestion } from '@/types/Trip'
 
@@ -68,8 +68,8 @@ const toSuggestion = (item: NominatimItem, lang: string): PlaceSuggestion | null
 export const GET = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) return unauthorized()
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) return ctx
 
     const q = request.nextUrl.searchParams.get('q')?.trim() ?? ''
     const lang = request.nextUrl.searchParams.get('lang') === 'he' ? 'he' : 'en'

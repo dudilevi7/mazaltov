@@ -1,6 +1,6 @@
-import { forbidden, internalServerError, unauthorized } from '@/lib/api/errorHandling'
+import { forbidden, internalServerError } from '@/lib/api/errorHandling'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { getEventContext } from '@/lib/supabase/auth'
+import { requireEventContext } from '@/lib/supabase/auth'
 import { type EventMemberRow, mapEventMemberRowToEventMember, EventRole, EventMemberStatus } from '@/types/eventMember'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseBody } from '@/lib/api/modeling'
@@ -14,9 +14,9 @@ type InviteBody = { email: string; role: EventRole }
 export const POST = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) {
-      return unauthorized()
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) {
+      return ctx
     }
     if (ctx.role !== 'admin') {
       return forbidden('Only admins can invite users')
@@ -77,8 +77,8 @@ export const POST = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const supabase = await createSupabaseServerClient()
-    const ctx = await getEventContext(supabase, request)
-    if (!ctx) return unauthorized()
+    const ctx = await requireEventContext(supabase, request)
+    if (ctx instanceof NextResponse) return ctx
     if (ctx.role !== 'admin') return forbidden('Only admins can remove members')
 
     const id = request.nextUrl.searchParams.get('id')

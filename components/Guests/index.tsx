@@ -23,6 +23,7 @@ import fetchData, { METHODS } from '@/lib/fetchData'
 import CustomSlideover from '@/components/Shared/CustomSlideover'
 import GuestsStatistics from './GuestsStatistics'
 import { ToastType } from '@/types/Toast'
+import useEventGate from '@/hooks/useEventGate'
 
 const Guests = () => {
   const {
@@ -47,6 +48,7 @@ const Guests = () => {
     isLoadingGuests,
   } = useGuestsContext()
   const { languageDirection, eventSettings, showToast } = useAppContext()
+  const { canCreate, gateTooltip } = useEventGate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null)
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false)
@@ -181,7 +183,12 @@ const Guests = () => {
         <GuestsSummaryBar />
 
         <div className="flex flex-wrap items-center gap-2">
-          <CustomButton size={ButtonSize.SM} onClick={openAdd} icon={<FontAwesomeIcon icon={faPlus} />}>
+          <CustomButton
+            size={ButtonSize.SM}
+            onClick={openAdd}
+            disabled={!canCreate}
+            tooltip={gateTooltip}
+            icon={<FontAwesomeIcon icon={faPlus} />}>
             הוסף אורח
           </CustomButton>
           <ImportGuestsExcelButton />

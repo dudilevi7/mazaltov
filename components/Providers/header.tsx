@@ -10,6 +10,7 @@ import { paidStatusOptions } from './helper'
 import { exportExpensesToExcel } from '@/components/Budget/helper'
 import { useAppContext } from '@/context/AppContext'
 import { useProvidersContext } from '@/context/ProvidersContext'
+import useEventGate from '@/hooks/useEventGate'
 
 interface ProvidersHeaderProps {
   onAddClick: () => void
@@ -38,6 +39,7 @@ const ProvidersHeader = ({
 }: ProvidersHeaderProps) => {
   const { languageDirection } = useAppContext()
   const { providers } = useProvidersContext()
+  const { canCreate, gateTooltip } = useEventGate()
   const dropdownOptions: SelectOption[] = [
     { value: '', label: 'הכל' },
     ...serviceOptions.map((service) => ({
@@ -50,7 +52,9 @@ const ProvidersHeader = ({
   return (
     <div className="flex flex-col gap-3 w-full" dir={languageDirection}>
       <div className="flex flex-row items-center gap-3">
-        <CustomButton onClick={onAddClick}>הוסף ספק</CustomButton>
+        <CustomButton onClick={onAddClick} disabled={!canCreate} tooltip={gateTooltip}>
+          הוסף ספק
+        </CustomButton>
         <SearchBar value={searchValue} onChange={onSearchChange} placeholder="חיפוש ספק" />
       </div>
       <div className={`flex flex-wrap gap-2 text-sm text-gray-700`}>

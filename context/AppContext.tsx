@@ -12,6 +12,7 @@ import useSupabase from '@/hooks/useSupabase'
 import fetchData, { METHODS } from '@/lib/fetchData'
 import { API_URL } from '@/constants'
 import { API_ROUTES } from '@/constants/apiRoutes'
+import { EVENT_SETUP_LABELS, NO_EVENT_EVENT_NAME } from '@/constants/eventSetup'
 
 interface AppContextType {
   languageDirection: LanguageDirection
@@ -34,8 +35,10 @@ interface AppContextType {
   isLoadingTodos: boolean
   accessibleEvents: AccessibleEvent[]
   activeEventId: string | null
+  isEventAccessResolved: boolean
   currentRole: EventRole | null
   setActiveEvent: (eventId: string) => void
+  refreshEventAccess: () => Promise<void>
   eventMembers: EventMember[]
   fetchEventMembers: (force?: boolean) => Promise<void>
   setEventMembers: (members: EventMember[]) => void
@@ -74,8 +77,10 @@ export const AppContext = createContext<AppContextType>({
   isLoadingTodos: false,
   accessibleEvents: [],
   activeEventId: null,
+  isEventAccessResolved: false,
   currentRole: null,
   setActiveEvent: () => {},
+  refreshEventAccess: async () => {},
   eventMembers: [],
   fetchEventMembers: async () => {},
   setEventMembers: () => {},
@@ -111,6 +116,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoadingTodos, setIsLoadingTodos] = useState<boolean>(false)
   const [accessibleEvents, setAccessibleEvents] = useState<AccessibleEvent[]>([])
   const [activeEventId, setActiveEventId] = useState<string | null>(null)
+  const [isEventAccessResolved, setIsEventAccessResolved] = useState(false)
   const [currentRole, setCurrentRole] = useState<EventRole | null>(null)
   const [eventMembers, setEventMembers] = useState<EventMember[]>([])
   const membersLoadedFor = useRef<string | null>(null)
@@ -136,6 +142,20 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeApp()
   }, [user?.id, isAuthLoading, isAuthenticated])
+
+  // The API answers NO_EVENT when the user has no event yet; surface a friendly
+  // guide instead of the generic failure toast. Deferred so it lands after the
+  // caller's own error toast and wins.
+  useEffect(() => {
+    const onNoEvent = () => {
+      const labels = languageDirection === LanguageDirection.HEB ? EVENT_SETUP_LABELS.HEB : EVENT_SETUP_LABELS.ENG
+      setTimeout(() => {
+        showToast({ type: ToastType.INFO, title: labels.toastTitle, message: labels.toastMessage, duration: 6000 })
+      }, 0)
+    }
+    window.addEventListener(NO_EVENT_EVENT_NAME, onNoEvent)
+    return () => window.removeEventListener(NO_EVENT_EVENT_NAME, onNoEvent)
+  }, [languageDirection])
 
   const initializeApp = async () => {
     await initEventAccess()
@@ -180,7 +200,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch {
       setAccessibleEvents([])
+    } finally {
+      setIsEventAccessResolved(true)
     }
+  }
+
+  // Re-resolve accessible events in place (e.g. right after the first event is
+  // created in Settings) so the app unlocks without a page reload.
+  const refreshEventAccess = async () => {
+    await initEventAccess()
   }
 
   const setActiveEvent = (eventId: string) => {
@@ -346,8 +374,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         isLoadingTodos,
         accessibleEvents,
         activeEventId,
+        isEventAccessResolved,
         currentRole,
         setActiveEvent,
+        refreshEventAccess,
         eventMembers,
         fetchEventMembers,
         setEventMembers,
