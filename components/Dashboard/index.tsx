@@ -20,6 +20,8 @@ import moment from 'moment'
 import { useAppContext } from '@/context/AppContext'
 import { useGuestsContext } from '@/context/GuestsContext'
 import { useBudgetContext } from '@/context/BudgetContext'
+import { useProvidersContext } from '@/context/ProvidersContext'
+import { useGiftsContext } from '@/context/GiftsContext'
 import { usePublicNotesContext } from '@/context/PublicNotesContext'
 import { getEventDisplayName } from '@/components/AppHeader/helper'
 import { getEventTypeDisplayName, hasEventData } from '@/components/Settings/helper'
@@ -33,6 +35,8 @@ import Card, { CardVariant } from '@/components/Shared/Card'
 import Tooltip from '@/components/Tooltip'
 import PublicNotesModal from '@/components/PublicNotes/PublicNotesModal'
 import EventSetupGuide from '@/components/Shared/EventSetupGuide'
+import SpinnerLoader from '@/components/Shared/SpinnerLoader'
+import useEventGate from '@/hooks/useEventGate'
 
 const EVENT_TYPE_ICON: Record<EventType, IconDefinition> = {
   [EventType.WEDDING]: faRing,
@@ -41,12 +45,30 @@ const EVENT_TYPE_ICON: Record<EventType, IconDefinition> = {
   [EventType.CUSTOM]: faCalendarDays,
 }
 
+const StatValue = ({
+  isLoading,
+  children,
+  className,
+}: {
+  isLoading: boolean
+  children: React.ReactNode
+  className: string
+}) => (
+  <span className={`flex min-h-10 items-center ${className}`}>
+    {isLoading ? <SpinnerLoader size="lg" className="opacity-60" /> : children}
+  </span>
+)
+
 const Dashboard = () => {
   const router = useRouter()
-  const { eventSettings, todos, languageDirection } = useAppContext()
-  const { guests } = useGuestsContext()
+  const { eventSettings, todos, languageDirection, isLoadingTodos } = useAppContext()
+  const { guests, isLoadingGuests } = useGuestsContext()
   const { totalPrice, totalPaid, totalToBePaid, guestsIncome, estimatedTotal, balance } = useBudgetContext()
-  const { publicNotes } = usePublicNotesContext()
+  const { isLoadingProviders } = useProvidersContext()
+  const { isLoadingGifts } = useGiftsContext()
+  const { publicNotes, isLoadingPublicNotes } = usePublicNotesContext()
+  const { isResolving } = useEventGate()
+  const isLoadingBudget = isLoadingProviders || isLoadingGifts
   const [notesModalOpen, setNotesModalOpen] = useState(false)
 
   const isHeb = languageDirection === LanguageDirection.HEB
@@ -106,6 +128,10 @@ const Dashboard = () => {
             )}
           </div>
         </Card>
+      ) : isResolving ? (
+        <Card className="flex items-center justify-center min-h-[180px] h-full">
+          <SpinnerLoader size="md" />
+        </Card>
       ) : (
         <EventSetupGuide variant="card" />
       )}
@@ -114,9 +140,11 @@ const Dashboard = () => {
         onClick={() => router.push('/guests')}
         className="flex flex-col items-center h-full justify-start gap-3 min-h-[180px]">
         <FontAwesomeIcon icon={faUsers} className="text-blue-500 text-2xl group-hover:text-white transition-colors" />
-        <span className="text-4xl font-bold text-gray-800 group-hover:text-white transition-all">
+        <StatValue
+          isLoading={isLoadingGuests}
+          className="text-4xl font-bold text-gray-800 group-hover:text-white transition-all">
           {totalGuestCount}
-        </span>
+        </StatValue>
         <span className="text-sm text-gray-500 group-hover:text-white transition-all">
           {isHeb ? 'אורחים' : 'Guests'}
         </span>
@@ -127,11 +155,11 @@ const Dashboard = () => {
         onClick={() => router.push('/tasks')}
         className="flex flex-col items-center justify-center gap-2 min-h-[180px]">
         <FontAwesomeIcon icon={faListCheck} className="text-white text-2xl transition-colors" />
-        <span className="text-3xl font-bold text-white transition-all">
+        <StatValue isLoading={isLoadingTodos} className="text-3xl font-bold text-white transition-all">
           {completedCount}/{todos.length}
-        </span>
+        </StatValue>
         <span className="text-sm text-white transition-all">{isHeb ? 'משימות הושלמו' : 'Tasks completed'}</span>
-        {upcomingTask && (
+        {!isLoadingTodos && upcomingTask && (
           <div className="mt-2 w-full bg-blue-800 rounded-lg px-3 py-2 text-center transition-all">
             <span className="text-xs text-white font-medium">{isHeb ? 'משימה קרובה' : 'Upcoming task'}:</span>
             <div className="flex flex-col items-center gap-0.5">
@@ -160,9 +188,11 @@ const Dashboard = () => {
           </Tooltip>
         </div>
         <FontAwesomeIcon icon={faNoteSticky} className="text-blue-500 text-2xl group-hover:text-white transition-colors" />
-        <span className="text-4xl font-bold text-gray-800 group-hover:text-white transition-all">
+        <StatValue
+          isLoading={isLoadingPublicNotes}
+          className="text-4xl font-bold text-gray-800 group-hover:text-white transition-all">
           {publicNotes.length}
-        </span>
+        </StatValue>
         <span className="text-sm text-gray-500 group-hover:text-white transition-all">
           {isHeb ? PUBLIC_NOTE_LABELS.HEB.notes : PUBLIC_NOTE_LABELS.ENG.notes}
         </span>
@@ -177,28 +207,36 @@ const Dashboard = () => {
           <span className="text-lg font-bold text-gray-800">{isHeb ? 'תקציב' : 'Budget'}</span>
         </div>
 
-        <ProgressBar total={totalPrice} completed={totalPaid} remaining={totalToBePaid} />
+        {isLoadingBudget ? (
+          <div className="flex min-h-20 items-center justify-center text-gray-400">
+            <SpinnerLoader size="lg" />
+          </div>
+        ) : (
+          <>
+            <ProgressBar total={totalPrice} completed={totalPaid} remaining={totalToBePaid} />
 
-        <div className="flex flex-wrap gap-6 text-sm">
-          <div className="flex flex-col">
-            <span className="text-gray-500">{isHeb ? 'הכנסות' : 'Income'}</span>
-            <span className="text-green-600 font-semibold">{formatCurrency(incomeValue)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-gray-500">{isHeb ? 'הוצאות' : 'Expenses'}</span>
-            <span className="text-red-500 font-semibold">{formatCurrency(totalPrice)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-gray-500">{isHeb ? 'שולם' : 'Paid'}</span>
-            <span className="text-blue-600 font-semibold">{formatCurrency(totalPaid)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-gray-500">{isHeb ? 'יתרה' : 'Balance'}</span>
-            <span className={`font-semibold ${balance >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-              {formatCurrency(balance)}
-            </span>
-          </div>
-        </div>
+            <div className="flex flex-wrap gap-6 text-sm">
+              <div className="flex flex-col">
+                <span className="text-gray-500">{isHeb ? 'הכנסות' : 'Income'}</span>
+                <span className="text-green-600 font-semibold">{formatCurrency(incomeValue)}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-gray-500">{isHeb ? 'הוצאות' : 'Expenses'}</span>
+                <span className="text-red-500 font-semibold">{formatCurrency(totalPrice)}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-gray-500">{isHeb ? 'שולם' : 'Paid'}</span>
+                <span className="text-blue-600 font-semibold">{formatCurrency(totalPaid)}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-gray-500">{isHeb ? 'יתרה' : 'Balance'}</span>
+                <span className={`font-semibold ${balance >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                  {formatCurrency(balance)}
+                </span>
+              </div>
+            </div>
+          </>
+        )}
       </Card>
 
       <PublicNotesModal isOpen={notesModalOpen} onClose={() => setNotesModalOpen(false)} />
