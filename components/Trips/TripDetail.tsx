@@ -69,6 +69,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
         isRtl={isRtl}
         totals={totals}
         totalsLabel={selectedLocation ? `${copy.totalCost} · ${locationFilter}` : copy.totalCost}
+        excludeFlightsNote={selectedLocation ? copy.totalsExcludeFlights : undefined}
         locations={locations.map((location) => location.name)}
         locationFilter={locationFilter}
         locationOptions={locationOptions}
@@ -79,7 +80,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
       />
       <TripFlights {...slice} />
       <TripHotels {...slice} />
-      {!selectedLocation && <TripAttractions trip={trip} isRtl={isRtl} />}
+      <TripAttractions {...slice} />
       <TripCosts {...slice} />
       <TripTasks trip={trip} isRtl={isRtl} />
     </div>

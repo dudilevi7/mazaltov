@@ -156,4 +156,6 @@ export const emptyAttraction = (): Omit<Attraction, 'id'> => ({
   currency: TripCurrency.ILS,
   description: '',
   date: '',
+  location: '',
+  countryCode: '',
 })

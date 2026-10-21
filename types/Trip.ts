@@ -81,6 +81,8 @@ interface Attraction {
   currency: TripCurrency
   description: string
   date: string
+  location?: string
+  countryCode?: string
 }
 
 interface TripTask {

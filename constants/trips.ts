@@ -103,6 +103,7 @@ export const getTripCopy = (isRtl: boolean) => ({
   noLocationResults: isRtl ? 'לא נמצאו מיקומים' : 'No locations found',
   other: isRtl ? 'אחר' : 'Other',
   allLocations: isRtl ? 'הכל' : 'All',
+  totalsExcludeFlights: isRtl ? 'הסה״כ לא כולל טיסות' : 'Total does not include flights',
   emptyFilteredSection: isRtl ? 'אין פריטים במיקום זה' : 'No items for this location',
   addFlight: isRtl ? 'הוסף טיסה' : 'Add flight',
   editFlight: isRtl ? 'עריכת טיסה' : 'Edit flight',

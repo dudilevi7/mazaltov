@@ -19,6 +19,7 @@ interface TripDetailHeaderProps {
   isRtl: boolean
   totals: CurrencyTotals
   totalsLabel: string
+  excludeFlightsNote?: string
   locations: string[]
   locationFilter: string
   locationOptions: SelectOption[]
@@ -33,6 +34,7 @@ const TripDetailHeader = ({
   isRtl,
   totals,
   totalsLabel,
+  excludeFlightsNote,
   locations,
   locationFilter,
   locationOptions,
@@ -79,17 +81,20 @@ const TripDetailHeader = ({
           />
         </div>
       )}
-      {hasAnyCost(totals) && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-          <FontAwesomeIcon icon={faCoins} className="text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">{totalsLabel}</span>
-          {CURRENCY_ORDER.map((currency) =>
-            totals[currency] ? (
-              <span key={currency} className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-                {formatTripCost(totals[currency], currency)}
-              </span>
-            ) : null
-          )}
+      {(hasAnyCost(totals) || excludeFlightsNote) && (
+        <div className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <FontAwesomeIcon icon={faCoins} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">{totalsLabel}</span>
+            {CURRENCY_ORDER.map((currency) =>
+              totals[currency] ? (
+                <span key={currency} className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                  {formatTripCost(totals[currency], currency)}
+                </span>
+              ) : null
+            )}
+          </div>
+          {excludeFlightsNote ? <p className="text-xs text-gray-500">{excludeFlightsNote}</p> : null}
         </div>
       )}
     </>

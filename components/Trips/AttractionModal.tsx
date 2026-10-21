@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Attraction } from '@/types/Trip'
+import type { Attraction, PlaceSuggestion } from '@/types/Trip'
 import { TripCurrency } from '@/types/Trip'
 import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import SelectDropdown from '@/components/Shared/SelectDropdown'
 import Modal from '@/components/Shared/Modal'
 import { CURRENCY_OPTIONS, getTripCopy } from '@/constants/trips'
 import { INPUT_CLASS, emptyAttraction } from './helper'
+import LocationAutocomplete from './LocationAutocomplete'
 
 interface AttractionModalProps {
   isOpen: boolean
@@ -15,9 +16,10 @@ interface AttractionModalProps {
   onSave: (attraction: Omit<Attraction, 'id'>) => void
   attraction?: Attraction | null
   isRtl: boolean
+  existingPlaces?: PlaceSuggestion[]
 }
 
-const AttractionModal = ({ isOpen, onClose, onSave, attraction, isRtl }: AttractionModalProps) => {
+const AttractionModal = ({ isOpen, onClose, onSave, attraction, isRtl, existingPlaces = [] }: AttractionModalProps) => {
   const copy = getTripCopy(isRtl)
   const isEdit = !!attraction
   const [values, setValues] = useState(emptyAttraction())
@@ -26,7 +28,7 @@ const AttractionModal = ({ isOpen, onClose, onSave, attraction, isRtl }: Attract
     if (!isOpen) return
     if (attraction) {
       const { id: _id, ...rest } = attraction
-      setValues(rest)
+      setValues({ ...emptyAttraction(), ...rest, location: rest.location ?? '', countryCode: rest.countryCode ?? '' })
     } else {
       setValues(emptyAttraction())
     }
@@ -34,7 +36,7 @@ const AttractionModal = ({ isOpen, onClose, onSave, attraction, isRtl }: Attract
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(values)
+    onSave({ ...values, location: values.location?.trim() ?? '', countryCode: values.countryCode?.trim() ?? '' })
   }
 
   return (
@@ -85,6 +87,15 @@ const AttractionModal = ({ isOpen, onClose, onSave, attraction, isRtl }: Attract
               className="w-full"
             />
           </div>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{copy.location}</label>
+          <LocationAutocomplete
+            value={values.location ?? ''}
+            countryCode={values.countryCode}
+            existingPlaces={existingPlaces}
+            onChange={({ name, countryCode }) => setValues({ ...values, location: name, countryCode: countryCode ?? '' })}
+          />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{copy.description}</label>

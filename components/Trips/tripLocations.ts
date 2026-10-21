@@ -1,5 +1,5 @@
 import { TripCurrency } from '@/types/Trip'
-import type { AdditionalCost, Flight, Hotel, Trip, TripLocation } from '@/types/Trip'
+import type { AdditionalCost, Attraction, Flight, Hotel, Trip, TripLocation } from '@/types/Trip'
 import { linkedFlightIds, locationKey, matchesLocation, type CurrencyTotals } from './helper'
 
 const displayNames = new Map<string, Intl.DisplayNames>()
@@ -32,6 +32,7 @@ const countryCodesForLocation = (trip: Trip, location: string): Set<string> => {
     consider(flight.destinationCountryCode)
   })
   ;(trip.additionalCosts ?? []).forEach((cost) => consider(cost.countryCode))
+  ;(trip.attractions ?? []).forEach((attraction) => consider(attraction.countryCode))
   return codes
 }
 
@@ -56,6 +57,9 @@ const countryPlaceKeys = (trip: Trip, location: string, countryCodes: Set<string
   })
   ;(trip.additionalCosts ?? []).forEach((cost) => {
     if (inCountry(countryCodes, cost.countryCode)) add(cost.location)
+  })
+  ;(trip.attractions ?? []).forEach((attraction) => {
+    if (inCountry(countryCodes, attraction.countryCode)) add(attraction.location)
   })
   return keys
 }
@@ -90,6 +94,10 @@ export const collectTripLocations = (trip: Trip, locale = 'en'): TripLocation[] 
     add(cost.location, cost.countryCode)
     add(regionName(cost.countryCode ?? '', locale), cost.countryCode)
   })
+  ;(trip.attractions ?? []).forEach((attraction) => {
+    add(attraction.location, attraction.countryCode)
+    add(regionName(attraction.countryCode ?? '', locale), attraction.countryCode)
+  })
 
   return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name, locale, { sensitivity: 'base' }))
 }
@@ -122,6 +130,18 @@ export const filterHotelsByLocation = (trip: Trip, location: string): Hotel[] =>
   )
 }
 
+export const filterAttractionsByLocation = (trip: Trip, location: string): Attraction[] => {
+  const attractions = trip.attractions ?? []
+  if (!location.trim()) return attractions
+  const countryCodes = countryCodesForLocation(trip, location)
+  const placeKeys = countryPlaceKeys(trip, location, countryCodes)
+  return attractions.filter(
+    (attraction) =>
+      matchesLocation([attraction.location], location) ||
+      matchesCountryPlace(countryCodes, placeKeys, attraction.location, attraction.countryCode)
+  )
+}
+
 export const filterAdditionalCostsByLocation = (trip: Trip, location: string): AdditionalCost[] => {
   const costs = trip.additionalCosts ?? []
   if (!location.trim()) return costs
@@ -146,14 +166,16 @@ export const computeTripTotals = (trip: Trip, location = ''): CurrencyTotals => 
     if (!amount) return
     totals[currency] = (totals[currency] ?? 0) + amount
   }
-  const flights = loc ? filterFlightsByLocation(trip, loc) : trip.flights
-  flights.forEach((flight) => {
-    if (flight.isReturn) return
-    add(flight.price, flight.currency)
-  })
+  if (!loc) {
+    trip.flights.forEach((flight) => {
+      if (flight.isReturn) return
+      add(flight.price, flight.currency)
+    })
+  }
   const hotels = loc ? filterHotelsByLocation(trip, loc) : trip.hotels
   hotels.forEach((hotel) => add(hotel.totalPrice, hotel.currency))
-  if (!loc) trip.attractions.forEach((attraction) => add(attraction.price, attraction.currency))
+  const attractions = loc ? filterAttractionsByLocation(trip, loc) : (trip.attractions ?? [])
+  attractions.forEach((attraction) => add(attraction.price, attraction.currency))
   const costs = loc ? filterAdditionalCostsByLocation(trip, loc) : (trip.additionalCosts ?? [])
   costs.forEach((cost) => add(cost.price, cost.currency))
   return totals
