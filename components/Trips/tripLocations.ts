@@ -16,6 +16,8 @@ const regionName = (code: string, locale: string): string => {
   return label && locationKey(label) !== normalized ? label : ''
 }
 
+export const countryLabel = (code: string | undefined, locale: string): string => regionName(code ?? '', locale)
+
 const countryCodesForLocation = (trip: Trip, location: string): Set<string> => {
   const selected = locationKey(location)
   const codes = new Set<string>()
@@ -147,7 +149,11 @@ export const filterAdditionalCostsByLocation = (trip: Trip, location: string): A
   if (!location.trim()) return costs
   const countryCodes = countryCodesForLocation(trip, location)
   const placeKeys = countryPlaceKeys(trip, location, countryCodes)
-  return costs.filter((cost) => matchesLocation([cost.location], location) || matchesCountryPlace(countryCodes, placeKeys, cost.location, cost.countryCode))
+  return costs.filter(
+    (cost) =>
+      matchesLocation([cost.location], location) ||
+      matchesCountryPlace(countryCodes, placeKeys, cost.location, cost.countryCode)
+  )
 }
 
 export const sumAmounts = (entries: { amount: number; currency: TripCurrency }[]): CurrencyTotals => {

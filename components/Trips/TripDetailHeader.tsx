@@ -1,7 +1,15 @@
 'use client'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronLeft, faChevronRight, faCoins, faFilter, faPen, faTrash } from '@fortawesome/free-solid-svg-icons'
+import {
+  faChartPie,
+  faChevronLeft,
+  faChevronRight,
+  faCoins,
+  faFilter,
+  faPen,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons'
 import type { Trip } from '@/types/Trip'
 import { TripCurrency } from '@/types/Trip'
 import { LanguageDirection } from '@/types/General'
@@ -24,6 +32,7 @@ interface TripDetailHeaderProps {
   locationFilter: string
   locationOptions: SelectOption[]
   onLocationChange: (value: string) => void
+  onOpenStatistics: () => void
   onBack: () => void
   onEditTrip: () => void
   onDeleteTrip: () => void
@@ -39,6 +48,7 @@ const TripDetailHeader = ({
   locationFilter,
   locationOptions,
   onLocationChange,
+  onOpenStatistics,
   onBack,
   onEditTrip,
   onDeleteTrip,
@@ -54,33 +64,59 @@ const TripDetailHeader = ({
           variant="white"
           size={ButtonSize.SM}
           onClick={onBack}
-          icon={<FontAwesomeIcon icon={languageDirection === LanguageDirection.HEB ? faChevronRight : faChevronLeft} />}>
+          icon={
+            <FontAwesomeIcon icon={languageDirection === LanguageDirection.HEB ? faChevronRight : faChevronLeft} />
+          }>
           {copy.back}
         </CustomButton>
         <div className="flex items-center gap-0.5">
-          <ActionButton icon={faPen} variant={ActionButtonVariant.EDIT} size={ActionButtonSize.SM} tooltip={copy.edit} onClick={onEditTrip} />
-          <ActionButton icon={faTrash} variant={ActionButtonVariant.DELETE} size={ActionButtonSize.SM} tooltip={copy.delete} onClick={onDeleteTrip} />
+          <ActionButton
+            icon={faPen}
+            variant={ActionButtonVariant.EDIT}
+            size={ActionButtonSize.SM}
+            tooltip={copy.edit}
+            onClick={onEditTrip}
+          />
+          <ActionButton
+            icon={faTrash}
+            variant={ActionButtonVariant.DELETE}
+            size={ActionButtonSize.SM}
+            tooltip={copy.delete}
+            onClick={onDeleteTrip}
+          />
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <FontAwesomeIcon icon={typeMeta.icon} className={typeMeta.color} />
         <h1 className="text-lg font-semibold text-gray-800">{trip.name}</h1>
-        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">{isRtl ? typeMeta.he : typeMeta.en}</span>
+        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+          {isRtl ? typeMeta.he : typeMeta.en}
+        </span>
       </div>
-      {locations.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
-          <FontAwesomeIcon icon={faFilter} className="text-gray-500" aria-hidden />
-          <span className="whitespace-nowrap">{copy.locationFilter}:</span>
-          <SelectDropdown
-            value={locationFilter}
-            onChange={onLocationChange}
-            options={[{ value: ALL_LOCATIONS, label: copy.allLocations }, ...locationOptions]}
-            placeholder={copy.allLocations}
-            className="min-w-32"
-            searchable
-          />
-        </div>
-      )}
+      <div className="flex flex-col items-start gap-3">
+        {locations.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
+            <FontAwesomeIcon icon={faFilter} className="text-gray-500" aria-hidden />
+            <span className="whitespace-nowrap">{copy.locationFilter}:</span>
+            <SelectDropdown
+              value={locationFilter}
+              onChange={onLocationChange}
+              options={[{ value: ALL_LOCATIONS, label: copy.allLocations }, ...locationOptions]}
+              placeholder={copy.allLocations}
+              className="min-w-32"
+              searchable
+            />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={onOpenStatistics}
+          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-blue-400 via-blue-600 to-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-300/50 transition hover:shadow-lg hover:brightness-110 cursor-pointer">
+          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition duration-500 group-hover:translate-x-full" />
+          <FontAwesomeIcon icon={faChartPie} className="relative" />
+          <span className="">{copy.statistics}</span>
+        </button>
+      </div>
       {(hasAnyCost(totals) || excludeFlightsNote) && (
         <div className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
@@ -89,7 +125,7 @@ const TripDetailHeader = ({
             {CURRENCY_ORDER.map((currency) =>
               totals[currency] ? (
                 <span key={currency} className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-                  {formatTripCost(totals[currency], currency)}
+                  {formatTripCost(totals[currency] || 0, currency)}
                 </span>
               ) : null
             )}

@@ -5,10 +5,12 @@ import type { PlaceSuggestion, Trip } from '@/types/Trip'
 import { LanguageDirection } from '@/types/General'
 import { useAppContext } from '@/context/AppContext'
 import { getTripCopy } from '@/constants/trips'
+import CustomSlideover from '@/components/Shared/CustomSlideover'
 import { ALL_LOCATIONS, locationKey } from './helper'
 import { collectTripLocations, computeTripTotals } from './tripLocations'
 import { flagEmoji } from './PlaceFlag'
 import TripDetailHeader from './TripDetailHeader'
+import TripStatistics from './TripStatistics'
 import TripFlights from './TripFlights'
 import TripHotels from './TripHotels'
 import TripAttractions from './TripAttractions'
@@ -27,10 +29,15 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
   const isRtl = languageDirection === LanguageDirection.HEB
   const copy = getTripCopy(isRtl)
   const [locationFilter, setLocationFilter] = useState(ALL_LOCATIONS)
+  const [statisticsOpen, setStatisticsOpen] = useState(false)
 
   const locations = useMemo(() => collectTripLocations(trip, isRtl ? 'he' : 'en'), [trip, isRtl])
   const locationOptions = useMemo(
-    () => locations.map((location) => ({ value: location.name, label: [flagEmoji(location.countryCode), location.name].filter(Boolean).join(' ') })),
+    () =>
+      locations.map((location) => ({
+        value: location.name,
+        label: [flagEmoji(location.countryCode), location.name].filter(Boolean).join(' '),
+      })),
     [locations]
   )
   const existingPlaces = useMemo<PlaceSuggestion[]>(
@@ -74,6 +81,7 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
         locationFilter={locationFilter}
         locationOptions={locationOptions}
         onLocationChange={setLocationFilter}
+        onOpenStatistics={() => setStatisticsOpen(true)}
         onBack={onBack}
         onEditTrip={onEditTrip}
         onDeleteTrip={onDeleteTrip}
@@ -83,6 +91,9 @@ const TripDetail = ({ trip, onBack, onEditTrip, onDeleteTrip }: TripDetailProps)
       <TripAttractions {...slice} />
       <TripCosts {...slice} />
       <TripTasks trip={trip} isRtl={isRtl} />
+      <CustomSlideover isOpen={statisticsOpen} onClose={() => setStatisticsOpen(false)} title={copy.statistics}>
+        <TripStatistics trip={trip} isRtl={isRtl} />
+      </CustomSlideover>
     </div>
   )
 }
