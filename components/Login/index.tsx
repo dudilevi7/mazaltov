@@ -6,15 +6,45 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEnvelope, faLock, faRightToBracket } from '@fortawesome/free-solid-svg-icons'
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import useSupabase from '@/hooks/useSupabase'
+import { useAppContext } from '@/context/AppContext'
+import { LanguageDirection } from '@/types/General'
+import LanguageToggle from '@/components/Shared/LanguageToggle'
 import Logo from '../AppHeader/Logo'
 import CustomButton from '../Button/custom-button'
 
+const COPY = {
+  [LanguageDirection.HEB]: {
+    subtitle: 'כנסו ונהלו את האירוע שלכם',
+    email: 'אימייל',
+    password: 'סיסמה',
+    submit: 'כניסה',
+    submitting: 'נכנסים...',
+    or: 'או',
+    google: 'כניסה עם Google',
+    account: 'אין לכם חשבון?',
+    signup: 'הירשמו',
+  },
+  [LanguageDirection.ENG]: {
+    subtitle: 'Sign in to manage your event',
+    email: 'Email',
+    password: 'Password',
+    submit: 'Sign in',
+    submitting: 'Signing in...',
+    or: 'or',
+    google: 'Sign in with Google',
+    account: "Don't have an account?",
+    signup: 'Sign up',
+  },
+}
+
 const Login = () => {
   const { signIn, signInWithGoogle, isAuthenticated } = useSupabase()
+  const { languageDirection, setLanguageDirection } = useAppContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const copy = COPY[languageDirection] ?? COPY[LanguageDirection.HEB]
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,30 +52,36 @@ const Login = () => {
     setIsSubmitting(true)
     const { error: err } = await signIn(email, password)
     setIsSubmitting(false)
-    if (err) {
-      setError(err.message)
-      return
-    }
+    if (err) setError(err.message)
   }
 
   if (isAuthenticated) {
-    return <div className="flex flex-col min-h-screen bg-gray-50" />
+    return <div className="flex min-h-screen flex-col bg-gray-50" />
   }
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center bg-gray-50 px-4 animate-fade-in-0.5">
+    <div
+      dir={languageDirection}
+      lang={languageDirection === LanguageDirection.HEB ? 'he' : 'en'}
+      className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 animate-fade-in-0.5">
       <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="mb-4 flex justify-end">
+          <LanguageToggle
+            isHebrew={languageDirection === LanguageDirection.HEB}
+            onLanguage={setLanguageDirection}
+            label={copy.subtitle}
+          />
+        </div>
         <div className="flex flex-col items-center text-center">
           <Logo className="" />
-          <p className="mt-1 text-sm text-gray-500">Sign in to manage your event</p>
-          <span className=" text-sm text-gray-500">כנס ונהל את האירוע שלך</span>
+          <p className="mt-1 text-sm text-gray-500">{copy.subtitle}</p>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
+        <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-4">
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
-              Email | אימייל
+              {copy.email}
             </label>
-            <div className="relative">
+            <div className="relative" dir="ltr">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <FontAwesomeIcon icon={faEnvelope} className="h-4 w-4" />
               </span>
@@ -63,9 +99,9 @@ const Login = () => {
           </div>
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
-              Password | סיסמה
+              {copy.password}
             </label>
-            <div className="relative">
+            <div className="relative" dir="ltr">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <FontAwesomeIcon icon={faLock} className="h-4 w-4" />
               </span>
@@ -89,31 +125,26 @@ const Login = () => {
           <CustomButton
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center !gap-2 rounded-lg bg-linear-to-r from-blue-500 to-blue-700
-              px-4 py-2.5 font-medium text-white transition hover:from-blue-600 hover:to-blue-800 disabled:opacity-50 cursor-pointer"
+            className="flex w-full cursor-pointer items-center justify-center !gap-2 rounded-lg bg-linear-to-r from-blue-500 to-blue-700 px-4 py-2.5 font-medium text-white transition hover:from-blue-600 hover:to-blue-800 disabled:opacity-50"
             icon={<FontAwesomeIcon icon={faRightToBracket} className="h-4 w-4" />}>
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? copy.submitting : copy.submit}
           </CustomButton>
-          {/* 7e43d410-6ffc-4a7e-bd81-2920f1cb07b3 */}
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">or</span>
+            <span className="text-xs text-gray-400">{copy.or}</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
-
           <CustomButton
             type="button"
             onClick={() => signInWithGoogle()}
-            className="w-full flex items-center justify-center !gap-2 rounded-lg bg-linear-to-r from-gray-500 to-gray-700
-              px-4 py-2.5 font-medium !text-white transition hover:from-gray-600 hover:to-gray-800 cursor-pointer"
+            className="flex w-full cursor-pointer items-center justify-center !gap-2 rounded-lg bg-linear-to-r from-gray-500 to-gray-700 px-4 py-2.5 font-medium !text-white transition hover:from-gray-600 hover:to-gray-800"
             icon={<FontAwesomeIcon icon={faGoogle} className="h-4 w-4 text-white" />}>
-            Sign in with Google
+            {copy.google}
           </CustomButton>
-
           <p className="text-center text-sm text-gray-500">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-800 transition">
-              Sign up | הירשם
+            {copy.account}{' '}
+            <Link href="/signup" className="font-medium text-blue-600 transition hover:text-blue-800">
+              {copy.signup}
             </Link>
           </p>
         </form>

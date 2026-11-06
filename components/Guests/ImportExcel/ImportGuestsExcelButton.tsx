@@ -7,6 +7,7 @@ import CustomButton, { ButtonSize } from '@/components/Button/custom-button'
 import Modal from '@/components/Shared/Modal'
 import ImportFormatSelection from './ImportFormatSelection'
 import MazalTovImportFlow from './MazalTovImportFlow'
+import CustomImportFlow from './CustomImportFlow'
 import useEventGate from '@/hooks/useEventGate'
 
 enum ImportView {
@@ -42,7 +43,7 @@ const ImportGuestsExcelButton = () => {
         onClose={handleClose}
         closeOnBackdropClick
         overlayClassName="animate-fade-in-0.5 overflow-y-auto"
-        className="rounded-xl p-6 max-w-lg mx-4 max-h-[95vh] overflow-y-auto">
+        className={`mx-4 max-h-[95vh] overflow-y-auto rounded-xl p-6 ${view === ImportView.CUSTOM ? 'max-w-2xl' : 'max-w-lg'}`}>
         {view === 'select' && (
               <ImportFormatSelection
                 onSelectMazalTov={() => setView(ImportView.MAZALTOV)}
@@ -54,14 +55,7 @@ const ImportGuestsExcelButton = () => {
               <MazalTovImportFlow onBack={() => setView(ImportView.SELECT)} onClose={handleClose} />
             )}
 
-            {view === 'custom' && (
-              <div className="flex flex-col items-center gap-4 py-8">
-                <p className="text-sm text-gray-500">מיפוי מותאם אישית - בקרוב</p>
-                <CustomButton size={ButtonSize.SM} variant="white" onClick={() => setView(ImportView.SELECT)}>
-                  חזרה
-                </CustomButton>
-              </div>
-            )}
+            {view === 'custom' && <CustomImportFlow onBack={() => setView(ImportView.SELECT)} onClose={handleClose} />}
       </Modal>
     </>
   )

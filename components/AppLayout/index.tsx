@@ -16,7 +16,7 @@ interface AppLayoutProps {
 }
 
 const AUTH_PATHS = ['/login', '/signup']
-const PUBLIC_PATHS = ['/publicnote']
+const PUBLIC_PATHS = ['/publicnote', '/']
 const SETTINGS_PATH = '/settings'
 
 const AppLayout = ({ children }: AppLayoutProps) => {
@@ -27,11 +27,16 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const isAuthPage = AUTH_PATHS.includes(pathname)
+  const isMarketing = pathname === '/'
   const isPublicPage = PUBLIC_PATHS.includes(pathname)
   const showSetupBanner = showGuide && pathname !== SETTINGS_PATH
 
   useEffect(() => {
     if (isLoading) return
+    if (isMarketing) {
+      if (isAuthenticated) router.push('/dashboard')
+      return
+    }
     if (isPublicPage) return
     if (!isAuthenticated && !isAuthPage) {
       redirect('/login')
@@ -39,12 +44,19 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     }
     if (isAuthenticated && isAuthPage) {
       router.push('/dashboard')
-      return
     }
-    if (pathname === '/') {
-      router.push('/dashboard')
+  }, [isLoading, isAuthenticated, router, isAuthPage, isPublicPage, isMarketing])
+
+  if (isMarketing) {
+    if (isLoading || isAuthenticated) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-white">
+          <SpinnerLoader size="lg" isLoadingPage />
+        </div>
+      )
     }
-  }, [isLoading, isAuthenticated, pathname, router, isAuthPage, isPublicPage])
+    return <>{children}</>
+  }
 
   if (isPublicPage) {
     return <>{children}</>

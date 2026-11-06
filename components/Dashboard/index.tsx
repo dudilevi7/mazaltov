@@ -3,19 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faRing,
-  faStar,
-  faBaby,
-  faCalendarDays,
-  faUsers,
-  faListCheck,
-  faCoins,
-  faLocationDot,
-  faNoteSticky,
-  faCircleInfo,
-} from '@fortawesome/free-solid-svg-icons'
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { faUsers, faListCheck, faNoteSticky, faCircleInfo } from '@fortawesome/free-solid-svg-icons'
 import moment from 'moment'
 import { useAppContext } from '@/context/AppContext'
 import { useGuestsContext } from '@/context/GuestsContext'
@@ -25,25 +13,18 @@ import { useGiftsContext } from '@/context/GiftsContext'
 import { usePublicNotesContext } from '@/context/PublicNotesContext'
 import { getEventDisplayName } from '@/components/AppHeader/helper'
 import { getEventTypeDisplayName, hasEventData } from '@/components/Settings/helper'
-import { EventType } from '@/types/Settings'
 import { TodoStatus } from '@/types/Todo'
 import { LanguageDirection } from '@/types/General'
-import { formatCurrency } from '@/lib/utils'
 import { PUBLIC_NOTE_TOOLTIP_HEB, PUBLIC_NOTE_TOOLTIP_ENG, PUBLIC_NOTE_LABELS } from '@/constants/publicNotes'
-import ProgressBar from '@/components/Shared/ProgressBar'
 import Card, { CardVariant } from '@/components/Shared/Card'
-import Tooltip from '@/components/Tooltip'
+import Tooltip, { TooltipPlace } from '@/components/Tooltip'
 import PublicNotesModal from '@/components/PublicNotes/PublicNotesModal'
 import EventSetupGuide from '@/components/Shared/EventSetupGuide'
 import SpinnerLoader from '@/components/Shared/SpinnerLoader'
 import useEventGate from '@/hooks/useEventGate'
-
-const EVENT_TYPE_ICON: Record<EventType, IconDefinition> = {
-  [EventType.WEDDING]: faRing,
-  [EventType.BAR_MITZVA]: faStar,
-  [EventType.BRIT]: faBaby,
-  [EventType.CUSTOM]: faCalendarDays,
-}
+import EventCard from './EventCard'
+import BudgetCard from './BudgetCard'
+import TripsCard from './TripsCard'
 
 const StatValue = ({
   isLoading,
@@ -54,8 +35,8 @@ const StatValue = ({
   children: React.ReactNode
   className: string
 }) => (
-  <span className={`flex min-h-10 items-center ${className}`}>
-    {isLoading ? <SpinnerLoader size="lg" className="opacity-60" /> : children}
+  <span className={`flex min-h-12 items-center justify-start ${className}`}>
+    {isLoading ? <SpinnerLoader size="lg" /> : children}
   </span>
 )
 
@@ -88,7 +69,6 @@ const Dashboard = () => {
     })[0]
   }, [todos])
 
-  const eventIcon = EVENT_TYPE_ICON[eventSettings.eventType] || faCalendarDays
   const eventName = getEventDisplayName(eventSettings)
   const eventTypeName = getEventTypeDisplayName(
     eventSettings.eventType,
@@ -98,149 +78,107 @@ const Dashboard = () => {
   const showEvent = hasEventData(eventSettings)
 
   const incomeValue = guestsIncome > 0 ? guestsIncome : estimatedTotal
+  const notesLabel = isHeb ? PUBLIC_NOTE_LABELS.HEB.notes : PUBLIC_NOTE_LABELS.ENG.notes
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-0.5 p-2" dir={languageDirection}>
-      {showEvent ? (
-        <Card className="flex flex-col items-start gap-3 h-full">
-          <div className="flex items-center gap-2 border-b border-gray-200 pb-0.5">
-            <FontAwesomeIcon icon={eventIcon} className="text-blue-500 text-2xl" />
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-gray-800">
-                {eventTypeName}
-                {eventTypeName && eventName ? ' - ' : ''}
-                {eventName}
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2 mt-1 text-sm text-gray-800">
-            {eventSettings.eventDate && (
-              <div className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faCalendarDays} className="text-blue-500 text-xl" />
-                <span className="text-gray-800">{moment(eventSettings.eventDate).format('YYYY | MM | DD')}</span>
-              </div>
-            )}
-            {eventSettings.eventHall && (
-              <div className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faLocationDot} className="text-blue-500 text-xl" />
-                <span>{eventSettings.eventHall}</span>
-              </div>
-            )}
-          </div>
-        </Card>
-      ) : isResolving ? (
-        <Card className="flex items-center justify-center min-h-[180px] h-full">
-          <SpinnerLoader size="md" />
-        </Card>
-      ) : (
-        <EventSetupGuide variant="card" />
-      )}
-      <Card
-        variant={CardVariant.GRADIENT}
-        onClick={() => router.push('/guests')}
-        className="flex flex-col items-center h-full justify-start gap-3 min-h-[180px]">
-        <FontAwesomeIcon icon={faUsers} className="text-blue-500 text-2xl group-hover:text-white transition-colors" />
-        <StatValue
-          isLoading={isLoadingGuests}
-          className="text-4xl font-bold text-gray-800 group-hover:text-white transition-all">
-          {totalGuestCount}
-        </StatValue>
-        <span className="text-sm text-gray-500 group-hover:text-white transition-all">
-          {isHeb ? 'אורחים' : 'Guests'}
-        </span>
-      </Card>
+    <>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5" dir={languageDirection}>
+        {showEvent ? (
+          <EventCard
+            typeName={eventTypeName}
+            eventName={eventName}
+            eventDate={eventSettings.eventDate}
+            eventHall={eventSettings.eventHall}
+          />
+        ) : isResolving ? (
+          <Card
+            variant={CardVariant.EVENT}
+            className="flex h-full min-h-60 items-center justify-center motion-safe:animate-rise md:col-span-8">
+            <SpinnerLoader size="md" className="text-blue-600" />
+          </Card>
+        ) : (
+          <EventSetupGuide variant="card" className="h-full motion-safe:animate-rise md:col-span-8" />
+        )}
 
-      <Card
-        variant={CardVariant.BLUE}
-        onClick={() => router.push('/tasks')}
-        className="flex flex-col items-center justify-center gap-2 min-h-[180px]">
-        <FontAwesomeIcon icon={faListCheck} className="text-white text-2xl transition-colors" />
-        <StatValue isLoading={isLoadingTodos} className="text-3xl font-bold text-white transition-all">
-          {completedCount}/{todos.length}
-        </StatValue>
-        <span className="text-sm text-white transition-all">{isHeb ? 'משימות הושלמו' : 'Tasks completed'}</span>
-        {!isLoadingTodos && upcomingTask && (
-          <div className="mt-2 w-full bg-blue-800 rounded-lg px-3 py-2 text-center transition-all">
-            <span className="text-xs text-white font-medium">{isHeb ? 'משימה קרובה' : 'Upcoming task'}:</span>
-            <div className="flex flex-col items-center gap-0.5">
-              <p className="text-sm text-white font-semibold truncate">{upcomingTask.name}</p>
-              <span className="text-xs text-white font-medium">
+        <Card
+          variant={CardVariant.GUESTS}
+          onClick={() => router.push('/guests')}
+          style={{ animationDelay: '70ms' }}
+          className="flex h-full min-h-44 flex-col justify-between text-start motion-safe:animate-rise md:col-span-4">
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-500">
+            <FontAwesomeIcon icon={faUsers} className="text-blue-500" />
+            {isHeb ? 'אורחים' : 'Guests'}
+          </span>
+          <StatValue isLoading={isLoadingGuests} className="text-5xl font-semibold tracking-tight text-blue-600 tabular-nums">
+            {totalGuestCount}
+          </StatValue>
+        </Card>
+
+        <Card
+          variant={CardVariant.TASKS}
+          onClick={() => router.push('/tasks')}
+          style={{ animationDelay: '140ms' }}
+          className="flex h-full min-h-44 flex-col gap-4 text-start motion-safe:animate-rise md:col-span-6">
+          <span className="flex items-center gap-2 text-sm font-medium text-blue-50">
+            <FontAwesomeIcon icon={faListCheck} />
+            {isHeb ? 'משימות הושלמו' : 'Tasks completed'}
+          </span>
+          <StatValue isLoading={isLoadingTodos} className="text-4xl font-semibold tracking-tight text-white tabular-nums md:text-5xl">
+            {completedCount}/{todos.length}
+          </StatValue>
+          {!isLoadingTodos && upcomingTask && (
+            <div className="mt-auto rounded-2xl bg-white/15 px-3.5 py-2.5 text-start backdrop-blur-sm">
+              <span className="text-xs font-medium text-blue-50">{isHeb ? 'משימה קרובה' : 'Upcoming task'}</span>
+              <p className="truncate text-sm font-semibold text-white">{upcomingTask.name}</p>
+              <span className="text-xs text-blue-50">
                 {moment(upcomingTask.reminderTimestamp).format('DD.MM.YYYY, HH:mm')}
               </span>
             </div>
-          </div>
-        )}
-      </Card>
+          )}
+        </Card>
 
-      <Card
-        variant={CardVariant.GRADIENT}
-        onClick={() => setNotesModalOpen(true)}
-        className="flex flex-col items-center h-full justify-start gap-3 min-h-[180px] relative">
-        <div className="absolute top-3 end-3">
-          <Tooltip
-            content={
-              <span className="whitespace-pre-line text-xs max-w-[260px] block">
-                {isHeb ? PUBLIC_NOTE_TOOLTIP_HEB : PUBLIC_NOTE_TOOLTIP_ENG}
-              </span>
-            }
-            contentClassName="whitespace-pre-line w-[280px]">
-            <FontAwesomeIcon icon={faCircleInfo} className="text-gray-400 group-hover:text-white/80 transition-colors w-4 h-4" />
-          </Tooltip>
-        </div>
-        <FontAwesomeIcon icon={faNoteSticky} className="text-blue-500 text-2xl group-hover:text-white transition-colors" />
-        <StatValue
-          isLoading={isLoadingPublicNotes}
-          className="text-4xl font-bold text-gray-800 group-hover:text-white transition-all">
-          {publicNotes.length}
-        </StatValue>
-        <span className="text-sm text-gray-500 group-hover:text-white transition-all">
-          {isHeb ? PUBLIC_NOTE_LABELS.HEB.notes : PUBLIC_NOTE_LABELS.ENG.notes}
-        </span>
-      </Card>
-
-      <Card
-        variant={CardVariant.SUBTLE}
-        onClick={() => router.push('/budget')}
-        className="md:col-span-3 flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <FontAwesomeIcon icon={faCoins} className="text-blue-500 text-xl" />
-          <span className="text-lg font-bold text-gray-800">{isHeb ? 'תקציב' : 'Budget'}</span>
-        </div>
-
-        {isLoadingBudget ? (
-          <div className="flex min-h-20 items-center justify-center text-gray-400">
-            <SpinnerLoader size="lg" />
-          </div>
-        ) : (
-          <>
-            <ProgressBar total={totalPrice} completed={totalPaid} remaining={totalToBePaid} />
-
-            <div className="flex flex-wrap gap-6 text-sm">
-              <div className="flex flex-col">
-                <span className="text-gray-500">{isHeb ? 'הכנסות' : 'Income'}</span>
-                <span className="text-green-600 font-semibold">{formatCurrency(incomeValue)}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-gray-500">{isHeb ? 'הוצאות' : 'Expenses'}</span>
-                <span className="text-red-500 font-semibold">{formatCurrency(totalPrice)}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-gray-500">{isHeb ? 'שולם' : 'Paid'}</span>
-                <span className="text-blue-600 font-semibold">{formatCurrency(totalPaid)}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-gray-500">{isHeb ? 'יתרה' : 'Balance'}</span>
-                <span className={`font-semibold ${balance >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                  {formatCurrency(balance)}
+        <Card
+          variant={CardVariant.NOTES}
+          onClick={() => setNotesModalOpen(true)}
+          style={{ animationDelay: '210ms' }}
+          className="flex h-full min-h-44 flex-col gap-4 text-start motion-safe:animate-rise md:col-span-6">
+          <div className="flex items-center justify-between gap-3">
+            <span className="flex items-center gap-2 text-sm font-medium text-indigo-700/80">
+              <FontAwesomeIcon icon={faNoteSticky} className="text-indigo-500" />
+              {notesLabel}
+            </span>
+            <Tooltip
+              place={isHeb ? TooltipPlace.RIGHT : TooltipPlace.LEFT}
+              content={
+                <span dir={languageDirection} className="block max-w-[260px] whitespace-pre-line text-start text-xs">
+                  {isHeb ? PUBLIC_NOTE_TOOLTIP_HEB : PUBLIC_NOTE_TOOLTIP_ENG}
                 </span>
-              </div>
-            </div>
-          </>
-        )}
-      </Card>
+              }
+              contentClassName="w-[280px] whitespace-pre-line">
+              <FontAwesomeIcon icon={faCircleInfo} className="h-4 w-4 text-indigo-500" />
+            </Tooltip>
+          </div>
+          <StatValue
+            isLoading={isLoadingPublicNotes}
+            className="text-5xl font-semibold tracking-tight text-indigo-700 tabular-nums">
+            {publicNotes.length}
+          </StatValue>
+        </Card>
 
+        <BudgetCard
+          isHebrew={isHeb}
+          isLoading={isLoadingBudget}
+          income={incomeValue}
+          expenses={totalPrice}
+          paid={totalPaid}
+          remaining={totalToBePaid}
+          balance={balance}
+          onClick={() => router.push('/budget')}
+        />
+        <TripsCard isHebrew={isHeb} />
+      </div>
       <PublicNotesModal isOpen={notesModalOpen} onClose={() => setNotesModalOpen(false)} />
-    </div>
+    </>
   )
 }
 
